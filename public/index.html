@@ -190,6 +190,7 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .loading span{width:7px;height:7px;border-radius:50%;background:var(--ac);animation:ldot 1.2s infinite;transition:background 3s}
 .loading span:nth-child(2){animation-delay:.2s}.loading span:nth-child(3){animation-delay:.4s}
 @keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+@keyframes spinRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ══════════════════════════════════════
    ADVICE TABLE STYLES
@@ -862,14 +863,61 @@ async function runAnalysis(){
 
   // Show progress
   const showProgress=(done,total,sphereName)=>{
-    const progressHTML=`<div style="padding:24px 0;text-align:center">
-      <div class="loading" style="margin-bottom:12px"><span></span><span></span><span></span></div>
-      <div style="font-size:.72rem;color:var(--tm);transition:color 3s">
-        Аналізую: <strong>${sphereName}</strong><br>
-        <span style="color:var(--tl)">${done} з ${total} сфер</span>
+    const pct=Math.round(done/total*100);
+    const ar=document.getElementById('analysisRow');
+    const ac=document.getElementById('analysisContent');
+    if(ar&&ac){
+      ar.style.display='block';
+      if(done===0) setTimeout(()=>ar.scrollIntoView({behavior:'smooth',block:'start'}),100);
+    }
+    const target=ac||document.getElementById('adviceArea');
+    target.innerHTML=`
+    <div style="padding:32px 20px;text-align:center;max-width:520px;margin:0 auto">
+      <!-- Spinner + Icon -->
+      <div style="position:relative;width:80px;height:80px;margin:0 auto 20px">
+        <svg viewBox="0 0 80 80" style="position:absolute;inset:0;animation:spinRing 1.4s linear infinite">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="var(--sb)" stroke-width="5"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="var(--ac)" stroke-width="5"
+            stroke-dasharray="60 154" stroke-linecap="round" style="transition:stroke 3s"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🧠</div>
       </div>
-      <div style="margin:10px auto;width:120px;height:4px;background:var(--sb);border-radius:2px;overflow:hidden;transition:background 3s">
-        <div style="width:${Math.round(done/total*100)}%;height:100%;background:var(--ac);border-radius:2px;transition:width .4s,background 3s"></div>
+
+      <!-- Title -->
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--td);margin-bottom:6px;transition:color 3s">
+        AI-аналіз у процесі
+      </div>
+      <div style="font-size:.75rem;color:var(--tm);margin-bottom:20px;transition:color 3s">
+        Аналізую сферу: <strong style="color:var(--ac)">${sphereName}</strong>
+      </div>
+
+      <!-- Big progress bar -->
+      <div style="background:var(--sb);border-radius:20px;height:14px;overflow:hidden;margin-bottom:8px;transition:background 3s">
+        <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--ac),#5090e0);border-radius:20px;transition:width .6s ease,background 3s;position:relative">
+          <div style="position:absolute;right:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35));border-radius:20px"></div>
+        </div>
+      </div>
+
+      <!-- Percent + counter -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <span style="font-size:.68rem;color:var(--tl);transition:color 3s">${done} з ${total} сфер</span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--ac);transition:color 3s">${pct}%</span>
+      </div>
+
+      <!-- Steps indicators -->
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+        ${Array.from({length:total},(_,i)=>`
+          <div style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.62rem;font-weight:600;
+            background:${i<done?'rgba(40,120,200,.15)':i===done?'rgba(40,120,200,.08)':'var(--sb)'};
+            color:${i<done?'var(--ac)':i===done?'var(--tm)':'var(--tl)'};
+            border:1px solid ${i<done?'var(--ac)':i===done?'var(--sb)':'transparent'};
+            transition:all .3s,color 3s,background 3s">
+            ${i<done?'✓':i===done?'⟳':'○'}
+          </div>`).join('')}
+      </div>
+
+      <div style="margin-top:16px;font-size:.62rem;color:var(--tl);font-style:italic;transition:color 3s">
+        Зачекайте, це займає 15–30 секунд…
       </div>
     </div>`;
   };
@@ -904,6 +952,21 @@ JSON: {"overview":"2 речення про загальну картину","bal
     btn.style.display='';
     btn.textContent='✦ Змінити вибір сфер';
     btn.onclick=showPicker;
+
+    // Show big save button
+    const existingSave=document.getElementById('bigSaveBtn');
+    if(existingSave) existingSave.remove();
+    const saveBtn=document.createElement('div');
+    saveBtn.id='bigSaveBtn';
+    saveBtn.style.cssText='margin-top:12px;';
+    saveBtn.innerHTML=`<button onclick="exportPDF()" style="width:100%;padding:14px 16px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:12px;font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;letter-spacing:.05em;box-shadow:0 6px 24px rgba(40,120,200,.45);transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(40,120,200,.55)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(40,120,200,.45)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      💾 Зберегти результат як PDF
+    </button>
+    <p style="text-align:center;font-size:.6rem;color:var(--tl);margin-top:5px;transition:color 3s">Збережи план — роздрукуй або завантаж у Google Drive</p>`;
+    document.getElementById('btnAdv').closest('.glass').appendChild(saveBtn);
 
   }catch(err){
     const msg=err.message||String(err);
@@ -1070,8 +1133,8 @@ function exportPDF(){
   const now=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
   const avg_score=globalAvg().toFixed(1);
 
-  const tmpC=document.createElement('canvas');tmpC.width=400;tmpC.height=400;
-  drawWheelOnCtx(tmpC,200,200,165,18,(Math.PI*2)/12,active.id);
+  const tmpC=document.createElement('canvas');tmpC.width=500;tmpC.height=500;
+  drawWheelOnCtx(tmpC,250,250,200,22,(Math.PI*2)/12,active.id);
   const wheelImg=tmpC.toDataURL('image/png');
 
   const prioLabel=sc=>sc<4?'КРИТИЧНО':sc<6?'ВАЖЛИВО':sc<8?'РЕКОМЕНДОВАНО':'ПІДТРИМКА';
@@ -1162,10 +1225,11 @@ const roadmap=lastParsed&&lastParsed.balance_roadmap
     .no-print{display:none!important}
   }
 </style></head><body>
-<div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:11px 15px;border-radius:7px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
-  <img src="${wheelImg}" style="width:75px;height:75px;border-radius:5px;flex-shrink:0">
-  <div>
-    <div style="font-size:17px;font-weight:800;margin-bottom:3px">Колесо Життя — Мій Звіт</div>
+<div style="text-align:center;margin-bottom:14px;page-break-inside:avoid">
+  <img src="${pdfWheelImg}" style="width:220px;height:220px;border-radius:50%;box-shadow:0 4px 20px rgba(40,120,200,.2)">
+</div>
+<div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:11px 15px;border-radius:7px;margin-bottom:12px;text-align:center">
+  <div style="font-size:17px;font-weight:800;margin-bottom:3px">Колесо Життя — Мій Звіт</div>
     <div style="font-size:10px;opacity:.85;line-height:1.7">Дата: ${now} · Середній бал: <b>${avg_score}/10</b><br>
     AI: Claude · ${lastParsed?'Аналіз: '+lastParsed.advice.length+' сфер':'Тільки бали'}</div>
   </div>
@@ -1339,8 +1403,8 @@ function saveToGoogleDrive(avgScore){
   const date=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
   const fileName='Koleso-Zhyttia-'+date.replace(/ /g,'-')+'.pdf';
 
-  const tmpC=document.createElement('canvas');tmpC.width=400;tmpC.height=400;
-  drawWheelOnCtx(tmpC,200,200,165,18,(Math.PI*2)/12,active.id);
+  const tmpC=document.createElement('canvas');tmpC.width=500;tmpC.height=500;
+  drawWheelOnCtx(tmpC,250,250,200,22,(Math.PI*2)/12,active.id);
   const wheelImg=tmpC.toDataURL('image/png');
 
   const prioColor=function(sc){return sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';};
