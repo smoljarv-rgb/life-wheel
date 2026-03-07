@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── Rate limiting (20 запитів/хвилину з одного IP) ──
+// ── Rate limiting ──
 const rateMap = new Map();
 function rateLimit(ip, max = 20, windowMs = 60_000) {
   const now = Date.now();
@@ -18,7 +18,7 @@ function rateLimit(ip, max = 20, windowMs = 60_000) {
   return entry.count <= max;
 }
 
-// ── Gemini API proxy ──
+// ── Groq API proxy ──
 app.post('/api/analyze', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
@@ -34,38 +34,37 @@ app.post('/api/analyze', async (req, res) => {
     return res.status(400).json({ error: 'Запит надто довгий' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY не налаштовано на сервері' });
+    return res.status(500).json({ error: 'GROQ_API_KEY не налаштовано на сервері' });
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2000,
-          responseMimeType: 'application/json',
-        },
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2000,
+        temperature: 0.7,
       }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Gemini error:', JSON.stringify(data));
-      const msg = data?.error?.message || 'Помилка Gemini API';
+      console.error('Groq error:', JSON.stringify(data));
+      const msg = data?.error?.message || 'Помилка Groq API';
       return res.status(response.status).json({ error: msg });
     }
 
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data?.choices?.[0]?.message?.content || '';
     if (!text) {
-      return res.status(500).json({ error: 'Порожня відповідь від Gemini' });
+      return res.status(500).json({ error: 'Порожня відповідь від Groq' });
     }
 
     res.json({ text });
@@ -82,5 +81,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Колесо Життя (Gemini) запущено на http://localhost:${PORT}`);
+  console.log(`Колесо Життя (Groq) запущено на http://localhost:${PORT}`);
 });
