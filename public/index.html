@@ -1296,15 +1296,65 @@ function getCalendarDate(daysFromNow){
 
 function shareResult(avgScore){
   const text=`🌀 Я пройшов тест Колеса Життя — мій середній бал ${avgScore}/10. Перевір свій баланс: ${location.href}`;
-  if(navigator.share){
-    navigator.share({title:'Колесо Життя',text,url:location.href})
-      .then(()=>trackEvent('share_native','social','result'));
-  } else {
-    navigator.clipboard.writeText(text).then(()=>{
-      alert('Текст скопійовано! Встав у будь-який месенджер.');
-      trackEvent('share_clipboard','social','result');
+  const url=encodeURIComponent(location.href);
+  const msg=encodeURIComponent(text);
+
+  // Remove existing share menu if open
+  const existing=document.getElementById('shareMenu');
+  if(existing){ existing.remove(); return; }
+
+  // Build share menu
+  const menu=document.createElement('div');
+  menu.id='shareMenu';
+  menu.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9000;background:rgba(18,28,50,.97);backdrop-filter:blur(14px);border:1.5px solid rgba(100,160,240,.25);border-radius:16px;padding:16px 18px;min-width:280px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:Nunito,sans-serif';
+  menu.innerHTML=`
+    <div style="font-size:.72rem;color:#8aabcc;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;text-align:center">Поділитись результатом</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a href="https://t.me/share/url?url=${url}&text=${msg}" target="_blank" onclick="trackEvent('share_telegram','social','result')"
+        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;text-decoration:none;transition:background .2s;cursor:pointer;border:1px solid rgba(100,160,240,.15)"
+        onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#29B6F6"/><path d="M5.5 11.5l10-4-3.5 11-2.5-3.5-4 2.5 1.5-3.5 7-3.5-7 2.5-.5-2z" fill="white"/></svg>
+        <span style="font-size:.65rem;color:#c0d8f0">Telegram</span>
+      </a>
+      <a href="viber://forward?text=${msg}" onclick="trackEvent('share_viber','social','result')"
+        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;text-decoration:none;transition:background .2s;cursor:pointer;border:1px solid rgba(100,160,240,.15)"
+        onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+        <svg width="28" height="28" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#7B519D"/><path d="M17 8.5c-.5-2-2.5-2.5-4-2.5S8 6.5 7.5 8.5C7 10 7 12 7.5 13.5c.4 1.2 1.5 2 2.5 2.3v1.7l1.5-1.5h.5c1.5 0 3.5-.5 4-2.5.5-1.5.5-3.5 0-5z" fill="white" opacity=".9"/><path d="M10 10h4M10 12h2.5" stroke="#7B519D" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span style="font-size:.65rem;color:#c0d8f0">Viber</span>
+      </a>
+      <a href="https://wa.me/?text=${msg}" target="_blank" onclick="trackEvent('share_whatsapp','social','result')"
+        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;text-decoration:none;transition:background .2s;cursor:pointer;border:1px solid rgba(100,160,240,.15)"
+        onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+        <svg width="28" height="28" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#25D366"/><path d="M17 14.5c-.3-.1-1.7-.8-2-1-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1-1-.4-2.5-1.5-3.3-3-.1-.2 0-.4.2-.5l.6-.7c.2-.2.2-.4.1-.6l-.9-2c-.2-.4-.5-.4-.7-.4h-.6c-.2 0-.5.1-.8.4C8 8.5 7.5 9 7.5 10.5s1.1 3 1.3 3.2c.2.2 2.1 3.3 5.2 4.5 2.5 1 3 .8 3.5.7.5-.1 1.7-.7 1.9-1.3.2-.6.2-1.2.1-1.3l-.5-.3z" fill="white"/></svg>
+        <span style="font-size:.65rem;color:#c0d8f0">WhatsApp</span>
+      </a>
+      <button onclick="copyShareText('${text.replace(/`/g,'')}')" 
+        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(100,160,240,.15);cursor:pointer;transition:background .2s"
+        onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c0d8f0" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span style="font-size:.65rem;color:#c0d8f0" id="copyBtnTxt">Копіювати</span>
+      </button>
+    </div>
+    <button onclick="document.getElementById('shareMenu').remove()" style="width:100%;margin-top:12px;padding:7px;background:transparent;color:#6a8aaa;border:1px solid rgba(100,160,240,.2);border-radius:8px;font-size:.68rem;cursor:pointer;font-family:Nunito,sans-serif">Закрити</button>
+  `;
+  document.body.appendChild(menu);
+
+  // Close on outside click
+  setTimeout(()=>{
+    document.addEventListener('click',function handler(e){
+      if(!menu.contains(e.target)){menu.remove();document.removeEventListener('click',handler);}
     });
-  }
+  },100);
+
+  trackEvent('share_menu_opened','social','result');
+}
+
+function copyShareText(text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copyBtnTxt');
+    if(btn){btn.textContent='Скопійовано ✓';setTimeout(()=>{btn.textContent='Копіювати';},2000);}
+    trackEvent('share_copy','social','result');
+  });
 }
 
 // ── Check reminder on load ──
