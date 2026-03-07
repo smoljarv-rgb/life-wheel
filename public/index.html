@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Колесо Життя</title>
+<!-- Google Analytics — замінити G-XXXXXXXXXX на свій ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-XXXXXXXXXX');
+function trackEvent(action,category,label){
+  gtag('event',action,{event_category:category,event_label:label});
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -63,7 +74,9 @@ body.mood-sunny   .cloud{opacity:.92;filter:blur(0)}
 .mood-pill .mm{font-size:.68rem;font-weight:600;color:var(--tm);transition:color 3s;margin-left:2px}
 
 /* ── LAYOUT ── */
-.wrapper{position:relative;z-index:10;display:grid;grid-template-columns:292px 1fr 320px;min-height:100vh;padding-top:52px}
+.wrapper{position:relative;z-index:10;display:grid;grid-template-columns:292px 1fr 320px;grid-template-rows:auto auto;min-height:100vh;padding-top:52px}
+.analysis-row{grid-column:1/-1;padding:0 16px 24px;display:none}
+.analysis-row.visible{display:block}
 
 /* ── GLASS ── */
 .glass{background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(18px);border-radius:14px;box-shadow:0 6px 28px var(--sh);transition:background 3s,border-color 3s,box-shadow 3s}
@@ -130,6 +143,34 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .btn-print:hover{background:var(--sf);box-shadow:0 4px 18px var(--sh);transform:translateY(-1px)}
 .btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
+.paywall-overlay{position:fixed;inset:0;background:rgba(10,20,40,.7);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.paywall-box{background:#fff;border-radius:16px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:'Nunito',sans-serif}
+.paywall-box h2{font-size:1.25rem;color:#1a2e48;margin-bottom:6px;font-weight:800}
+.paywall-box p{font-size:.82rem;color:#5a7090;line-height:1.6;margin-bottom:16px}
+.paywall-features{list-style:none;margin-bottom:20px}
+.paywall-features li{font-size:.78rem;color:#2a4060;padding:4px 0;display:flex;align-items:center;gap:8px}
+.paywall-features li::before{content:"✓";color:#2878c8;font-weight:800}
+.pay-btn{width:100%;padding:13px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;letter-spacing:.04em;transition:opacity .2s}
+.pay-btn:hover{opacity:.9}
+.pay-btn-free{width:100%;padding:9px;background:transparent;color:#8aabcc;border:1px solid #d0e4f8;border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:8px;transition:all .2s}
+.pay-btn-free:hover{color:#5a80aa;border-color:#b0cce8}
+.email-capture{background:linear-gradient(135deg,#f0f8ff,#e8f4ff);border:1.5px solid #c0ddf8;border-radius:12px;padding:16px;margin-top:12px}
+.email-capture h3{font-size:.8rem;font-weight:700;color:#1a3060;margin-bottom:6px}
+.email-row{display:flex;gap:6px;margin-top:8px}
+.email-input{flex:1;padding:8px 10px;border:1.5px solid #c0ddf8;border-radius:8px;font-size:.72rem;font-family:'Nunito',sans-serif;color:#1a2e48;outline:none}
+.email-input:focus{border-color:#2878c8}
+.email-submit{padding:8px 14px;background:#2878c8;color:#fff;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
+.email-submit:hover{opacity:.9}
+.promo-banner{background:linear-gradient(135deg,#fff8e8,#fff3d8);border:1.5px solid #f0c060;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.72rem;color:#8a5010;text-align:center;font-weight:600}
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:900;background:rgba(18,28,50,.96);backdrop-filter:blur(12px);border-top:1.5px solid rgba(100,160,240,.25);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'Nunito',sans-serif;transform:translateY(100%);transition:transform .4s ease}
+.cookie-banner.visible{transform:translateY(0)}
+.cookie-txt{flex:1;min-width:220px;font-size:.72rem;color:#c0d8f0;line-height:1.6}
+.cookie-txt a{color:#6ab4ff;text-decoration:underline;cursor:pointer}
+.cookie-btns{display:flex;gap:8px;flex-shrink:0}
+.cookie-accept{padding:8px 20px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:opacity .2s}
+.cookie-accept:hover{opacity:.9}
+.cookie-decline{padding:8px 14px;background:transparent;color:#8aabcc;border:1px solid rgba(100,160,240,.3);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+.cookie-decline:hover{color:#c0d8f0;border-color:rgba(100,160,240,.5)}
 .placeholder-txt{font-size:.73rem;color:var(--tl);font-style:italic;line-height:1.65;text-align:center;padding:10px 0;transition:color 3s}
 
 /* ── SPHERE PICKER ── */
@@ -329,6 +370,11 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     <div class="detail-box glass" id="detailBox"></div>
   </div>
 
+  <!-- FULL-WIDTH ANALYSIS ROW (shown after analysis) -->
+  <div class="analysis-row glass" id="analysisRow" style="display:none;padding:20px 28px;margin:0 16px 24px;border-radius:16px">
+    <div id="analysisContent"></div>
+  </div>
+
   <!-- RIGHT -->
   <div class="right-col" id="rightCol">
 
@@ -361,6 +407,16 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 
       <div id="adviceArea">
         <p class="placeholder-txt">Оціни сфери та натисни «Отримати план» — AI-коуч визначить 3 найкритичніші або ти обереш самостійно. Отримаєш таблицю балансу та покроковий алгоритм до 10/10.</p>
+      </div>
+      <!-- Email capture — показується після аналізу -->
+      <div id="emailCapture" style="display:none" class="email-capture">
+        <h3>📩 Отримати план на email</h3>
+        <p style="font-size:.68rem;color:#4a6080;margin:0">Надішлемо твій звіт + щотижневі поради для зростання</p>
+        <div class="email-row">
+          <input id="emailInput" class="email-input" type="email" placeholder="твій@email.com">
+          <button class="email-submit" onclick="submitEmail()">Надіслати</button>
+        </div>
+        <div id="emailMsg" style="font-size:.65rem;color:#2878c8;margin-top:5px;display:none"></div>
       </div>
     </div>
 
@@ -624,6 +680,97 @@ cv.addEventListener('click',e=>{
 ══════════════════════════════════════════════ */
 let lastParsed=null;
 let selectedSpheres=new Set();
+let isPremiumUnlocked=false; // true after payment or promo
+
+// ── Check if already paid (session) ──
+try{ if(sessionStorage.getItem('premium_unlocked')==='1') isPremiumUnlocked=true; }catch(e){}
+
+// ── Owner unlock via URL: ?owner=ТВІЙ_СЕКРЕТ або localStorage ──
+(function checkOwner(){
+  try{
+    const OWNER_SECRET='life2025owner'; // змінити на свій секрет
+    const urlParams=new URLSearchParams(window.location.search);
+    if(urlParams.get('owner')===OWNER_SECRET){
+      localStorage.setItem('owner_unlocked','1');
+      // Clean URL without reload
+      window.history.replaceState({},'',window.location.pathname);
+    }
+    if(localStorage.getItem('owner_unlocked')==='1'){
+      isPremiumUnlocked=true;
+    }
+  }catch(e){}
+})();
+
+// ── Paywall ──
+function showPaywall(){
+  trackEvent('paywall_shown','monetization','ai_analysis');
+  const overlay=document.createElement('div');
+  overlay.className='paywall-overlay';
+  overlay.id='paywallOverlay';
+  overlay.innerHTML=`
+    <div class="paywall-box">
+      <div class="promo-banner">🎯 AI-аналіз твого Колеса Життя</div>
+      <h2>Персональний план зростання</h2>
+      <p>Отримай детальний 7-денний план для кожної сфери, щоденний алгоритм дій та стратегію досягнення 10/10</p>
+      <ul class="paywall-features">
+        <li>Аналіз 3 критичних сфер від AI-коуча</li>
+        <li>7-денний покроковий план дій</li>
+        <li>Щоденні завдання з часом виконання</li>
+        <li>Ціль на 30 днів + шлях до 10/10</li>
+        <li>PDF-звіт для друку</li>
+      </ul>
+      <button class="pay-btn" onclick="processPayment()">💳 Отримати план — $2</button>
+      <button class="pay-btn-free" onclick="closePaywall()">Пізніше</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) closePaywall(); });
+}
+
+function closePaywall(){
+  const el=document.getElementById('paywallOverlay');
+  if(el) el.remove();
+}
+
+function processPayment(){
+  trackEvent('payment_initiated','monetization','$2_plan');
+  // TODO: замінити на свій Stripe Payment Link
+  // Отримати на: dashboard.stripe.com → Payment Links → Create
+  const stripeUrl='https://buy.stripe.com/ЗАМІНИТИ_НА_СВІЙ_ПОСИЛАННЯ';
+  
+  // Для тестування — тимчасово розблоковуємо без оплати
+  // Видали цей блок після підключення Stripe:
+  isPremiumUnlocked=true;
+  try{ sessionStorage.setItem('premium_unlocked','1'); }catch(e){}
+  closePaywall();
+  runAnalysis();
+  // window.open(stripeUrl,'_blank'); // розкоментуй після налаштування Stripe
+}
+
+// ── Email capture ──
+function submitEmail(){
+  const email=document.getElementById('emailInput').value.trim();
+  const msg=document.getElementById('emailMsg');
+  if(!email||!email.includes('@')){
+    msg.style.display='block';
+    msg.style.color='#c04040';
+    msg.textContent='Введіть правильний email';
+    return;
+  }
+  trackEvent('email_captured','leads',email);
+  // Зберігаємо в localStorage
+  try{
+    const list=JSON.parse(localStorage.getItem('email_leads')||'[]');
+    list.push({email,date:new Date().toISOString(),avg:globalAvg().toFixed(1)});
+    localStorage.setItem('email_leads',JSON.stringify(list));
+  }catch(e){}
+  // TODO: надіслати на сервер — розкоментуй після налаштування endpoint:
+  // fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  msg.style.display='block';
+  msg.style.color='#2878c8';
+  msg.textContent='✓ Дякуємо! Перевір пошту.';
+  document.getElementById('emailInput').disabled=true;
+  document.querySelector('.email-submit').disabled=true;
+}
 
 
 function showPicker(){
@@ -700,6 +847,11 @@ async function callAI(prompt){
 }
 
 async function runAnalysis(){
+  // Check premium
+  if(!isPremiumUnlocked){
+    showPaywall();
+    return;
+  }
   const picker=document.getElementById('spherePicker');
   const area=document.getElementById('adviceArea');
   const btn=document.getElementById('btnAdv');
@@ -712,7 +864,7 @@ async function runAnalysis(){
 
   // Show progress
   const showProgress=(done,total,sphereName)=>{
-    area.innerHTML=`<div style="padding:16px 0;text-align:center">
+    const progressHTML=`<div style="padding:24px 0;text-align:center">
       <div class="loading" style="margin-bottom:12px"><span></span><span></span><span></span></div>
       <div style="font-size:.72rem;color:var(--tm);transition:color 3s">
         Аналізую: <strong>${sphereName}</strong><br>
@@ -874,7 +1026,68 @@ function renderAdvice(parsed){
       ${parsed.balance_roadmap}
     </div>`;
   }
-  document.getElementById('adviceArea').innerHTML=html;
+
+  // ── RETURN CTA ──
+  const returnDate=new Date();
+  returnDate.setDate(returnDate.getDate()+30);
+  const returnDateStr=returnDate.toLocaleDateString('uk-UA',{day:'2-digit',month:'long'});
+  const avgNow=globalAvg().toFixed(1);
+
+  html+=`<div id="returnCta" style="margin-top:16px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:14px;padding:18px 16px;color:#fff;text-align:center">
+    <div style="font-size:1.1rem;font-weight:800;margin-bottom:6px">📅 Повернись ${returnDateStr} і виміряй прогрес</div>
+    <div style="font-size:.72rem;opacity:.88;line-height:1.6;margin-bottom:14px">
+      Твій поточний середній бал: <strong>${avgNow}/10</strong><br>
+      За 30 днів практики більшість людей зростають на <strong>1.5–2.5 бали</strong><br>
+      Зафіксуй дату повернення щоб побачити свій реальний прогрес
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      <button onclick="setReturnReminder('${returnDateStr}','${avgNow}')" style="padding:9px 18px;background:#fff;color:#1a3a6a;border:none;border-radius:9px;font-size:.73rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">
+        🔔 Нагадати через 30 днів
+      </button>
+      <button onclick="shareResult('${avgNow}')" style="padding:9px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:9px;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">
+        📤 Поділитись результатом
+      </button>
+    </div>
+    <div id="reminderConfirm" style="display:none;margin-top:10px;font-size:.68rem;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;line-height:1.6"></div>
+  </div>`;
+
+  // ── PROGRESS COMPARE BLOCK (if previous result exists) ──
+  try{
+    const prev=JSON.parse(localStorage.getItem('prev_result')||'null');
+    if(prev){
+      const diff=(parseFloat(avgNow)-parseFloat(prev.avg)).toFixed(1);
+      const diffColor=diff>0?'#4ade80':diff<0?'#f87171':'#fff';
+      const diffIcon=diff>0?'📈':diff<0?'📉':'➡️';
+      html+=`<div style="margin-top:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:12px 14px;text-align:center;color:#fff">
+        <div style="font-size:.7rem;opacity:.7;margin-bottom:4px">Порівняння з попереднім тестом (${prev.date})</div>
+        <div style="font-size:1.3rem;font-weight:800;color:${diffColor}">${diffIcon} ${diff>0?'+':''}${diff} балів</div>
+        <div style="font-size:.68rem;opacity:.8">${prev.avg}/10 → ${avgNow}/10</div>
+      </div>`;
+    }
+    // Save current result
+    localStorage.setItem('prev_result',JSON.stringify({avg:avgNow,date:new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'})}));
+  }catch(e){}
+
+  // Write to full-width analysis panel
+  const analysisRow=document.getElementById('analysisRow');
+  const analysisContent=document.getElementById('analysisContent');
+  if(analysisRow && analysisContent){
+    analysisContent.innerHTML=html;
+    analysisRow.style.display='block';
+    // Scroll to analysis
+    setTimeout(()=>analysisRow.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  } else {
+    document.getElementById('adviceArea').innerHTML=html;
+  }
+  // Show email capture after analysis
+  // Show email capture inside analysis row
+  const emailCapture=document.getElementById('emailCapture');
+  if(emailCapture){
+    const analysisContent2=document.getElementById('analysisContent');
+    if(analysisContent2) analysisContent2.appendChild(emailCapture);
+    emailCapture.style.display='block';
+  }
+  trackEvent('analysis_completed','engagement','spheres_'+parsed.advice.length);
 }
 
 /* ══════════════════════════════════════════════
@@ -946,7 +1159,19 @@ function exportPDF(){
     </div>`;
   }).join(''):'';
 
-  const roadmap=lastParsed&&lastParsed.balance_roadmap
+  const affiliateHTML=`
+  <div style="margin-top:14px;padding:11px 15px;background:#fff8e8;border:1.5px solid #f0c06077;border-radius:8px">
+    <b style="display:block;font-size:11px;color:#8a5010;margin-bottom:6px">📚 Рекомендовані ресурси для зростання</b>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:10px">
+      <a href="https://www.audible.com/?tag=ТВІЙ_AFFILIATE_TAG" style="color:#2878c8;text-decoration:none;padding:4px 10px;border:1px solid #2878c844;border-radius:6px">🎧 Audible — аудіокниги</a>
+      <a href="https://www.masterclass.com/?ref=ТВІЙ_REF" style="color:#2878c8;text-decoration:none;padding:4px 10px;border:1px solid #2878c844;border-radius:6px">🎓 MasterClass — курси</a>
+      <a href="https://www.headspace.com/?ref=ТВІЙ_REF" style="color:#2878c8;text-decoration:none;padding:4px 10px;border:1px solid #2878c844;border-radius:6px">🧘 Headspace — медитація</a>
+      <a href="https://www.notion.so/?r=ТВІЙ_REF" style="color:#2878c8;text-decoration:none;padding:4px 10px;border:1px solid #2878c844;border-radius:6px">📝 Notion — планування</a>
+    </div>
+    <p style="font-size:9px;color:#aaa;margin-top:6px">* Партнерські посилання — підтримуєш розвиток проекту</p>
+  </div>`;
+
+const roadmap=lastParsed&&lastParsed.balance_roadmap
     ?`<div style="margin-top:14px;padding:11px 15px;background:#f0f6ff;border:1.5px solid #2878c877;border-radius:8px;font-size:11px;color:#1a3060;line-height:1.65">
         <b style="display:block;font-size:12px;color:#16478a;margin-bottom:4px">Стратегія 100% балансу</b>${lastParsed.balance_roadmap}</div>`:'';
 
@@ -988,6 +1213,12 @@ ${overview}
 </table>
 ${algoHTML?`<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:10px">Щоденний алгоритм — покроковий план</div>${algoHTML}`:''}
 ${roadmap}
+${affiliateHTML}
+<div style="margin-top:14px;padding:12px 15px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:8px;color:#fff;text-align:center">
+  <b style="display:block;font-size:12px;margin-bottom:4px">📅 Повернись через 30 днів і виміряй прогрес!</b>
+  <p style="font-size:10px;opacity:.9;margin-bottom:8px">Твій поточний середній бал зафіксовано у звіті. Після практики пройди тест знову і порівняй результат.</p>
+  <a href="https://life-wheel-one.vercel.app" style="display:inline-block;padding:7px 20px;background:#fff;color:#1a3a6a;border-radius:7px;font-weight:800;font-size:11px;text-decoration:none">🌀 life-wheel-one.vercel.app</a>
+</div>
 <div class="no-print" style="margin-top:18px;text-align:center;padding:12px;border-top:1px solid #dde8f8">
   <button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:10px 30px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>
   <p style="margin-top:6px;font-size:9px;color:#8aabcc">Оберіть принтер «Зберегти як PDF» → OK</p>
@@ -1019,8 +1250,161 @@ ${roadmap}
   }
 }
 
+/* ── RETURN & SHARE ── */
+function setReturnReminder(dateStr, avgScore){
+  const confirm=document.getElementById('reminderConfirm');
+  // Browser notification permission
+  if('Notification' in window && Notification.permission !== 'denied'){
+    Notification.requestPermission().then(perm=>{
+      if(perm==='granted'){
+        // Save reminder to localStorage
+        try{
+          localStorage.setItem('return_reminder',JSON.stringify({
+            date:dateStr, avg:avgScore, set:new Date().toISOString()
+          }));
+        }catch(e){}
+        confirm.style.display='block';
+        confirm.innerHTML=`✅ Нагадування збережено!<br>Повернись <strong>${dateStr}</strong> щоб порівняти результат з поточним балом <strong>${avgScore}/10</strong><br><span style="opacity:.75;font-size:.62rem">Збережи це посилання: <a href="${location.href}" style="color:#fff">${location.hostname}</a></span>`;
+        trackEvent('reminder_set','retention','30_days');
+      } else {
+        showManualReminder(dateStr, avgScore, confirm);
+      }
+    });
+  } else {
+    showManualReminder(dateStr, avgScore, confirm);
+  }
+}
+
+function showManualReminder(dateStr, avgScore, confirm){
+  confirm.style.display='block';
+  confirm.innerHTML=`📌 Збережи нагадування вручну:<br>
+    <strong>${dateStr}</strong> — повернутись на <a href="${location.href}" style="color:#fff">${location.hostname}</a><br>
+    Поточний бал для порівняння: <strong>${avgScore}/10</strong><br>
+    <span style="opacity:.75;font-size:.62rem">Додай в календар або збережи посилання</span>`;
+  // Try to add to calendar
+  const calUrl='https://calendar.google.com/calendar/render?action=TEMPLATE&text=Колесо+Життя+—+повторний+тест&details=Повернутись+на+'+encodeURIComponent(location.href)+'+та+порівняти+результат.+Поточний+бал:+'+avgScore+'/10&dates='+getCalendarDate(30);
+  confirm.innerHTML+=`<br><a href="${calUrl}" target="_blank" style="color:#fff;font-size:.65rem;opacity:.85">📆 Додати в Google Calendar</a>`;
+  trackEvent('reminder_manual','retention','30_days');
+}
+
+function getCalendarDate(daysFromNow){
+  const d=new Date();
+  d.setDate(d.getDate()+daysFromNow);
+  const pad=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T090000/'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T093000';
+}
+
+function shareResult(avgScore){
+  const text=`🌀 Я пройшов тест Колеса Життя — мій середній бал ${avgScore}/10. Перевір свій баланс: ${location.href}`;
+  if(navigator.share){
+    navigator.share({title:'Колесо Життя',text,url:location.href})
+      .then(()=>trackEvent('share_native','social','result'));
+  } else {
+    navigator.clipboard.writeText(text).then(()=>{
+      alert('Текст скопійовано! Встав у будь-який месенджер.');
+      trackEvent('share_clipboard','social','result');
+    });
+  }
+}
+
+// ── Check reminder on load ──
+(function checkReminder(){
+  try{
+    const r=JSON.parse(localStorage.getItem('return_reminder')||'null');
+    if(!r) return;
+    const setDate=new Date(r.set);
+    const daysPassed=Math.floor((Date.now()-setDate)/86400000);
+    if(daysPassed>=28){
+      // Show welcome back banner
+      setTimeout(()=>{
+        const banner=document.createElement('div');
+        banner.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a3a6a,#2878c8);color:#fff;border-radius:12px;padding:14px 20px;font-family:Nunito,sans-serif;font-size:.78rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:340px;text-align:center;line-height:1.6';
+        banner.innerHTML=`🎉 <strong>Ласкаво повернувся!</strong><br>
+          ${daysPassed} днів тому твій бал був <strong>${r.avg}/10</strong><br>
+          Пройди тест знову щоб побачити прогрес<br>
+          <button onclick="this.parentElement.remove()" style="margin-top:8px;padding:6px 16px;background:#fff;color:#1a3a6a;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:.72rem">Почати →</button>`;
+        document.body.appendChild(banner);
+        trackEvent('return_reminder_shown','retention',daysPassed+'_days');
+      }, 1500);
+    }
+  }catch(e){}
+})();
+
+/* ── COOKIES ── */
+function initCookieBanner(){
+  try{
+    const consent=localStorage.getItem('cookie_consent');
+    if(consent) return; // already decided
+    setTimeout(()=>{
+      const banner=document.getElementById('cookieBanner');
+      if(banner) banner.classList.add('visible');
+    },1500);
+  }catch(e){}
+}
+
+function acceptCookies(){
+  try{ localStorage.setItem('cookie_consent','accepted'); }catch(e){}
+  hideCookieBanner();
+  // Enable GA tracking
+  gtag('consent','update',{analytics_storage:'granted'});
+  trackEvent('cookie_accepted','consent','banner');
+}
+
+function declineCookies(){
+  try{ localStorage.setItem('cookie_consent','declined'); }catch(e){}
+  hideCookieBanner();
+  // Disable GA tracking
+  gtag('consent','update',{analytics_storage:'denied'});
+}
+
+function hideCookieBanner(){
+  const banner=document.getElementById('cookieBanner');
+  if(banner){ banner.style.transform='translateY(100%)'; setTimeout(()=>banner.remove(),400); }
+}
+
+function showPrivacyPolicy(){
+  document.getElementById('privacyModal').style.display='flex';
+}
+
 /* ── INIT ── */
-buildNav();buildDetail();drawWheel();updateResults();
+buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
 </script>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookieBanner">
+  <div class="cookie-txt">
+    🍪 Ми використовуємо cookies для аналітики та покращення досвіду. 
+    Продовжуючи користуватись сайтом, ви погоджуєтесь з нашою 
+    <a onclick="showPrivacyPolicy()">Політикою конфіденційності</a>.
+  </div>
+  <div class="cookie-btns">
+    <button class="cookie-decline" onclick="declineCookies()">Відхилити</button>
+    <button class="cookie-accept" onclick="acceptCookies()">Прийняти ✓</button>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY MODAL -->
+<div class="modal-overlay" id="privacyModal" style="display:none;z-index:950">
+  <div class="modal" style="max-width:500px">
+    <h2>Політика <em>конфіденційності</em></h2>
+    <div class="modal-section">
+      <h3>📊 Які дані ми збираємо</h3>
+      <p>Ми використовуємо Google Analytics для збору анонімної статистики відвідувань: кількість користувачів, країна, браузер, час на сайті. Особисті дані не збираються без вашої згоди.</p>
+    </div>
+    <div class="modal-section">
+      <h3>📩 Email адреси</h3>
+      <p>Якщо ви добровільно вводите email у форму на сайті — він зберігається виключно для надсилання вашого звіту та корисних матеріалів. Ми не передаємо email третім особам.</p>
+    </div>
+    <div class="modal-section">
+      <h3>🍪 Cookies</h3>
+      <p>Ми використовуємо cookies для роботи Google Analytics та збереження ваших налаштувань (тема, попередні результати тесту). Ви можете відмовитись від cookies — функціонал сайту при цьому не постраждає.</p>
+    </div>
+    <div class="modal-section">
+      <h3>🔒 Ваші права</h3>
+      <p>Ви можете в будь-який момент: відмовитись від cookies, запросити видалення ваших даних, написавши нам на email. Ми дотримуємось вимог GDPR.</p>
+    </div>
+    <button class="btn-start" onclick="document.getElementById('privacyModal').style.display='none'">Зрозуміло ✓</button>
+  </div>
+</div>
 </body>
 </html>
