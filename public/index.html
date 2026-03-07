@@ -953,21 +953,7 @@ JSON: {"overview":"2 речення про загальну картину","bal
     btn.textContent='✦ Змінити вибір сфер';
     btn.onclick=showPicker;
 
-    // Show big save button
-    const existingSave=document.getElementById('bigSaveBtn');
-    if(existingSave) existingSave.remove();
-    const saveBtn=document.createElement('div');
-    saveBtn.id='bigSaveBtn';
-    saveBtn.style.cssText='margin-top:12px;';
-    saveBtn.innerHTML=`<button onclick="exportPDF()" style="width:100%;padding:14px 16px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:12px;font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;letter-spacing:.05em;box-shadow:0 6px 24px rgba(40,120,200,.45);transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px"
-      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(40,120,200,.55)'"
-      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(40,120,200,.45)'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      💾 Зберегти результат як PDF
-    </button>
-    <p style="text-align:center;font-size:.6rem;color:var(--tl);margin-top:5px;transition:color 3s">Збережи план — роздрукуй або завантаж у Google Drive</p>`;
-    const glassPanel=document.getElementById('btnAdv').closest('.glass');
-    if(glassPanel) glassPanel.appendChild(saveBtn);
+
 
   }catch(err){
     const msg=err.message||String(err);
@@ -1075,6 +1061,24 @@ function renderAdvice(parsed){
     </div>`;
   });
   algoHTML+=`</div>`;
+
+  // ── Big Save Button ──
+  algoHTML+=`<div style="margin-top:20px;text-align:center">
+    <button onclick="exportPDF()"
+      style="display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:14px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 8px 28px rgba(40,120,200,.5);transition:all .3s"
+      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 36px rgba(40,120,200,.6)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 8px 28px rgba(40,120,200,.5)'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      💾 Зберегти результат як PDF
+    </button>
+    <div style="margin-top:8px;font-size:.68rem;color:var(--tl);transition:color 3s">
+      Роздрукуй або завантаж у Google Drive
+    </div>
+  </div>`;
 
   // Return CTA
   const returnDate=new Date();
