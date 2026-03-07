@@ -691,8 +691,7 @@ async function callAI(prompt){
   }
   const raw=await res.json();
   if(raw.error) throw new Error(raw.error);
-  // Gemini повертає { text: "..." }
-  const text=raw.text||'';
+  const text=raw.content.map(b=>b.text||'').join('');
   const clean=text.replace(/```json/g,'').replace(/```/g,'').trim();
   return JSON.parse(clean);
 }
