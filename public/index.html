@@ -135,9 +135,10 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 
 /* ── BUTTONS ROW ── */
 .btn-row{display:flex;gap:8px;margin-bottom:2px}
-.btn-advice{flex:1;border:1.5px solid var(--sb);background:var(--sf2);color:var(--ac);font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600}
-.btn-advice:hover:not(:disabled){box-shadow:0 4px 18px var(--sh);transform:translateY(-1px);background:var(--sf)}
-.btn-advice:disabled{opacity:.5;cursor:not-allowed}
+.btn-advice{flex:1;border:none;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;font-family:'Nunito',sans-serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:13px 10px;cursor:pointer;border-radius:11px;transition:all .3s;font-weight:800;box-shadow:0 6px 20px rgba(40,120,200,.4);position:relative;overflow:hidden}
+.btn-advice::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);pointer-events:none}
+.btn-advice:hover:not(:disabled){box-shadow:0 10px 28px rgba(40,120,200,.55);transform:translateY(-2px)}
+.btn-advice:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;background:#8aabcc}
 .btn-print{flex:0 0 auto;border:1.5px solid var(--sb);background:var(--sf2);color:var(--tm);font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .btn-print:hover{background:var(--sf);box-shadow:0 4px 18px var(--sh);transform:translateY(-1px)}
 .btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -173,9 +174,9 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .placeholder-txt{font-size:.73rem;color:var(--tl);font-style:italic;line-height:1.65;text-align:center;padding:10px 0;transition:color 3s}
 
 /* ── SPHERE PICKER ── */
-.picker-wrap{padding:6px 0 10px}
-.picker-title{font-size:.7rem;font-weight:700;color:var(--td);margin-bottom:8px;transition:color 3s}
-.picker-sub{font-size:.63rem;color:var(--tl);margin-bottom:10px;transition:color 3s}
+.picker-wrap{padding:12px 14px;background:linear-gradient(135deg,rgba(40,120,200,.07),rgba(40,120,200,.03));border:1.5px solid rgba(40,120,200,.2);border-radius:12px;margin-bottom:4px}
+.picker-title{font-size:.88rem;font-weight:800;color:var(--td);margin-bottom:6px;transition:color 3s}
+.picker-sub{font-size:.74rem;color:var(--tm);margin-bottom:10px;line-height:1.5;transition:color 3s}
 .picker-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .picker-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid transparent;font-size:.62rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--sf2);color:var(--tm);user-select:none}
 .picker-chip.selected{color:white;transform:translateY(-1px);box-shadow:0 3px 10px var(--sh)}
@@ -191,6 +192,9 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .loading span:nth-child(2){animation-delay:.2s}.loading span:nth-child(3){animation-delay:.4s}
 @keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 @keyframes spinRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulseCta{0%,100%{box-shadow:0 6px 20px rgba(40,120,200,.4)}50%{box-shadow:0 6px 28px rgba(40,120,200,.7),0 0 0 6px rgba(40,120,200,.15)}}
+.btn-advice:not(:disabled){animation:pulseCta 2.5s ease-in-out infinite}
+.btn-advice:not(:disabled):hover{animation:none}
 
 /* ══════════════════════════════════════
    ADVICE TABLE STYLES
@@ -846,11 +850,14 @@ async function callAI(prompt){
 }
 
 async function runAnalysis(){
-  // Check premium
+  // Check premium — limit to 1 analysis per payment
   if(!isPremiumUnlocked){
     showPaywall();
     return;
   }
+  // Lock after use (re-lock for next analysis)
+  isPremiumUnlocked=false;
+  try{ sessionStorage.removeItem('premium_unlocked'); }catch(e){}
   const picker=document.getElementById('spherePicker');
   const area=document.getElementById('adviceArea');
   const btn=document.getElementById('btnAdv');
