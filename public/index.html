@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Колесо Життя</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ═══════════════════════════════════════════
+   MOOD VARIABLES
+═══════════════════════════════════════════ */
+:root{
+  --td:#1a2e48;--tm:#2e4e78;--tl:#5a80aa;
+  --ac:#2878c8;--ac2:#e8935c;
+  --sf:rgba(240,252,255,0.80);--sf2:rgba(255,255,255,0.62);
+  --sb:rgba(210,238,255,0.88);--sh:rgba(30,80,150,0.10);
+}
+body.mood-storm  {--td:#c0d0e4;--tm:#7a9ab8;--tl:#4a6070;--ac:#6a9ab8;--sf:rgba(18,24,38,0.75);--sf2:rgba(22,30,46,0.62);--sb:rgba(40,60,90,0.52);--sh:rgba(0,0,0,0.35)}
+body.mood-overcast{--td:#c8d8e8;--tm:#8aabbc;--tl:#5a7888;--ac:#78aac8;--sf:rgba(38,50,66,0.70);--sf2:rgba(44,58,76,0.58);--sb:rgba(70,95,120,0.46);--sh:rgba(0,0,0,0.25)}
+body.mood-cloudy {--td:#1e3250;--tm:#3a5c7a;--tl:#6888aa;--ac:#5090c0;--sf:rgba(215,232,248,0.72);--sf2:rgba(225,240,255,0.60);--sb:rgba(175,210,240,0.74);--sh:rgba(60,110,160,0.13)}
+body.mood-partly {--td:#1a2e48;--tm:#2e4e78;--tl:#5a80aa;--ac:#3888c8;--sf:rgba(228,244,255,0.74);--sf2:rgba(240,250,255,0.62);--sb:rgba(195,228,255,0.80);--sh:rgba(40,100,160,0.11)}
+body.mood-clear  {--td:#122240;--tm:#1e3e68;--tl:#4878a8;--ac:#2878c8;--sf:rgba(232,248,255,0.76);--sf2:rgba(244,252,255,0.64);--sb:rgba(200,235,255,0.84);--sh:rgba(30,90,150,0.09)}
+body.mood-sunny  {--td:#0a1c38;--tm:#182e58;--tl:#3868a0;--ac:#1868c8;--sf:rgba(238,252,255,0.80);--sf2:rgba(248,255,255,0.66);--sb:rgba(210,242,255,0.88);--sh:rgba(20,80,150,0.08)}
+
+body{font-family:'Nunito',sans-serif;font-weight:400;min-height:100vh;overflow-x:hidden;position:relative}
+
+/* ── SKY ── */
+.sky-bg{position:fixed;inset:0;z-index:0;transition:background 3.5s ease}
+body.mood-storm   .sky-bg{background:linear-gradient(175deg,#0d1220 0%,#1a2238 45%,#2a2030 100%)}
+body.mood-overcast .sky-bg{background:linear-gradient(175deg,#3a4558 0%,#566070 45%,#788090 100%)}
+body.mood-cloudy  .sky-bg{background:linear-gradient(175deg,#6888a8 0%,#92aec8 45%,#b8d0e4 100%)}
+body.mood-partly  .sky-bg{background:linear-gradient(175deg,#78a8d0 0%,#a8ccec 45%,#cce4f8 100%)}
+body.mood-clear   .sky-bg{background:linear-gradient(175deg,#3888cc 0%,#68b8e8 45%,#a8daf8 100%)}
+body.mood-sunny   .sky-bg{background:linear-gradient(175deg,#1878cc 0%,#50b0e8 35%,#90d8f8 70%,#e0f4ff 100%)}
+
+/* ── SUN ── */
+.sun{position:fixed;top:30px;right:70px;width:80px;height:80px;border-radius:50%;z-index:1;pointer-events:none;transition:all 3.5s ease}
+body.mood-sunny  .sun{background:radial-gradient(circle,#fffbe8 0%,#ffd030 55%,#ffa010 100%);box-shadow:0 0 70px 25px rgba(255,200,30,.40),0 0 140px 50px rgba(255,170,20,.18);opacity:1}
+body.mood-clear  .sun{background:radial-gradient(circle,#fff8d0 0%,#ffca28 60%);box-shadow:0 0 45px 12px rgba(255,190,30,.28);opacity:.85}
+body.mood-partly .sun{background:radial-gradient(circle,#ffeebb 0%,#ffcc38 60%);box-shadow:0 0 30px rgba(255,170,20,.22);opacity:.55}
+body.mood-cloudy .sun{opacity:.14;background:radial-gradient(circle,#ffe8a0,#ffc820)}
+body.mood-overcast .sun{opacity:.04}
+body.mood-storm  .sun{opacity:0}
+
+/* ── CLOUDS ── */
+.clouds{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.cloud{position:absolute;border-radius:60px;transition:opacity 3.5s ease,filter 3.5s ease;animation:cloudFloat linear infinite}
+@keyframes cloudFloat{from{transform:translateX(-250px)}to{transform:translateX(calc(100vw + 300px))}}
+body.mood-storm   .cloud{opacity:.10;filter:blur(4px)}
+body.mood-overcast .cloud{opacity:.22;filter:blur(2.5px)}
+body.mood-cloudy  .cloud{opacity:.52;filter:blur(1px)}
+body.mood-partly  .cloud{opacity:.72;filter:blur(.5px)}
+body.mood-clear   .cloud{opacity:.82;filter:blur(0)}
+body.mood-sunny   .cloud{opacity:.92;filter:blur(0)}
+
+/* ── MOOD PILL ── */
+.mood-pill{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:200;display:flex;align-items:center;gap:8px;background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(14px);border-radius:30px;padding:6px 18px;transition:all 2.5s ease;box-shadow:0 4px 20px var(--sh)}
+.mood-pill .mi{font-size:1rem}
+.mood-pill .ml{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--tl);transition:color 3s}
+.mood-pill .ms{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--ac);transition:color 3s}
+.mood-pill .mm{font-size:.68rem;font-weight:600;color:var(--tm);transition:color 3s;margin-left:2px}
+
+/* ── LAYOUT ── */
+.wrapper{position:relative;z-index:10;display:grid;grid-template-columns:292px 1fr 320px;min-height:100vh;padding-top:52px}
+
+/* ── GLASS ── */
+.glass{background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(18px);border-radius:14px;box-shadow:0 6px 28px var(--sh);transition:background 3s,border-color 3s,box-shadow 3s}
+
+/* ══ LEFT ══ */
+.left-col{padding:14px 8px 14px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;max-height:calc(100vh - 52px);scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300;color:var(--td);line-height:1.1;padding:8px 10px 12px;margin-bottom:4px;border-bottom:1.5px solid var(--sb);transition:color 3s,border-color 3s}
+.page-title em{font-style:italic;color:var(--ac);transition:color 3s}
+
+.sphere-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;width:100%;transition:all .2s}
+.sphere-btn:hover{background:var(--sf2);border-color:var(--sb)}
+.sphere-btn.active{background:var(--sf);border-color:var(--sb);box-shadow:0 2px 10px var(--sh)}
+.s-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.s-info{flex:1;min-width:0}
+.s-name{font-size:.78rem;font-weight:500;color:var(--td);display:flex;align-items:center;gap:5px;transition:color 3s}
+.s-avg{font-size:.62rem;color:var(--tl);transition:color 3s;margin-top:1px}
+.s-bar-wrap{width:36px;height:3px;background:rgba(128,160,200,.18);border-radius:2px;overflow:hidden}
+.s-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.badge{font-size:.5rem;padding:1px 5px;border-radius:6px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0}
+.bc{background:rgba(210,50,50,.15);color:#c03030}.bw{background:rgba(210,140,30,.15);color:#9a6010}
+.bg{background:rgba(50,160,90,.15);color:#207040}.bb{background:rgba(40,130,210,.15);color:#1860a0}
+
+/* ══ CENTER ══ */
+.center-col{display:flex;flex-direction:column;align-items:center;padding:14px 16px;gap:14px;overflow-y:auto;max-height:calc(100vh - 52px)}
+.wheel-card{width:100%;max-width:500px;padding:16px;position:relative}
+canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-shadow(0 4px 16px rgba(0,0,0,.22)) drop-shadow(0 0 2px rgba(255,255,255,.8));transition:filter 3s}
+body.mood-storm canvas#wheel{filter:drop-shadow(0 4px 22px rgba(0,0,0,.55)) drop-shadow(0 0 1px rgba(80,140,200,.3))}
+.wheel-hint{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tl);text-align:center;margin-top:4px;transition:color 3s}
+.detail-box{width:100%;max-width:500px;padding:18px 20px}
+.det-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:13px;border-bottom:1.5px solid var(--sb);transition:border-color 3s}
+.det-stripe{width:4px;height:42px;border-radius:3px;flex-shrink:0}
+.det-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;color:var(--td);transition:color 3s}
+.det-score-wrap{margin-left:auto;text-align:right}
+.det-score{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:600;line-height:1;transition:color 3s}
+.det-score-lbl{font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tl);transition:color 3s}
+.sub-list{display:flex;flex-direction:column;gap:12px}
+.sub-item{display:flex;flex-direction:column;gap:4px}
+.sub-top{display:flex;justify-content:space-between;align-items:center}
+.sub-lbl{font-size:.74rem;color:var(--tm);font-weight:400;transition:color 3s}
+.sub-num{font-size:.7rem;font-weight:600;min-width:20px;text-align:right;transition:color 3s}
+.sub-desc{font-size:.62rem;color:var(--tl);font-style:italic;line-height:1.4;transition:color 3s}
+input[type=range].srange{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;outline:none;cursor:pointer;transition:background .3s}
+input[type=range].srange::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:white;cursor:pointer;border:2.5px solid currentColor;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .15s,box-shadow .15s}
+input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
+
+/* ══ RIGHT ══ */
+.right-col{padding:14px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:calc(100vh - 52px);scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+.panel-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--td);letter-spacing:.04em;margin-bottom:9px;display:flex;align-items:center;gap:8px;transition:color 3s}
+.panel-title::after{content:'';flex:1;height:1.5px;background:var(--sb);border-radius:1px;transition:background 3s}
+.total-big{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:var(--ac);line-height:1;transition:color 3s}
+.total-lbl{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tl);margin-bottom:12px;transition:color 3s}
+.rank-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid rgba(128,160,200,.12)}
+.rank-row:last-child{border:none}
+.rank-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.rank-name{font-size:.68rem;color:var(--tm);flex:1;transition:color 3s}
+.rank-score{font-size:.7rem;font-weight:600;color:var(--td);transition:color 3s}
+
+/* ── BUTTONS ROW ── */
+.btn-row{display:flex;gap:8px;margin-bottom:2px}
+.btn-advice{flex:1;border:1.5px solid var(--sb);background:var(--sf2);color:var(--ac);font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600}
+.btn-advice:hover:not(:disabled){box-shadow:0 4px 18px var(--sh);transform:translateY(-1px);background:var(--sf)}
+.btn-advice:disabled{opacity:.5;cursor:not-allowed}
+.btn-print{flex:0 0 auto;border:1.5px solid var(--sb);background:var(--sf2);color:var(--tm);font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-print:hover{background:var(--sf);box-shadow:0 4px 18px var(--sh);transform:translateY(-1px)}
+.btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.placeholder-txt{font-size:.73rem;color:var(--tl);font-style:italic;line-height:1.65;text-align:center;padding:10px 0;transition:color 3s}
+
+/* ── SPHERE PICKER ── */
+.picker-wrap{padding:6px 0 10px}
+.picker-title{font-size:.7rem;font-weight:700;color:var(--td);margin-bottom:8px;transition:color 3s}
+.picker-sub{font-size:.63rem;color:var(--tl);margin-bottom:10px;transition:color 3s}
+.picker-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.picker-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid transparent;font-size:.62rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--sf2);color:var(--tm);user-select:none}
+.picker-chip.selected{color:white;transform:translateY(-1px);box-shadow:0 3px 10px var(--sh)}
+.picker-chip .chip-score{font-size:.58rem;opacity:.8}
+.picker-chip .chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.picker-actions{display:flex;gap:7px;align-items:center}
+.btn-analyze{flex:1;border:1.5px solid var(--sb);background:var(--ac);color:white;font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:700}
+.btn-analyze:hover:not(:disabled){opacity:.9;transform:translateY(-1px);box-shadow:0 4px 18px var(--sh)}
+.btn-analyze:disabled{opacity:.45;cursor:not-allowed}
+.picker-hint{font-size:.6rem;color:var(--tl);transition:color 3s}
+.loading{display:flex;gap:5px;justify-content:center;padding:18px}
+.loading span{width:7px;height:7px;border-radius:50%;background:var(--ac);animation:ldot 1.2s infinite;transition:background 3s}
+.loading span:nth-child(2){animation-delay:.2s}.loading span:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+
+/* ══════════════════════════════════════
+   ADVICE TABLE STYLES
+══════════════════════════════════════ */
+.adv-overview{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.92rem;color:var(--tm);line-height:1.65;padding:12px 14px;border-left:3px solid var(--ac);border-radius:0 9px 9px 0;background:var(--sf2);margin-bottom:10px;transition:all 3s}
+
+.adv-table-wrap{overflow-x:auto;margin-bottom:10px}
+.adv-table{width:100%;border-collapse:collapse;font-size:.7rem;min-width:600px}
+.adv-table th{background:rgba(40,120,200,.12);color:var(--td);font-weight:700;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:2px solid var(--sb);white-space:nowrap;transition:color 3s,background 3s,border-color 3s}
+.adv-table td{padding:8px 10px;border-bottom:1px solid rgba(128,160,200,.1);color:var(--tm);vertical-align:top;line-height:1.45;transition:color 3s,border-color 3s,background 3s}
+.adv-table tr:hover td{background:rgba(40,120,200,.04)}
+.adv-table .col-sphere{font-weight:600;white-space:nowrap}
+.adv-table .col-score{text-align:center;font-weight:700;font-size:.78rem}
+.adv-table .col-gap{text-align:center;font-size:.7rem;font-weight:600}
+.adv-table .col-prio{text-align:center;white-space:nowrap}
+
+/* ── ALGORITHM BLOCK ── */
+.algo-block{background:var(--sf2);border:1.5px solid var(--sb);border-radius:12px;padding:16px 18px;margin-bottom:10px;transition:all 3s}
+.algo-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--td);margin-bottom:12px;display:flex;align-items:center;gap:8px;transition:color 3s}
+.algo-phases{display:flex;flex-direction:column;gap:0}
+
+.algo-phase{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed rgba(128,160,200,.2);position:relative;transition:border-color 3s}
+.algo-phase:last-child{border:none;padding-bottom:0}
+.algo-phase-left{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0}
+.algo-phase-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:white;flex-shrink:0}
+.algo-phase-line{width:2px;flex:1;background:rgba(128,160,200,.2);margin:4px 0;min-height:20px;transition:background 3s}
+.algo-phase:last-child .algo-phase-line{display:none}
+.algo-phase-content{flex:1;padding-top:2px}
+.algo-phase-week{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;transition:color 3s}
+.algo-phase-name{font-size:.8rem;font-weight:600;color:var(--td);margin-bottom:6px;transition:color 3s}
+.algo-actions{list-style:none;padding:0;display:flex;flex-direction:column;gap:3px}
+.algo-action{font-size:.7rem;color:var(--tm);display:flex;gap:6px;align-items:flex-start;line-height:1.45;transition:color 3s}
+.algo-action-num{width:16px;height:16px;border-radius:50%;background:rgba(40,120,200,.12);color:var(--ac);font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background 3s,color 3s}
+.algo-month{font-size:.68rem;color:var(--tl);font-style:italic;margin-top:5px;padding-top:5px;border-top:1px solid rgba(128,160,200,.12);transition:color 3s,border-color 3s}
+.algo-to10{font-size:.68rem;color:var(--ac);font-weight:600;margin-top:3px;transition:color 3s}
+
+.roadmap-card{padding:14px 16px;border-radius:10px;border-left:3px solid var(--ac2);background:var(--sf2);transition:all 3s;font-size:.72rem;color:var(--tm);line-height:1.6}
+.roadmap-card strong{color:var(--td);font-weight:700;display:block;margin-bottom:5px;font-size:.76rem;transition:color 3s}
+
+/* ══════════════════════════════════════
+   ONBOARDING MODAL
+══════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(10,20,40,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:rgba(240,250,255,.97);border:1.5px solid rgba(200,230,255,.9);border-radius:20px;box-shadow:0 20px 60px rgba(20,60,140,.25);max-width:620px;width:100%;max-height:90vh;overflow-y:auto;padding:36px 40px}
+body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);border-color:rgba(60,100,150,.5)}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--td);margin-bottom:4px;transition:color 3s}
+.modal h2 em{font-style:italic;color:var(--ac);transition:color 3s}
+.modal .tagline{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tl);margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--sb);transition:color 3s,border-color 3s}
+.modal-section{margin-bottom:20px}
+.modal-section h3{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--ac);margin-bottom:10px;transition:color 3s}
+.modal-section p{font-size:.78rem;color:var(--tm);line-height:1.7;transition:color 3s}
+.step-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+.step-list li{display:flex;gap:10px;align-items:flex-start;font-size:.77rem;color:var(--tm);line-height:1.6;transition:color 3s}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--ac);color:white;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background 3s}
+.score-scale{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
+.score-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:var(--sf2);border:1px solid var(--sb);transition:all 3s}
+.score-num{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;line-height:1;flex-shrink:0}
+.score-txt{font-size:.67rem;color:var(--tm);line-height:1.4;transition:color 3s}
+.score-txt strong{display:block;font-size:.7rem;color:var(--td);font-weight:600;margin-bottom:1px;transition:color 3s}
+.btn-start{width:100%;margin-top:22px;background:linear-gradient(135deg,var(--ac),#5090e0);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;padding:14px;cursor:pointer;font-weight:600;box-shadow:0 6px 20px rgba(30,100,200,.30);transition:all .3s}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(30,100,200,.38)}
+
+/* ══════════════════════════════════════
+   PRINT STYLES
+══════════════════════════════════════ */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .sky-bg,.clouds,.sun,.mood-pill,.modal-overlay,.no-print{display:none!important}
+  body{background:#fff!important;color:#1a2e48!important}
+  .wrapper{display:block!important;padding-top:0!important}
+  .left-col,.center-col{display:none!important}
+  .right-col{display:block!important;max-height:none!important;overflow:visible!important;padding:0!important}
+  .glass{background:#fff!important;border:1px solid #cce!important;box-shadow:none!important;backdrop-filter:none!important;border-radius:8px!important}
+  .right-col > div{margin-bottom:16px!important;page-break-inside:avoid}
+
+  /* Print header injected */
+  .print-header{display:block!important;text-align:center;padding:24px 0 16px;border-bottom:2px solid #2878c8;margin-bottom:20px}
+  .print-header h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;font-weight:300;color:#1a2e48}
+  .print-header p{font-size:11px;color:#5a80aa;letter-spacing:.15em;text-transform:uppercase;margin-top:4px}
+
+  .adv-table th{background:#e8f4ff!important;color:#1a2e48!important;border-bottom:2px solid #2878c8!important}
+  .adv-table td{color:#2e4e78!important;border-bottom:1px solid #ddeeff!important}
+  .adv-table tr:hover td{background:transparent!important}
+
+  .algo-block{background:#f8fbff!important;border:1px solid #cce!important}
+  .algo-title{color:#1a2e48!important}
+  .algo-phase-name{color:#1a2e48!important}
+  .algo-action{color:#2e4e78!important}
+  .adv-overview,.roadmap-card{background:#f0f7ff!important;border-color:#2878c8!important}
+
+  .btn-row,.btn-print,.btn-advice{display:none!important}
+  .panel-title::after{background:#cce!important}
+  .panel-title{color:#1a2e48!important;font-size:13px!important}
+  .total-big{color:#2878c8!important}
+  .rank-name,.rank-score{color:#1a2e48!important}
+  .rank-row{border-color:#ddeeff!important}
+
+  .adv-table-wrap{overflow:visible!important}
+  .adv-table{min-width:auto!important;font-size:9px!important}
+  .adv-table th{font-size:8px!important;padding:5px 7px!important}
+  .adv-table td{padding:5px 7px!important}
+}
+
+.print-header{display:none}
+
+/* ── wheel canvas print ── */
+#printWheelWrap{display:none}
+@media print{
+  #printWheelWrap{display:block!important;text-align:center;margin:16px 0;page-break-inside:avoid}
+  #printWheelWrap img,#printWheelWrap canvas{max-width:340px!important;height:auto!important}
+}
+
+@media(max-width:960px){
+  .wrapper{grid-template-columns:1fr;grid-template-rows:auto}
+  .left-col,.right-col{max-height:none;overflow:visible}
+  .left-col{display:grid;grid-template-columns:repeat(3,1fr)}
+  .page-title{display:none}
+  canvas#wheel{max-width:360px}
+}
+</style>
+</head>
+<body class="mood-partly">
+
+<div class="sky-bg"></div>
+<div class="sun"></div>
+<div class="clouds" id="clouds"></div>
+
+<div class="mood-pill">
+  <span class="mi" id="moodIcon">⛅</span>
+  <span class="ml">Баланс:</span>
+  <span class="ms" id="moodScore">5.0</span>
+  <span class="mm" id="moodName">Мінливо</span>
+</div>
+
+<!-- ONBOARDING -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Колесо <em>Життя</em></h2>
+    <p class="tagline">Інструмент самопізнання та особистісного зростання</p>
+    <div class="modal-section">
+      <h3>🌀 Що таке Колесо Життя?</h3>
+      <p>Колесо Життя — класичний інструмент коучингу, що дозволяє оцінити 12 ключових сфер одночасно та побачити, де є дисбаланс. Воно показує вашу реальну картину життя зараз, допомагає знайти «сліпі зони» та розставити пріоритети для розвитку. Регулярне використання (раз на місяць) дає змогу відстежувати прогрес і жити усвідомленіше.</p>
+    </div>
+    <div class="modal-section">
+      <h3>📋 Інструкція</h3>
+      <ul class="step-list">
+        <li><span class="step-num">1</span>Оберіть сферу в меню ліворуч або натисніть на сектор колеса.</li>
+        <li><span class="step-num">2</span>Оцініть кожну з 5 підкатегорій за шкалою 1–10, орієнтуючись на опис балів нижче. Бал виставляйте чесно — без завищень і заниження.</li>
+        <li><span class="step-num">3</span>Спостерігайте як колесо, кольори та небо змінюються залежно від загального балансу.</li>
+        <li><span class="step-num">4</span>Натисніть «Отримати план» — AI-коуч створить таблицю пріоритетів і покроковий алгоритм дій для кожної сфери.</li>
+        <li><span class="step-num">5</span>Роздрукуйте результати — кнопка поруч із «Отримати план» — щоб мати план на папері.</li>
+      </ul>
+    </div>
+    <div class="modal-section">
+      <h3>📊 Шкала оцінювання 1–10</h3>
+      <div class="score-scale" id="modalScaleGrid"></div>
+    </div>
+    <button class="btn-start" onclick="closeModal()">✦ Розпочати оцінку</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="wrapper">
+
+  <!-- LEFT -->
+  <div class="left-col" id="leftNav">
+    <div class="page-title">Колесо<br><em>Життя</em></div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center-col">
+    <div class="wheel-card glass">
+      <canvas id="wheel" width="480" height="480"></canvas>
+      <div class="wheel-hint">Натисни на сектор · Оціни підкатегорії</div>
+    </div>
+    <div class="detail-box glass" id="detailBox"></div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-col" id="rightCol">
+
+    <!-- score summary -->
+    <div class="glass" style="padding:14px 16px">
+      <div class="panel-title">Зведення</div>
+      <div class="total-big" id="totalBig">5.0</div>
+      <div class="total-lbl">середній бал / 10</div>
+      <div id="rankList"></div>
+    </div>
+
+    <!-- print header (hidden on screen) -->
+    <div class="print-header" id="printHeader">
+      <h1>Колесо Життя — Мій Звіт</h1>
+      <p id="printDate"></p>
+    </div>
+    <div id="printWheelWrap"><canvas id="printWheel" width="340" height="340"></canvas></div>
+
+    <!-- advice -->
+    <div class="glass" style="padding:14px 16px;flex:1">
+      <div class="panel-title">План зростання</div>
+      <div class="btn-row no-print">
+        <button class="btn-advice" id="btnAdv" onclick="showPicker()">✦ Отримати план до балансу</button>
+        <button class="btn-print" onclick="exportPDF()" title="Друк / Зберегти PDF">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          PDF
+        </button>
+      </div>
+      <div id="spherePicker" style="display:none"></div>
+
+      <div id="adviceArea">
+        <p class="placeholder-txt">Оціни сфери та натисни «Отримати план» — AI-коуч визначить 3 найкритичніші або ти обереш самостійно. Отримаєш таблицю балансу та покроковий алгоритм до 10/10.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── SCORE DESCRIPTIONS ── */
+const SCORE_DESCS=[
+  {score:1,label:'Повна відсутність',   desc:'Сфера повністю занедбана або не існує. Починати з нуля.'},
+  {score:2,label:'Критичний стан',      desc:'Серйозні проблеми, що впливають на все. Потребує негайних дій.'},
+  {score:3,label:'Дуже низький рівень', desc:'Сфера є, але майже не функціонує. Постійний дискомфорт.'},
+  {score:4,label:'Нижче норми',         desc:'Є прогалини та труднощі. Усвідомлення є, але мало дій.'},
+  {score:5,label:'Середній рівень',     desc:'Задовільно, але далеко від бажаного. Нейтральне відчуття.'},
+  {score:6,label:'Вище середнього',     desc:'Непогано, але є чіткий потенціал. Іноді добре, іноді ні.'},
+  {score:7,label:'Добрий рівень',       desc:'Загалом задоволений. Є стабільність, але є куди рости.'},
+  {score:8,label:'Сильна позиція',      desc:'Добре розвинена сфера. Незначні корективи зроблять її чудовою.'},
+  {score:9,label:'Дуже високий рівень', desc:'Майже ідеально. Відчуваєш повноту і радість від цієї сфери.'},
+  {score:10,label:'Абсолютна вершина',  desc:'Повна гармонія і розквіт. Джерело сили та натхнення.'},
+];
+const SC=[
+  '#c02020','#c84020','#d06020','#c87820',
+  '#b09020','#789020','#449030','#2880a0','#2060b0','#1848c0'
+];
+const sg=document.getElementById('modalScaleGrid');
+SCORE_DESCS.forEach(s=>{
+  sg.innerHTML+=`<div class="score-item"><div class="score-num" style="color:${SC[s.score-1]}">${s.score}</div><div class="score-txt"><strong>${s.label}</strong>${s.desc}</div></div>`;
+});
+
+/* ── SPHERES ── */
+const SPHERES=[
+  {id:'love',   name:'Любов',        color:'#d83868',angle:0,
+   sub:[{n:'Інтимність та близькість',k:'s1'},{n:'Якість стосунків',k:'s2'},{n:'Довіра та прив\'язаність',k:'s3'},{n:'Самолюбов',k:'s4'},{n:'Романтика',k:'s5'}]},
+  {id:'family', name:'Сім\'я',       color:'#d87030',angle:30,
+   sub:[{n:'Якість спілкування',k:'s1'},{n:'Взаємопідтримка',k:'s2'},{n:'Спільний час',k:'s3'},{n:'Традиції та цінності',k:'s4'},{n:'Відповідальність',k:'s5'}]},
+  {id:'friends',name:'Друзі',        color:'#b09018',angle:60,
+   sub:[{n:'Кількість близьких друзів',k:'s1'},{n:'Глибина дружби',k:'s2'},{n:'Регулярне спілкування',k:'s3'},{n:'Взаємна підтримка',k:'s4'},{n:'Нові знайомства',k:'s5'}]},
+  {id:'career', name:'Кар\'єра',     color:'#28a040',angle:90,
+   sub:[{n:'Задоволення від роботи',k:'s1'},{n:'Розвиток навичок',k:'s2'},{n:'Кар\'єрне зростання',k:'s3'},{n:'Баланс роботи/життя',k:'s4'},{n:'Визнання',k:'s5'}]},
+  {id:'money',  name:'Фінанси',      color:'#18a880',angle:120,
+   sub:[{n:'Поточний дохід',k:'s1'},{n:'Заощадження',k:'s2'},{n:'Інвестиції',k:'s3'},{n:'Фінансова грамотність',k:'s4'},{n:'Відчуття безпеки',k:'s5'}]},
+  {id:'self',   name:'Саморозвиток', color:'#1878c0',angle:150,
+   sub:[{n:'Наявність цілей',k:'s1'},{n:'Навчання та читання',k:'s2'},{n:'Корисні звички',k:'s3'},{n:'Рефлексія',k:'s4'},{n:'Особистісне зростання',k:'s5'}]},
+  {id:'spirit', name:'Духовність',   color:'#4848b8',angle:180,
+   sub:[{n:'Сенс і призначення',k:'s1'},{n:'Внутрішній спокій',k:'s2'},{n:'Медитація/практики',k:'s3'},{n:'Зв\'язок з вищим',k:'s4'},{n:'Цінності',k:'s5'}]},
+  {id:'rest',   name:'Відпочинок',   color:'#7030b0',angle:210,
+   sub:[{n:'Хобі та захоплення',k:'s1'},{n:'Якість відпустки',k:'s2'},{n:'Розваги',k:'s3'},{n:'Відновлення енергії',k:'s4'},{n:'Час без гаджетів',k:'s5'}]},
+  {id:'env',    name:'Середовище',   color:'#a030a0',angle:240,
+   sub:[{n:'Затишок та комфорт дому',k:'s1'},{n:'Порядок та організація',k:'s2'},{n:'Місто/природа навколо',k:'s3'},{n:'Робоче місце',k:'s4'},{n:'Подорожі',k:'s5'}]},
+  {id:'comm',   name:'Комунікація',  color:'#c02860',angle:270,
+   sub:[{n:'Навички спілкування',k:'s1'},{n:'Вміння слухати',k:'s2'},{n:'Вирішення конфліктів',k:'s3'},{n:'Публічні виступи',k:'s4'},{n:'Соціальна активність',k:'s5'}]},
+  {id:'health', name:'Здоров\'я',    color:'#20a040',angle:300,
+   sub:[{n:'Фізична активність',k:'s1'},{n:'Харчування',k:'s2'},{n:'Сон',k:'s3'},{n:'Ментальне здоров\'я',k:'s4'},{n:'Огляди у лікаря',k:'s5'}]},
+  {id:'look',   name:'Зовнішність',  color:'#a89020',angle:330,
+   sub:[{n:'Догляд за тілом',k:'s1'},{n:'Стиль та гардероб',k:'s2'},{n:'Догляд за шкірою',k:'s3'},{n:'Зачіска',k:'s4'},{n:'Самовпевненість',k:'s5'}]},
+];
+const state={};
+SPHERES.forEach(s=>{state[s.id]={};s.sub.forEach(sub=>state[s.id][sub.k]=5);});
+let active=SPHERES[0];
+
+/* ── HELPERS ── */
+function avg(id){const s=SPHERES.find(x=>x.id===id);return s.sub.map(sub=>state[id][sub.k]).reduce((a,b)=>a+b,0)/s.sub.length}
+function globalAvg(){return SPHERES.reduce((s,sp)=>s+avg(sp.id),0)/SPHERES.length}
+function sDesc(v){return SCORE_DESCS[Math.min(9,Math.max(0,Math.round(v)-1))]}
+function sColor(v){return SC[Math.min(9,Math.max(0,Math.round(v)-1))]}
+
+/* ── MODAL ── */
+function closeModal(){document.getElementById('modalOverlay').style.display='none'}
+
+/* ── CLOUDS ── */
+function makeClouds(){
+  const c=document.getElementById('clouds');c.innerHTML='';
+  [{w:320,h:85},{w:200,h:58},{w:440,h:105},{w:170,h:52},{w:360,h:95},{w:250,h:72},{w:190,h:58},{w:520,h:125}].forEach(sh=>{
+    const el=document.createElement('div');el.className='cloud';
+    const top=4+Math.random()*38,dur=55+Math.random()*85,delay=-Math.random()*dur;
+    el.style.cssText=`width:${sh.w}px;height:${sh.h}px;top:${top}%;left:${-sh.w}px;background:radial-gradient(ellipse at 35% 55%,rgba(255,255,255,.96) 0%,rgba(238,248,255,.72) 55%,transparent 100%);filter:blur(${8+Math.random()*10}px);animation-duration:${dur}s;animation-delay:${delay}s;border-radius:${sh.h/2}px;`;
+    c.appendChild(el);
+  });
+}
+makeClouds();
+
+/* ── MOOD ── */
+const MOODS=[
+  {min:0,  max:2.5, cls:'mood-storm',   icon:'⛈',name:'Буря'},
+  {min:2.5,max:4,   cls:'mood-overcast',icon:'🌧',name:'Похмуро'},
+  {min:4,  max:5.5, cls:'mood-cloudy',  icon:'☁️',name:'Хмарно'},
+  {min:5.5,max:6.8, cls:'mood-partly',  icon:'⛅',name:'Мінливо'},
+  {min:6.8,max:8,   cls:'mood-clear',   icon:'🌤',name:'Ясно'},
+  {min:8,  max:10.1,cls:'mood-sunny',   icon:'☀️',name:'Сонячно'},
+];
+function updateMood(){
+  const g=globalAvg();
+  const m=MOODS.find(x=>g>=x.min&&g<x.max)||MOODS[MOODS.length-1];
+  document.body.className=m.cls;
+  document.getElementById('moodIcon').textContent=m.icon;
+  document.getElementById('moodScore').textContent=g.toFixed(1);
+  document.getElementById('moodName').textContent=m.name;
+  document.getElementById('totalBig').textContent=g.toFixed(1);
+}
+
+/* ── NAV ── */
+function buildNav(){
+  const nav=document.getElementById('leftNav');
+  const title=nav.querySelector('.page-title');
+  nav.innerHTML='';if(title)nav.appendChild(title);
+  SPHERES.forEach(s=>{
+    const a=avg(s.id);
+    let badge='',bc='';
+    if(a<4){badge='!';bc='bc';}else if(a<6){badge='~';bc='bw';}else if(a<8){badge='✓';bc='bg';}else{badge='★';bc='bb';}
+    const btn=document.createElement('button');
+    btn.className='sphere-btn'+(s.id===active.id?' active':'');
+    btn.innerHTML=`<div class="s-pip" style="background:${s.color};box-shadow:0 0 5px ${s.color}88"></div>
+      <div class="s-info">
+        <span class="s-name"><span>${s.name}</span><span class="badge ${bc}">${badge}</span></span>
+        <span class="s-avg">${a.toFixed(1)} / 10 · ${sDesc(a).label}</span>
+      </div>
+      <div class="s-bar-wrap"><div class="s-bar-fill" style="width:${a*10}%;background:${s.color}"></div></div>`;
+    btn.onclick=()=>{active=s;buildNav();buildDetail();drawWheel();};
+    nav.appendChild(btn);
+  });
+}
+
+/* ── DETAIL ── */
+function buildDetail(){
+  const s=active,a=avg(s.id),sd=sDesc(a);
+  const box=document.getElementById('detailBox');
+  box.innerHTML=`<div class="det-head">
+    <div class="det-stripe" style="background:${s.color};box-shadow:0 0 10px ${s.color}66"></div>
+    <div>
+      <div class="det-name">${s.name}</div>
+      <div style="font-size:.65rem;color:var(--tl);margin-top:2px;font-style:italic;transition:color 3s">${sd.label} — ${sd.desc.substring(0,62)}…</div>
+    </div>
+    <div class="det-score-wrap">
+      <div class="det-score" style="color:${s.color}">${a.toFixed(1)}</div>
+      <div class="det-score-lbl">середній бал</div>
+    </div>
+  </div>
+  <div class="sub-list" id="subList"></div>`;
+  const list=document.getElementById('subList');
+  s.sub.forEach(sub=>{
+    const v=state[s.id][sub.k];
+    const pct=v*10;
+    const track=`linear-gradient(90deg,${s.color}cc ${pct}%,rgba(160,190,220,.18) ${pct}%)`;
+    const sd2=sDesc(v);
+    const row=document.createElement('div');row.className='sub-item';
+    row.innerHTML=`<div class="sub-top">
+        <span class="sub-lbl">${sub.n}</span>
+        <span class="sub-num" style="color:${sColor(v)}" id="sv_${s.id}_${sub.k}">${v} — ${sd2.label}</span>
+      </div>
+      <input type="range" class="srange" min="1" max="10" step="1" value="${v}"
+        style="background:${track};color:${s.color}" id="r_${s.id}_${sub.k}">
+      <div class="sub-desc" id="sd_${s.id}_${sub.k}">${sd2.desc}</div>`;
+    list.appendChild(row);
+    const inp=row.querySelector('input');
+    inp.addEventListener('input',()=>{
+      const val=+inp.value,sd3=sDesc(val),p2=val*10;
+      state[s.id][sub.k]=val;
+      inp.style.background=`linear-gradient(90deg,${s.color}cc ${p2}%,rgba(160,190,220,.18) ${p2}%)`;
+      document.getElementById(`sv_${s.id}_${sub.k}`).textContent=`${val} — ${sd3.label}`;
+      document.getElementById(`sv_${s.id}_${sub.k}`).style.color=sColor(val);
+      document.getElementById(`sd_${s.id}_${sub.k}`).textContent=sd3.desc;
+      const newA=avg(s.id);
+      box.querySelector('.det-score').textContent=newA.toFixed(1);
+      box.querySelector('.det-score').nextElementSibling&&(box.querySelector('.det-score').parentElement.previousElementSibling.lastElementChild.textContent=`${sDesc(newA).label} — ${sDesc(newA).desc.substring(0,62)}…`);
+      buildNav();updateResults();drawWheel();
+    });
+  });
+}
+
+/* ── RESULTS ── */
+function updateResults(){
+  updateMood();
+  const sorted=[...SPHERES].sort((a,b)=>avg(b.id)-avg(a.id));
+  document.getElementById('rankList').innerHTML=sorted.map(s=>{
+    const a=avg(s.id);
+    let bc='',badge='';
+    if(a<4){bc='bc';badge='!';}else if(a<6){bc='bw';badge='~';}else if(a<8){bc='bg';badge='✓';}else{bc='bb';badge='★';}
+    return `<div class="rank-row">
+      <div class="rank-pip" style="background:${s.color};box-shadow:0 0 4px ${s.color}88"></div>
+      <div class="rank-name">${s.name}</div>
+      <span class="badge ${bc}">${badge}</span>
+      <div class="rank-score" style="color:${s.color}">${a.toFixed(1)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── WHEEL CANVAS ── */
+const cv=document.getElementById('wheel');
+const ctx=cv.getContext('2d');
+const W=480,CX=W/2,CY=W/2,MAXR=200,MINR=22,SL=(Math.PI*2)/12;
+
+function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
+  const ct=c.getContext('2d');
+  ct.clearRect(0,0,c.width,c.height);
+  // outer
+  ct.beginPath();ct.arc(cx,cy,maxr+6,0,Math.PI*2);
+  ct.fillStyle='rgba(255,255,255,.30)';ct.fill();
+  // disc
+  ct.beginPath();ct.arc(cx,cy,maxr,0,Math.PI*2);
+  ct.fillStyle='rgba(255,255,255,.90)';ct.fill();
+  ct.strokeStyle='rgba(60,120,200,.38)';ct.lineWidth=2;ct.stroke();
+  // grid
+  for(let i=1;i<=10;i++){
+    const r=minr+(maxr-minr)*i/10;
+    ct.beginPath();ct.arc(cx,cy,r,0,Math.PI*2);
+    if(i===5){ct.strokeStyle='rgba(40,100,200,.30)';ct.lineWidth=1.2;}
+    else if(i===10){ct.strokeStyle='rgba(40,100,200,.25)';ct.lineWidth=1.0;}
+    else{ct.strokeStyle='rgba(40,100,200,.10)';ct.lineWidth=.6;}
+    ct.stroke();
+    if(i%2===0){ct.font='500 8px Nunito';ct.fillStyle='rgba(40,100,180,.45)';ct.textAlign='left';ct.textBaseline='middle';ct.fillText(i,cx+r+3,cy-3);}
+  }
+  // dividers
+  for(let i=0;i<12;i++){
+    const a=-Math.PI/2+sl*i;
+    ct.beginPath();ct.moveTo(cx+minr*Math.cos(a),cy+minr*Math.sin(a));ct.lineTo(cx+maxr*Math.cos(a),cy+maxr*Math.sin(a));
+    ct.strokeStyle='rgba(40,100,200,.22)';ct.lineWidth=1.0;ct.stroke();
+  }
+  // sectors
+  SPHERES.forEach((s,i)=>{
+    const sa=-Math.PI/2+sl*i+.020,ea=sa+sl-.040;
+    const a=avg(s.id),r=minr+(maxr-minr)*a/10,isAct=s.id===activeId;
+    ct.beginPath();ct.moveTo(cx,cy);ct.arc(cx,cy,r,sa,ea);ct.closePath();
+    const g=ct.createRadialGradient(cx,cy,minr*.5,cx,cy,r);
+    g.addColorStop(0,s.color+'28');g.addColorStop(.55,s.color+(isAct?'bb':'88'));g.addColorStop(1,s.color+(isAct?'ff':'cc'));
+    ct.fillStyle=g;ct.fill();
+    ct.beginPath();ct.arc(cx,cy,r,sa,ea);
+    ct.strokeStyle=isAct?s.color:s.color+'cc';ct.lineWidth=isAct?3:2;ct.stroke();
+    ct.beginPath();ct.moveTo(cx,cy);ct.arc(cx,cy,r,sa,ea);ct.closePath();
+    ct.strokeStyle=s.color+'44';ct.lineWidth=.5;ct.stroke();
+    const ma=-Math.PI/2+sl*i+sl/2,lr=maxr+24;
+    ct.save();ct.translate(cx+lr*Math.cos(ma),cy+lr*Math.sin(ma));ct.rotate(ma+Math.PI/2);
+    ct.font=`${isAct?'700':'600'} ${isAct?10.5:9.5}px Nunito,sans-serif`;
+    ct.shadowColor='rgba(255,255,255,.9)';ct.shadowBlur=4;
+    ct.fillStyle=isAct?s.color:s.color+'ee';ct.textAlign='center';ct.textBaseline='middle';
+    ct.fillText(s.name,0,0);ct.shadowBlur=0;ct.restore();
+    const scoreR=Math.max(minr+18,r-20);
+    ct.font='700 9px Nunito';ct.shadowColor='rgba(255,255,255,.95)';ct.shadowBlur=5;
+    ct.fillStyle=isAct?s.color:'rgba(20,50,100,.80)';ct.textAlign='center';ct.textBaseline='middle';
+    ct.fillText(a.toFixed(1),cx+scoreR*Math.cos(ma),cy+scoreR*Math.sin(ma));ct.shadowBlur=0;
+  });
+  // center
+  const cg=ct.createRadialGradient(cx,cy,0,cx,cy,14);
+  cg.addColorStop(0,'#ffffff');cg.addColorStop(1,'#6ab0e0');
+  ct.beginPath();ct.arc(cx,cy,10,0,Math.PI*2);ct.fillStyle=cg;ct.fill();
+  ct.strokeStyle='rgba(40,100,200,.5)';ct.lineWidth=1.5;ct.stroke();
+}
+
+function drawWheel(){drawWheelOnCtx(cv,CX,CY,MAXR,MINR,SL,active.id);}
+
+cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect(),sc=W/r.width;
+  const x=(e.clientX-r.left)*sc-CX,y=(e.clientY-r.top)*sc-CY;
+  const d=Math.sqrt(x*x+y*y);if(d<MINR||d>MAXR+10)return;
+  let ang=Math.atan2(y,x)+Math.PI/2;if(ang<0)ang+=Math.PI*2;
+  active=SPHERES[Math.floor(ang/SL)%12];
+  buildNav();buildDetail();drawWheel();
+});
+
+/* ══════════════════════════════════════════════
+   AI ADVICE
+══════════════════════════════════════════════ */
+let lastParsed=null;
+let selectedSpheres=new Set();
+
+
+function showPicker(){
+  const picker=document.getElementById('spherePicker');
+  const area=document.getElementById('adviceArea');
+  const btn=document.getElementById('btnAdv');
+  const data=SPHERES.map(s=>({id:s.id,name:s.name,color:s.color,score:parseFloat(avg(s.id).toFixed(2))}));
+  const sorted=[...data].sort((a,b)=>a.score-b.score);
+  if(selectedSpheres.size===0) sorted.slice(0,3).forEach(s=>selectedSpheres.add(s.id));
+
+  function renderPicker(){
+    const sel=selectedSpheres.size;
+    picker.innerHTML=`<div class="picker-wrap">
+      <div class="picker-title">🎯 Які сфери аналізувати?</div>
+      <div class="picker-sub">
+        Автоматично обрано <strong>3 найкритичніші</strong> · або оберіть самостійно (обрано: <strong>${sel}</strong>)
+      </div>
+      <div class="picker-chips">
+        ${sorted.map(s=>{
+          const isSel=selectedSpheres.has(s.id);
+          const scoreCol=s.score<4?'#c03030':s.score<6?'#c07010':s.score<8?'#207040':'#1860a0';
+          return `<div class="picker-chip${isSel?' selected':''}"
+            style="${isSel?'background:'+s.color+40+';border-color:'+s.color+';color:'+s.color:'border-color:'+s.color+'33'}"
+            onclick="toggleSphere('${s.id}')">
+            <div class="chip-dot" style="background:${s.color}"></div>
+            <span>${s.name}</span>
+            <span class="chip-score" style="color:${isSel?s.color:scoreCol};font-weight:700">${s.score}/10</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:.6rem;color:var(--tl);margin-bottom:8px;transition:color 3s">
+        💡 AI-аналіз проводить Claude — отримаєш таблицю балансу + покроковий алгоритм до 10/10
+      </div>
+      <div class="picker-actions">
+        <button class="btn-analyze" onclick="runAnalysis()" ${sel===0?'disabled':''}>
+          ✦ Аналізувати ${sel>0?sel+' сфер'+(sel===1?'у':sel<5?'и':''):''}
+        </button>
+        <span class="picker-hint">${sel===0?'Оберіть хоча б одну':'Натисніть для аналізу'}</span>
+      </div>
+    </div>`;
+  }
+
+  picker.style.display='block';
+  area.innerHTML='';
+  btn.style.display='none';
+  renderPicker();
+  window._reRenderPicker=renderPicker;
+}
+
+function toggleSphere(id){
+  if(selectedSpheres.has(id)) selectedSpheres.delete(id);
+  else selectedSpheres.add(id);
+  if(window._reRenderPicker) window._reRenderPicker();
+}
+
+async function callAI(prompt){
+  const res=await fetch('/api/analyze',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt})
+  });
+  if(!res.ok){
+    const e=await res.text();
+    throw new Error('Сервер помилка '+res.status+': '+e.slice(0,200));
+  }
+  const raw=await res.json();
+  if(raw.error) throw new Error(raw.error);
+  // Gemini повертає { text: "..." }
+  const text=raw.text||'';
+  const clean=text.replace(/```json/g,'').replace(/```/g,'').trim();
+  return JSON.parse(clean);
+}
+
+async function runAnalysis(){
+  const picker=document.getElementById('spherePicker');
+  const area=document.getElementById('adviceArea');
+  const btn=document.getElementById('btnAdv');
+  picker.style.display='none';
+  btn.style.display='none';
+
+  const allData=SPHERES.map(s=>({id:s.id,name:s.name,avg:avg(s.id).toFixed(1),subs:s.sub.map(sub=>sub.n+':'+state[s.id][sub.k]).join('; ')}));
+  const chosen=allData.filter(s=>selectedSpheres.has(s.id));
+  const context=allData.map(s=>s.name+':'+s.avg).join(', ');
+
+  // Show progress
+  const showProgress=(done,total,sphereName)=>{
+    area.innerHTML=`<div style="padding:16px 0;text-align:center">
+      <div class="loading" style="margin-bottom:12px"><span></span><span></span><span></span></div>
+      <div style="font-size:.72rem;color:var(--tm);transition:color 3s">
+        Аналізую: <strong>${sphereName}</strong><br>
+        <span style="color:var(--tl)">${done} з ${total} сфер</span>
+      </div>
+      <div style="margin:10px auto;width:120px;height:4px;background:var(--sb);border-radius:2px;overflow:hidden;transition:background 3s">
+        <div style="width:${Math.round(done/total*100)}%;height:100%;background:var(--ac);border-radius:2px;transition:width .4s,background 3s"></div>
+      </div>
+    </div>`;
+  };
+
+  try{
+    const results=[];
+    // Analyze each sphere separately — keeps JSON small and reliable
+    for(let i=0;i<chosen.length;i++){
+      const s=chosen[i];
+      showProgress(i,chosen.length,s.name);
+      const sc=parseFloat(s.avg);
+      const prompt=`ICF life coach. Одна сфера.
+Контекст: ${context}
+Сфера: ${s.name} (${s.avg}/10): ${s.subs}
+
+Відповідай ТІЛЬКИ JSON (без коментарів, без markdown):
+{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"1 речення чому важливо","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія і фіксація результату","duration":"15 хв"}],"week2_habit":"коротка щоденна звичка на тижні 2-4","month_goal":"вимірювана ціль за 30 днів","to_10":"шлях до ідеалу"}`;
+      const data=await callAI(prompt);
+      results.push(data);
+    }
+
+    // Get overview + roadmap separately
+    showProgress(chosen.length,chosen.length,'Загальний висновок');
+    const summaryPrompt=`ICF coach. Короткий висновок.
+Проаналізовані сфери: ${results.map(r=>r.sphere+':'+r.score).join(', ')}
+Всі бали: ${context}
+JSON: {"overview":"2 речення про загальну картину","balance_roadmap":"2 речення стратегія 100% балансу"}`;
+    const summary=await callAI(summaryPrompt);
+
+    lastParsed={overview:summary.overview,advice:results,balance_roadmap:summary.balance_roadmap};
+    renderAdvice(lastParsed);
+    btn.style.display='';
+    btn.textContent='✦ Змінити вибір сфер';
+    btn.onclick=showPicker;
+
+  }catch(err){
+    const msg=err.message||String(err);
+    area.innerHTML=`<div style="padding:12px;background:#fff5f5;border:1px solid #ffcccc;border-radius:8px;margin:8px 0">
+      <div style="font-size:.75rem;font-weight:700;color:#c03030;margin-bottom:6px">⚠️ Помилка аналізу</div>
+      <div style="font-size:.68rem;color:#804040;line-height:1.6;word-break:break-word">${msg}</div>
+      <button onclick="showPicker()" style="margin-top:10px;padding:6px 14px;background:#c03030;color:white;border:none;border-radius:6px;font-size:.65rem;cursor:pointer;font-weight:600">↩ Спробувати знову</button>
+    </div>`;
+    console.error('API error:', err);
+    btn.style.display='';
+    btn.textContent='✦ Спробувати знову';
+    btn.onclick=showPicker;
+  }
+}
+
+function renderAdvice(parsed){
+  const colorMap={};SPHERES.forEach(s=>colorMap[s.name]=s.color);
+  const getPrio=sc=>sc<4?{cls:'bc',lbl:'🔴 КРИТИЧНО',bg:'#fff0f0'}:sc<6?{cls:'bw',lbl:'🟡 ВАЖЛИВО',bg:'#fff8e8'}:sc<8?{cls:'bg',lbl:'🔵 РЕКОМЕНДОВАНО',bg:'#f0fff4'}:{cls:'bb',lbl:'🟢 ПІДТРИМКА',bg:'#f0f8ff'};
+
+  let html=`<div class="adv-overview">${parsed.overview}</div>`;
+
+  /* ── SUMMARY TABLE ── */
+  html+=`
+  <div style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tl);margin-bottom:6px;margin-top:2px;transition:color 3s">
+    📊 Таблиця балансу — шлях до 10/10
+  </div>
+  <div class="adv-table-wrap">
+  <table class="adv-table">
+    <thead><tr>
+      <th>#</th><th>Сфера</th><th style="text-align:center">Бал</th>
+      <th style="text-align:center">До 10</th><th>Пріоритет</th>
+      <th>Результат за 30 днів</th><th>KPI досягнення 10/10</th>
+    </tr></thead>
+    <tbody>
+    ${parsed.advice.map((a,i)=>{
+      const color=colorMap[a.sphere]||'#4080c0';
+      const sc=parseFloat(a.score)||5;
+      const gap=parseFloat(a.gap)||(10-sc);
+      const pc=getPrio(sc);
+      const scCol=sc<4?'#c03030':sc<6?'#9a6010':sc<8?'#207040':'#1860a0';
+      const bar=Math.round(sc*10);
+      return `<tr>
+        <td style="color:var(--tl);font-size:.6rem;text-align:center">${i+1}</td>
+        <td class="col-sphere" style="color:${color}">${a.sphere}</td>
+        <td class="col-score" style="text-align:center">
+          <div style="color:${scCol};font-size:.82rem;font-weight:700">${sc}/10</div>
+          <div style="height:4px;background:#eef;border-radius:2px;margin-top:3px;overflow:hidden">
+            <div style="width:${bar}%;height:100%;background:${color};border-radius:2px"></div>
+          </div>
+        </td>
+        <td class="col-gap" style="text-align:center;color:#e8935c;font-weight:700">+${gap.toFixed(0)}</td>
+        <td><span class="badge ${pc.cls}">${pc.lbl}</span></td>
+        <td style="font-size:.65rem;line-height:1.5">${a.month_goal||'—'}</td>
+        <td style="font-size:.65rem;line-height:1.5;color:var(--ac)">${a.kpi||a.to_10||'—'}</td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>
+  </div>`;
+
+  /* ── DAILY ALGORITHM BLOCK ── */
+  html+=`<div class="algo-block">
+    <div class="algo-title">📅 Щоденний алгоритм — покроковий план по днях</div>`;
+
+  parsed.advice.forEach((a,ai)=>{
+    const color=colorMap[a.sphere]||'#4080c0';
+    const sc=parseFloat(a.score)||5;
+    const gap=parseFloat(a.gap)||(10-sc);
+    const pc=getPrio(sc);
+    const days=Array.isArray(a.days)?a.days:[];
+
+    html+=`<div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 10px;background:${color}18;border-radius:9px;border-left:3px solid ${color}">
+        <span class="badge ${pc.cls}">${pc.lbl}</span>
+        <span style="font-size:.88rem;font-weight:700;color:${color}">${a.sphere}</span>
+        <span style="font-size:.62rem;color:var(--tl);transition:color 3s;margin-left:auto">${sc}/10 · +${gap.toFixed(0)} до ідеалу</span>
+      </div>
+      ${a.priority_reason?`<div style="font-size:.67rem;color:var(--tm);font-style:italic;margin-bottom:8px;padding:5px 9px;background:${color}0a;border-radius:6px;line-height:1.5">${a.priority_reason}</div>`:''}
+
+      <div class="adv-table-wrap">
+      <table class="adv-table" style="min-width:400px">
+        <thead><tr>
+          <th style="width:58px">День</th>
+          <th style="width:90px">Фокус</th>
+          <th>Завдання на день</th>
+          <th style="width:54px;text-align:center">Час</th>
+        </tr></thead>
+        <tbody>
+          ${days.map((d,di)=>{
+            const isLast=di===days.length-1;
+            const rowBg=isLast?color+'18':di%2===0?'transparent':color+'08';
+            return `<tr style="background:${rowBg}">
+              <td style="font-weight:700;color:${color};font-size:.7rem;white-space:nowrap">${d.day}</td>
+              <td style="font-weight:600;font-size:.67rem;color:var(--td)">${d.title||''}</td>
+              <td style="font-size:.68rem;line-height:1.5">${d.task||''}</td>
+              <td style="text-align:center;font-size:.65rem;color:var(--tl);white-space:nowrap">${d.duration||''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      </div>
+
+      ${a.week2_habit?`<div style="font-size:.65rem;color:var(--tm);margin-top:6px;padding:5px 9px;background:${color}0d;border-radius:6px;border-left:2px solid ${color}66">
+        🔄 <strong style="color:${color}">Тижні 2–4 (щодня):</strong> ${a.week2_habit}</div>`:''}
+
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+        ${a.month_goal?`<div style="flex:1;min-width:130px;font-size:.63rem;background:var(--sf2);border-radius:7px;padding:6px 9px;border-left:2px solid ${color};line-height:1.5;transition:all 3s">
+          <strong style="color:${color};display:block;margin-bottom:2px">📌 Ціль 30 днів</strong>${a.month_goal}</div>`:''}
+        ${a.to_10?`<div style="flex:1;min-width:130px;font-size:.63rem;background:var(--sf2);border-radius:7px;padding:6px 9px;border-left:2px solid var(--ac);line-height:1.5;transition:all 3s">
+          <strong style="color:var(--ac);display:block;margin-bottom:2px">🎯 Шлях до 10/10</strong>${a.to_10}</div>`:''}
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  if(parsed.balance_roadmap){
+    html+=`<div class="roadmap-card">
+      <strong>🌟 Стратегія 100% балансу всіх 12 сфер</strong>
+      ${parsed.balance_roadmap}
+    </div>`;
+  }
+  document.getElementById('adviceArea').innerHTML=html;
+}
+
+/* ══════════════════════════════════════════════
+   PDF EXPORT
+══════════════════════════════════════════════ */
+function exportPDF(){
+  const now=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
+  const avg_score=globalAvg().toFixed(1);
+
+  const tmpC=document.createElement('canvas');tmpC.width=400;tmpC.height=400;
+  drawWheelOnCtx(tmpC,200,200,165,18,(Math.PI*2)/12,active.id);
+  const wheelImg=tmpC.toDataURL('image/png');
+
+  const prioLabel=sc=>sc<4?'КРИТИЧНО':sc<6?'ВАЖЛИВО':sc<8?'РЕКОМЕНДОВАНО':'ПІДТРИМКА';
+  const prioColor=sc=>sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';
+  const scoreColor=sc=>sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';
+
+  const allRows=[...SPHERES].map(s=>({name:s.name,color:s.color,score:parseFloat(avg(s.id).toFixed(1))})).sort((a,b)=>a.score-b.score);
+
+  const summaryRows=allRows.map((s,i)=>{
+    const gap=(10-s.score).toFixed(0);
+    const pl=prioLabel(s.score);
+    const ai=lastParsed?lastParsed.advice.find(a=>a.sphere===s.name):null;
+    return `<tr>
+      <td style="text-align:center;color:#888">${i+1}</td>
+      <td style="font-weight:700;color:${s.color}">${s.name}</td>
+      <td style="text-align:center;font-weight:800;color:${scoreColor(s.score)}">${s.score}/10
+        <div style="height:4px;background:#e0e8f8;border-radius:2px;margin-top:2px"><div style="width:${s.score*10}%;height:4px;background:${s.color};border-radius:2px"></div></div>
+      </td>
+      <td style="text-align:center;font-weight:700;color:#d08030">+${gap}</td>
+      <td style="font-weight:700;color:${prioColor(s.score)}">${pl}</td>
+      <td>${ai&&ai.month_goal?ai.month_goal:'—'}</td>
+      <td style="color:#1060b0">${ai&&ai.to_10?ai.to_10:'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const algoHTML=lastParsed&&lastParsed.advice?lastParsed.advice.map((a,ai)=>{
+    const sc=parseFloat(a.score)||5;
+    const gap=(10-sc).toFixed(0);
+    const color=SPHERES.find(s=>s.name===a.sphere)?.color||'#4080c0';
+    const days=Array.isArray(a.days)?a.days:[];
+    const dayRows=days.map((d,di)=>`<tr style="background:${di%2?'#f5f9ff':'#fff'}">
+      <td style="font-weight:800;color:${color};white-space:nowrap">${d.day}</td>
+      <td style="font-weight:600">${d.title||''}</td>
+      <td style="line-height:1.5">${d.task||''}</td>
+      <td style="text-align:center;color:#5a80aa;white-space:nowrap">${d.duration||''}</td>
+    </tr>`).join('');
+    return `<div style="margin-bottom:18px;page-break-inside:avoid">
+      <div style="background:${color};color:#fff;padding:8px 14px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:10px">
+        <b style="font-size:14px">${ai+1}. ${a.sphere}</b>
+        <span style="font-size:10px;opacity:.85">${sc}/10 · +${gap} до 10/10</span>
+        <span style="margin-left:auto;background:rgba(0,0,0,.2);padding:2px 8px;border-radius:8px;font-size:9px">${prioLabel(sc)}</span>
+      </div>
+      ${a.priority_reason?`<div style="padding:6px 12px;background:${color}18;border-left:3px solid ${color};font-size:10px;font-style:italic;line-height:1.5">${a.priority_reason}</div>`:''}
+      <table style="width:100%;border-collapse:collapse;border:1px solid ${color}33;font-size:10px">
+        <thead><tr style="background:${color}18">
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:55px">День</th>
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:100px">Фокус</th>
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color}">Завдання</th>
+          <th style="padding:5px 8px;text-align:center;color:${color};border-bottom:2px solid ${color};width:50px">Час</th>
+        </tr></thead>
+        <tbody>${dayRows}</tbody>
+      </table>
+      ${a.week2_habit?`<div style="padding:5px 10px;background:#f0f8ff;border-left:3px solid ${color};font-size:10px;margin-top:3px"><b style="color:${color}">Тижні 2–4:</b> ${a.week2_habit}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:5px">
+        ${a.month_goal?`<div style="flex:1;padding:7px 9px;border-left:3px solid ${color};background:#f8faff;font-size:10px;line-height:1.5;border-radius:2px"><b style="color:${color}">Ціль 30 днів:</b> ${a.month_goal}</div>`:''}
+        ${a.to_10?`<div style="flex:1;padding:7px 9px;border-left:3px solid #2878c8;background:#f8faff;font-size:10px;line-height:1.5;border-radius:2px"><b style="color:#1060b0">До 10/10:</b> ${a.to_10}</div>`:''}
+      </div>
+    </div>`;
+  }).join(''):'';
+
+  const roadmap=lastParsed&&lastParsed.balance_roadmap
+    ?`<div style="margin-top:14px;padding:11px 15px;background:#f0f6ff;border:1.5px solid #2878c877;border-radius:8px;font-size:11px;color:#1a3060;line-height:1.65">
+        <b style="display:block;font-size:12px;color:#16478a;margin-bottom:4px">Стратегія 100% балансу</b>${lastParsed.balance_roadmap}</div>`:'';
+
+  const overview=lastParsed&&lastParsed.overview
+    ?`<div style="margin-bottom:12px;padding:9px 13px;background:#f0f8ff;border-left:4px solid #2878c8;border-radius:0 8px 8px 0;font-size:11px;color:#2a4060;font-style:italic;line-height:1.65">${lastParsed.overview}</div>`:'';
+
+  const printDoc=`<!DOCTYPE html><html lang="uk"><head>
+<meta charset="UTF-8"><title>Колесо Життя — ${now}</title>
+<style>
+  @page{margin:10mm 8mm;size:A4}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#1a2e48;background:#fff}
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .no-print{display:none!important}
+  }
+</style></head><body>
+<div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:11px 15px;border-radius:7px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+  <img src="${wheelImg}" style="width:75px;height:75px;border-radius:5px;flex-shrink:0">
+  <div>
+    <div style="font-size:17px;font-weight:800;margin-bottom:3px">Колесо Життя — Мій Звіт</div>
+    <div style="font-size:10px;opacity:.85;line-height:1.7">Дата: ${now} · Середній бал: <b>${avg_score}/10</b><br>
+    AI: Claude · ${lastParsed?'Аналіз: '+lastParsed.advice.length+' сфер':'Тільки бали'}</div>
+  </div>
+</div>
+${overview}
+<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:7px">Таблиця балансу — всі 12 сфер</div>
+<table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px">
+  <thead><tr style="background:#16478a">
+    <th style="color:#fff;padding:5px 6px;width:18px;text-align:center">#</th>
+    <th style="color:#fff;padding:5px 6px;width:70px">Сфера</th>
+    <th style="color:#fff;padding:5px 6px;width:65px;text-align:center">Бал</th>
+    <th style="color:#fff;padding:5px 6px;width:35px;text-align:center">До 10</th>
+    <th style="color:#fff;padding:5px 6px;width:80px">Пріоритет</th>
+    <th style="color:#fff;padding:5px 6px">Ціль 30 днів</th>
+    <th style="color:#fff;padding:5px 6px">Шлях до 10/10</th>
+  </tr></thead>
+  <tbody>${summaryRows}</tbody>
+</table>
+${algoHTML?`<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:10px">Щоденний алгоритм — покроковий план</div>${algoHTML}`:''}
+${roadmap}
+<div class="no-print" style="margin-top:18px;text-align:center;padding:12px;border-top:1px solid #dde8f8">
+  <button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:10px 30px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>
+  <p style="margin-top:6px;font-size:9px;color:#8aabcc">Оберіть принтер «Зберегти як PDF» → OK</p>
+</div>
+</body></html>`;
+
+  // Open in new tab — works everywhere
+  const w=window.open('about:blank','_blank');
+  if(w){
+    w.document.open();
+    w.document.write(printDoc);
+    w.document.close();
+    setTimeout(()=>w.print(),600);
+  } else {
+    // Fallback: inject into hidden iframe and print
+    const old=document.getElementById('_printFrame');
+    if(old) old.remove();
+    const iframe=document.createElement('iframe');
+    iframe.id='_printFrame';
+    iframe.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;background:white';
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(printDoc);
+    iframe.contentDocument.close();
+    setTimeout(()=>{
+      iframe.contentWindow.print();
+      setTimeout(()=>iframe.remove(),2000);
+    },600);
+  }
+}
+
+/* ── INIT ── */
+buildNav();buildDetail();drawWheel();updateResults();
+</script>
+</body>
+</html>
