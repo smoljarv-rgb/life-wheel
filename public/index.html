@@ -232,7 +232,7 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 /* ══════════════════════════════════════
    ONBOARDING MODAL
 ══════════════════════════════════════ */
-.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(10,20,40,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .4s ease}
+.modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(10,20,40,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{background:rgba(240,250,255,.97);border:1.5px solid rgba(200,230,255,.9);border-radius:20px;box-shadow:0 20px 60px rgba(20,60,140,.25);max-width:620px;width:100%;max-height:90vh;overflow-y:auto;padding:36px 40px}
 body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);border-color:rgba(60,100,150,.5)}
@@ -478,7 +478,11 @@ function sDesc(v){return SCORE_DESCS[Math.min(9,Math.max(0,Math.round(v)-1))]}
 function sColor(v){return SC[Math.min(9,Math.max(0,Math.round(v)-1))]}
 
 /* ── MODAL ── */
-function closeModal(){document.getElementById('modalOverlay').style.display='none'}
+function closeModal(){
+  const m=document.getElementById('modalOverlay');
+  m.style.display='none';
+  m.style.pointerEvents='none';
+}
 
 /* ── CLOUDS ── */
 function makeClouds(){
@@ -1272,6 +1276,7 @@ function getCalendarDate(daysFromNow){
 
 function shareResult(avgScore){
   const text=`🌀 Я пройшов тест Колеса Життя — мій середній бал ${avgScore}/10. Перевір свій баланс: ${location.href}`;
+  const shareTextClean=text.replace(/\u0060/g,'');
   const url=encodeURIComponent(location.href);
   const msg=encodeURIComponent(text);
 
@@ -1316,7 +1321,7 @@ function shareResult(avgScore){
         <svg width="28" height="28" viewBox="0 0 24 24"><path d="M4.5 19L1.5 14L7.5 4H13.5L7.5 14L4.5 19Z" fill="#0F9D58"/><path d="M19.5 19H13.5L10.5 14H16.5L19.5 19Z" fill="#4285F4"/><path d="M16.5 4L22.5 14L19.5 19L13.5 9L16.5 4Z" fill="#FFBB00"/></svg>
         <span style="font-size:.65rem;color:#c0d8f0">Google Drive</span>
       </button>
-      <button onclick="copyShareText('${text.replace(/`/g,'')}')" 
+      <button onclick="copyShareText(shareTextClean)" 
         style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(100,160,240,.15);cursor:pointer;transition:background .2s"
         onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c0d8f0" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -1339,182 +1344,137 @@ function shareResult(avgScore){
 
 function saveToGoogleDrive(avgScore){
   const date=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
-  const fileName=`Koleso-Zhyttia-${date.replace(/ /g,'-')}.pdf`;
+  const fileName='Koleso-Zhyttia-'+date.replace(/ /g,'-')+'.pdf';
 
-  // Build full HTML report for PDF
   const tmpC=document.createElement('canvas');tmpC.width=400;tmpC.height=400;
   drawWheelOnCtx(tmpC,200,200,165,18,(Math.PI*2)/12,active.id);
   const wheelImg=tmpC.toDataURL('image/png');
 
-  const prioColor=sc=>sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';
-  const scoreColor=sc=>sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';
-  const prioLabel=sc=>sc<4?'КРИТИЧНО':sc<6?'ВАЖЛИВО':sc<8?'РЕКОМЕНДОВАНО':'ПІДТРИМКА';
+  const prioColor=function(sc){return sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';};
+  const scoreColor=function(sc){return sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';};
+  const prioLabel=function(sc){return sc<4?'КРИТИЧНО':sc<6?'ВАЖЛИВО':sc<8?'РЕКОМЕНДОВАНО':'ПІДТРИМКА';};
 
-  const allRows=[...SPHERES].map(s=>({name:s.name,color:s.color,score:parseFloat(avg(s.id).toFixed(1))})).sort((a,b)=>a.score-b.score);
-  const summaryRows=allRows.map((s,i)=>{
-    const ai=lastParsed?lastParsed.advice.find(a=>a.sphere===s.name):null;
-    return `<tr style="background:${i%2?'#f5f9ff':'#fff'}">
-      <td style="padding:5px 8px;color:#888;text-align:center">${i+1}</td>
-      <td style="padding:5px 8px;font-weight:700;color:${s.color}">${s.name}</td>
-      <td style="padding:5px 8px;text-align:center;font-weight:800;color:${scoreColor(s.score)}">${s.score}/10
-        <div style="height:4px;background:#e0e8f8;border-radius:2px;margin-top:2px"><div style="width:${s.score*10}%;height:4px;background:${s.color};border-radius:2px"></div></div>
-      </td>
-      <td style="padding:5px 8px;text-align:center;font-weight:700;color:#d08030">+${(10-s.score).toFixed(0)}</td>
-      <td style="padding:5px 8px;font-weight:700;color:${prioColor(s.score)}">${prioLabel(s.score)}</td>
-      <td style="padding:5px 8px;font-size:10px">${ai&&ai.month_goal?ai.month_goal:'—'}</td>
-    </tr>`;
-  }).join('');
+  const allRows=[].concat(SPHERES).map(function(s){return {name:s.name,color:s.color,score:parseFloat(avg(s.id).toFixed(1))};}).sort(function(a,b){return a.score-b.score;});
+  
+  let summaryRows='';
+  allRows.forEach(function(s,i){
+    const ai=lastParsed?lastParsed.advice.find(function(a){return a.sphere===s.name;}):null;
+    const bg=i%2?'#f5f9ff':'#fff';
+    const bar=s.score*10;
+    summaryRows+='<tr style="background:'+bg+'">';
+    summaryRows+='<td style="padding:5px 8px;color:#888;text-align:center">'+(i+1)+'</td>';
+    summaryRows+='<td style="padding:5px 8px;font-weight:700;color:'+s.color+'">'+s.name+'</td>';
+    summaryRows+='<td style="padding:5px 8px;text-align:center;font-weight:800;color:'+scoreColor(s.score)+'">'+s.score+'/10';
+    summaryRows+='<div style="height:4px;background:#e0e8f8;border-radius:2px;margin-top:2px">';
+    summaryRows+='<div style="width:'+bar+'%;height:4px;background:'+s.color+';border-radius:2px"></div></div></td>';
+    summaryRows+='<td style="padding:5px 8px;text-align:center;font-weight:700;color:#d08030">+'+(10-s.score).toFixed(0)+'</td>';
+    summaryRows+='<td style="padding:5px 8px;font-weight:700;color:'+prioColor(s.score)+'">'+prioLabel(s.score)+'</td>';
+    summaryRows+='<td style="padding:5px 8px;font-size:10px">'+(ai&&ai.month_goal?ai.month_goal:'—')+'</td>';
+    summaryRows+='</tr>';
+  });
 
-  const algoSections=lastParsed&&lastParsed.advice?lastParsed.advice.map(a=>{
-    const sc=parseFloat(a.score)||5;
-    const color=SPHERES.find(s=>s.name===a.sphere)?.color||'#4080c0';
-    const days=Array.isArray(a.days)?a.days:[];
-    return `<div style="margin-bottom:16px;page-break-inside:avoid">
-      <div style="background:${color};color:#fff;padding:7px 12px;border-radius:6px 6px 0 0;font-size:13px;font-weight:700">${a.sphere} — ${sc}/10</div>
-      ${a.priority_reason?`<div style="padding:5px 10px;background:${color}15;border-left:3px solid ${color};font-size:10px;font-style:italic">${a.priority_reason}</div>`:''}
-      <table style="width:100%;border-collapse:collapse;font-size:10px;border:1px solid ${color}33">
-        <thead><tr style="background:${color}18">
-          <th style="padding:4px 7px;text-align:left;color:${color};width:55px">День</th>
-          <th style="padding:4px 7px;text-align:left;color:${color};width:100px">Фокус</th>
-          <th style="padding:4px 7px;text-align:left;color:${color}">Завдання</th>
-          <th style="padding:4px 7px;text-align:center;color:${color};width:45px">Час</th>
-        </tr></thead>
-        <tbody>${days.map((d,di)=>`<tr style="background:${di%2?'#f5f9ff':'#fff'}">
-          <td style="padding:4px 7px;font-weight:700;color:${color}">${d.day}</td>
-          <td style="padding:4px 7px">${d.title||''}</td>
-          <td style="padding:4px 7px;line-height:1.4">${d.task||''}</td>
-          <td style="padding:4px 7px;text-align:center;color:#5a80aa">${d.duration||''}</td>
-        </tr>`).join('')}</tbody>
-      </table>
-      ${a.month_goal?`<div style="padding:5px 9px;background:#f0f8ff;border-left:3px solid ${color};font-size:10px;margin-top:3px"><b style="color:${color}">Ціль 30 днів:</b> ${a.month_goal}</div>`:''}
-      ${a.to_10?`<div style="padding:5px 9px;background:#f0f8ff;border-left:3px solid #2878c8;font-size:10px;margin-top:2px"><b style="color:#1060b0">До 10/10:</b> ${a.to_10}</div>`:''}
-    </div>`;
-  }).join(''):'';
+  let algoSections='';
+  if(lastParsed&&lastParsed.advice){
+    lastParsed.advice.forEach(function(a){
+      const sc=parseFloat(a.score)||5;
+      const sphereObj=SPHERES.find(function(s){return s.name===a.sphere;});
+      const color=sphereObj?sphereObj.color:'#4080c0';
+      const days=Array.isArray(a.days)?a.days:[];
+      algoSections+='<div style="margin-bottom:16px;page-break-inside:avoid">';
+      algoSections+='<div style="background:'+color+';color:#fff;padding:7px 12px;border-radius:6px 6px 0 0;font-size:13px;font-weight:700">'+a.sphere+' — '+sc+'/10</div>';
+      if(a.priority_reason) algoSections+='<div style="padding:5px 10px;background:'+color+'15;border-left:3px solid '+color+';font-size:10px;font-style:italic">'+a.priority_reason+'</div>';
+      algoSections+='<table style="width:100%;border-collapse:collapse;font-size:10px;border:1px solid '+color+'33">';
+      algoSections+='<thead><tr style="background:'+color+'18">';
+      algoSections+='<th style="padding:4px 7px;text-align:left;color:'+color+';width:55px">День</th>';
+      algoSections+='<th style="padding:4px 7px;text-align:left;color:'+color+';width:100px">Фокус</th>';
+      algoSections+='<th style="padding:4px 7px;text-align:left;color:'+color+'">Завдання</th>';
+      algoSections+='<th style="padding:4px 7px;text-align:center;color:'+color+';width:45px">Час</th>';
+      algoSections+='</tr></thead><tbody>';
+      days.forEach(function(d,di){
+        const rowBg=di%2?'#f5f9ff':'#fff';
+        algoSections+='<tr style="background:'+rowBg+'">';
+        algoSections+='<td style="padding:4px 7px;font-weight:700;color:'+color+'">'+(d.day||'')+'</td>';
+        algoSections+='<td style="padding:4px 7px">'+(d.title||'')+'</td>';
+        algoSections+='<td style="padding:4px 7px;line-height:1.4">'+(d.task||'')+'</td>';
+        algoSections+='<td style="padding:4px 7px;text-align:center;color:#5a80aa">'+(d.duration||'')+'</td>';
+        algoSections+='</tr>';
+      });
+      algoSections+='</tbody></table>';
+      if(a.month_goal) algoSections+='<div style="padding:5px 9px;background:#f0f8ff;border-left:3px solid '+color+';font-size:10px;margin-top:3px"><b style="color:'+color+'">Ціль 30 днів:</b> '+a.month_goal+'</div>';
+      if(a.to_10) algoSections+='<div style="padding:5px 9px;background:#f0f8ff;border-left:3px solid #2878c8;font-size:10px;margin-top:2px"><b style="color:#1060b0">До 10/10:</b> '+a.to_10+'</div>';
+      algoSections+='</div>';
+    });
+  }
 
-  const overview=lastParsed&&lastParsed.overview?`<div style="margin-bottom:12px;padding:9px 13px;background:#f0f8ff;border-left:4px solid #2878c8;font-size:11px;font-style:italic;line-height:1.65">${lastParsed.overview}</div>`:'';
-  const roadmap=lastParsed&&lastParsed.balance_roadmap?`<div style="margin:12px 0;padding:10px 14px;background:#f0f6ff;border:1.5px solid #2878c877;border-radius:7px;font-size:11px;line-height:1.65"><b style="color:#16478a">Стратегія 100% балансу:</b> ${lastParsed.balance_roadmap}</div>`:'';
+  const overview=lastParsed&&lastParsed.overview?'<div style="margin-bottom:12px;padding:9px 13px;background:#f0f8ff;border-left:4px solid #2878c8;font-size:11px;font-style:italic;line-height:1.65">'+lastParsed.overview+'</div>':'';
+  const roadmap=lastParsed&&lastParsed.balance_roadmap?'<div style="margin:12px 0;padding:10px 14px;background:#f0f6ff;border:1.5px solid #2878c877;border-radius:7px;font-size:11px;line-height:1.65"><b style="color:#16478a">Стратегія 100% балансу:</b> '+lastParsed.balance_roadmap+'</div>':'';
 
-  const printDoc=`<!DOCTYPE html><html lang="uk"><head>
-<meta charset="UTF-8"><title>${fileName}</title>
-<style>
-  @page{margin:10mm 8mm;size:A4}
-  *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-  body{font-size:11px;color:#1a2e48;background:#fff}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-</style></head><body>
-<div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:10px 14px;border-radius:7px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
-  <img src="${wheelImg}" style="width:70px;height:70px;border-radius:5px;flex-shrink:0">
-  <div>
-    <div style="font-size:17px;font-weight:800;margin-bottom:3px">Колесо Життя — Мій Звіт</div>
-    <div style="font-size:10px;opacity:.85">Дата: ${date} · Середній бал: <b>${avgScore}/10</b></div>
-  </div>
-</div>
-${overview}
-<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;padding:4px 8px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:7px">Таблиця балансу</div>
-<table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px">
-  <thead><tr style="background:#16478a">
-    <th style="color:#fff;padding:4px 6px;width:20px">#</th>
-    <th style="color:#fff;padding:4px 6px">Сфера</th>
-    <th style="color:#fff;padding:4px 6px;text-align:center">Бал</th>
-    <th style="color:#fff;padding:4px 6px;text-align:center">До 10</th>
-    <th style="color:#fff;padding:4px 6px">Пріоритет</th>
-    <th style="color:#fff;padding:4px 6px">Ціль 30 днів</th>
-  </tr></thead>
-  <tbody>${summaryRows}</tbody>
-</table>
-${roadmap}
-${algoSections?`<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;padding:4px 8px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:10px">Щоденний алгоритм</div>${algoSections}`:''}
-<div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:7px;color:#fff;text-align:center">
-  <b style="display:block;font-size:12px;margin-bottom:4px">Повернись через 30 днів і виміряй прогрес!</b>
-  <a href="https://life-wheel-one.vercel.app" style="color:#fff;font-size:11px">🌀 life-wheel-one.vercel.app</a>
-</div>
-<div class="no-print" style="margin-top:16px;text-align:center;padding:10px;border-top:1px solid #dde8f8">
-  <button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:9px 28px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>
-  <p style="margin-top:5px;font-size:9px;color:#8aabcc">Оберіть принтер «Зберегти як PDF» → OK → завантаж у Google Drive</p>
-</div>
-</body></html>`;
+  let printDoc='<!DOCTYPE html><html lang="uk"><head>';
+  printDoc+='<meta charset="UTF-8"><title>'+fileName+'</title>';
+  printDoc+='<style>@page{margin:10mm 8mm;size:A4}*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}body{font-size:11px;color:#1a2e48;background:#fff}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>';
+  printDoc+='</head><body>';
+  printDoc+='<div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:10px 14px;border-radius:7px;margin-bottom:12px;display:flex;align-items:center;gap:12px">';
+  printDoc+='<img src="'+wheelImg+'" style="width:70px;height:70px;border-radius:5px;flex-shrink:0">';
+  printDoc+='<div><div style="font-size:17px;font-weight:800;margin-bottom:3px">Колесо Життя — Мій Звіт</div>';
+  printDoc+='<div style="font-size:10px;opacity:.85">Дата: '+date+' · Середній бал: <b>'+avgScore+'/10</b></div></div></div>';
+  printDoc+=overview;
+  printDoc+='<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;padding:4px 8px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:7px">Таблиця балансу</div>';
+  printDoc+='<table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px">';
+  printDoc+='<thead><tr style="background:#16478a">';
+  printDoc+='<th style="color:#fff;padding:4px 6px;width:20px">#</th>';
+  printDoc+='<th style="color:#fff;padding:4px 6px">Сфера</th>';
+  printDoc+='<th style="color:#fff;padding:4px 6px;text-align:center">Бал</th>';
+  printDoc+='<th style="color:#fff;padding:4px 6px;text-align:center">До 10</th>';
+  printDoc+='<th style="color:#fff;padding:4px 6px">Пріоритет</th>';
+  printDoc+='<th style="color:#fff;padding:4px 6px">Ціль 30 днів</th>';
+  printDoc+='</tr></thead><tbody>'+summaryRows+'</tbody></table>';
+  printDoc+=roadmap;
+  if(algoSections){
+    printDoc+='<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;padding:4px 8px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:10px">Щоденний алгоритм</div>';
+    printDoc+=algoSections;
+  }
+  printDoc+='<div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:7px;color:#fff;text-align:center">';
+  printDoc+='<b style="display:block;font-size:12px;margin-bottom:4px">Повернись через 30 днів і виміряй прогрес!</b>';
+  printDoc+='<a href="https://life-wheel-one.vercel.app" style="color:#fff;font-size:11px">life-wheel-one.vercel.app</a></div>';
+  printDoc+='<div style="margin-top:16px;text-align:center;padding:10px;border-top:1px solid #dde8f8">';
+  printDoc+='<button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:9px 28px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>';
+  printDoc+='<p style="margin-top:5px;font-size:9px;color:#8aabcc">Оберіть принтер «Зберегти як PDF» → OK → завантаж у Google Drive</p></div>';
+  printDoc+='</body></html>';
 
   // Close share menu
   const menu=document.getElementById('shareMenu');
   if(menu) menu.remove();
 
-  // Show instruction modal first
+  // Show instruction modal
   const overlay=document.createElement('div');
   overlay.id='driveInstructionOverlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s ease';
-  overlay.innerHTML=`
-    <div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:Nunito,sans-serif">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-        <svg width="36" height="36" viewBox="0 0 24 24"><path d="M4.5 19L1.5 14L7.5 4H13.5L7.5 14L4.5 19Z" fill="#0F9D58"/><path d="M19.5 19H13.5L10.5 14H16.5L19.5 19Z" fill="#4285F4"/><path d="M16.5 4L22.5 14L19.5 19L13.5 9L16.5 4Z" fill="#FFBB00"/></svg>
-        <div>
-          <div style="font-size:1rem;font-weight:800;color:#1a2e48">Зберегти PDF у Google Drive</div>
-          <div style="font-size:.68rem;color:#8aabcc">3 прості кроки</div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:#f0f8ff;border-radius:10px;border-left:3px solid #2878c8">
-          <div style="width:24px;height:24px;background:#2878c8;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">1</div>
-          <div>
-            <div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Відкриється вікно друку</div>
-            <div style="font-size:.68rem;color:#5a7090;line-height:1.5">Натисни кнопку <b>"Зберегти як PDF"</b> у вікні або обери принтер <b>"Save as PDF"</b> у діалозі друку</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:#f0fff4;border-radius:10px;border-left:3px solid #0F9D58">
-          <div style="width:24px;height:24px;background:#0F9D58;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">2</div>
-          <div>
-            <div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Збережи PDF на комп'ютер</div>
-            <div style="font-size:.68rem;color:#5a7090;line-height:1.5">Запам'ятай куди зберігається файл — наприклад, папка <b>Завантаження</b></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:#fff8f0;border-radius:10px;border-left:3px solid #FFBB00">
-          <div style="width:24px;height:24px;background:#FFBB00;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">3</div>
-          <div>
-            <div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Завантаж у Google Drive</div>
-            <div style="font-size:.68rem;color:#5a7090;line-height:1.5">Google Drive відкриється автоматично. Натисни <b>"+ Новий"</b> → <b>"Завантажити файл"</b> → обери збережений PDF</div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="document.getElementById('driveInstructionOverlay').remove()" 
-          style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:Nunito,sans-serif">
-          Скасувати
-        </button>
-        <button onclick="startDrivePdfExport()" 
-          style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif">
-          🖨 Відкрити PDF та Drive →
-        </button>
-      </div>
-    </div>
-  `;
+  overlay.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px';
+  let overlayHTML='<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:Nunito,sans-serif">';
+  overlayHTML+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">';
+  overlayHTML+='<div><div style="font-size:1rem;font-weight:800;color:#1a2e48">Зберегти PDF у Google Drive</div>';
+  overlayHTML+='<div style="font-size:.68rem;color:#8aabcc">3 прості кроки</div></div></div>';
+  overlayHTML+='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">';
+  overlayHTML+='<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:#f0f8ff;border-radius:10px;border-left:3px solid #2878c8">';
+  overlayHTML+='<div style="width:24px;height:24px;background:#2878c8;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">1</div>';
+  overlayHTML+='<div><div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Відкриється вікно друку</div>';
+  overlayHTML+='<div style="font-size:.68rem;color:#5a7090;line-height:1.5">Обери принтер <b>Зберегти як PDF</b> і натисни Зберегти</div></div></div>';
+  overlayHTML+='<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:#f0fff4;border-radius:10px;border-left:3px solid #0F9D58">';
+  overlayHTML+='<div style="width:24px;height:24px;background:#0F9D58;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">2</div>';
+  overlayHTML+='<div><div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Збережи файл на комп\'ютер</div>';
+  overlayHTML+='<div style="font-size:.68rem;color:#5a7090;line-height:1.5">Запам\'ятай папку — наприклад <b>Завантаження</b></div></div></div>';
+  overlayHTML+='<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:#fff8f0;border-radius:10px;border-left:3px solid #FFBB00">';
+  overlayHTML+='<div style="width:24px;height:24px;background:#FFBB00;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">3</div>';
+  overlayHTML+='<div><div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Завантаж у Google Drive</div>';
+  overlayHTML+='<div style="font-size:.68rem;color:#5a7090;line-height:1.5">Drive відкриється автоматично. Натисни <b>+ Новий → Завантажити файл</b></div></div></div></div>';
+  overlayHTML+='<div style="display:flex;gap:8px">';
+  overlayHTML+='<button onclick="document.getElementById(\'driveInstructionOverlay\').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:Nunito,sans-serif">Скасувати</button>';
+  overlayHTML+='<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif">Відкрити PDF та Drive</button>';
+  overlayHTML+='</div></div>';
+  overlay.innerHTML=overlayHTML;
   document.body.appendChild(overlay);
 
-  // Store printDoc for use in startDrivePdfExport
   window._pendingPrintDoc=printDoc;
-  window._pendingFileName=fileName;
   trackEvent('save_google_drive_pdf','share','result');
-}
-
-function startDrivePdfExport(){
-  const overlay=document.getElementById('driveInstructionOverlay');
-  if(overlay) overlay.remove();
-  const printDoc=window._pendingPrintDoc||'';
-
-  // Open PDF preview window
-  const w=window.open('about:blank','_blank');
-  if(w){
-    w.document.open();
-    w.document.write(printDoc);
-    w.document.close();
-  } else {
-    const iframe=document.createElement('iframe');
-    iframe.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;background:white';
-    document.body.appendChild(iframe);
-    iframe.contentDocument.open();
-    iframe.contentDocument.write(printDoc);
-    iframe.contentDocument.close();
-  }
-  // Open Google Drive after short delay
-  setTimeout(()=>window.open('https://drive.google.com/drive/my-drive','_blank'),800);
 }
 
 function copyShareText(text){
@@ -1553,10 +1513,19 @@ function initCookieBanner(){
   try{
     const consent=localStorage.getItem('cookie_consent');
     if(consent) return; // already decided
-    setTimeout(()=>{
-      const banner=document.getElementById('cookieBanner');
-      if(banner) banner.classList.add('visible');
-    },1500);
+    // Wait for modal to be closed before showing cookie banner
+    function tryShowBanner(){
+      const modal=document.getElementById('modalOverlay');
+      if(modal && modal.style.display!=='none'){
+        setTimeout(tryShowBanner, 500);
+        return;
+      }
+      setTimeout(()=>{
+        const banner=document.getElementById('cookieBanner');
+        if(banner) banner.classList.add('visible');
+      },1000);
+    }
+    setTimeout(tryShowBanner, 3000);
   }catch(e){}
 }
 
