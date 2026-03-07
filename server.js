@@ -47,10 +47,14 @@ app.post('/api/analyze', async (req, res) => {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
+        model: 'llama3-70b-8192',
+        messages: [
+          { role: 'system', content: 'You are a JSON API. Always respond with valid JSON only. No markdown, no explanation, no text before or after JSON.' },
+          { role: 'user', content: prompt }
+        ],
         max_tokens: 2000,
-        temperature: 0.7,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
       }),
     });
 
