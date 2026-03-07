@@ -1063,13 +1063,6 @@ function renderAdvice(parsed){
   }
 }
 
-  // Show email capture after analysis
-  // Show email capture in adviceArea (right col)
-  const emailCapture=document.getElementById('emailCapture');
-  if(emailCapture) emailCapture.style.display='block';
-  trackEvent('analysis_completed','engagement','spheres_'+parsed.advice.length);
-}
-
 /* ══════════════════════════════════════════════
    PDF EXPORT
 ══════════════════════════════════════════════ */
