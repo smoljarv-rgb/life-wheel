@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Адмін — Колесо Життя</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1520;color:#c8d8f0;min-height:100vh}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#1a2540;border:1px solid #2a3a5a;border-radius:16px;padding:40px;width:360px;text-align:center}
+.login-box h1{font-size:1.4rem;color:#fff;margin-bottom:8px}
+.login-box p{font-size:.8rem;color:#6a8aaa;margin-bottom:24px}
+.login-box input{width:100%;padding:11px 14px;background:#0f1520;border:1.5px solid #2a3a5a;border-radius:9px;color:#c8d8f0;font-size:.9rem;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:#2878c8}
+.login-box button{width:100%;padding:12px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.9rem;font-weight:700;cursor:pointer}
+.app{display:none}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#131d30;border-right:1px solid #1e2d48;padding:20px 0;z-index:10}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid #1e2d48;margin-bottom:12px}
+.sidebar-logo h2{font-size:1rem;color:#fff;font-weight:700}
+.sidebar-logo span{font-size:.65rem;color:#4a6a8a}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:.8rem;color:#6a8aaa;transition:all .2s;border-left:3px solid transparent}
+.nav-item:hover{color:#c8d8f0;background:#1a2540}
+.nav-item.active{color:#fff;background:#1a2540;border-left-color:#2878c8}
+.nav-item .icon{font-size:1rem;width:20px;text-align:center}
+.main{margin-left:220px;padding:28px;min-height:100vh}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#1a2540;border:1px solid #1e2d48;border-radius:12px;padding:18px}
+.stat-card .label{font-size:.68rem;color:#4a6a8a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.stat-card .value{font-size:1.8rem;font-weight:800;color:#fff}
+.stat-card .sub{font-size:.68rem;color:#4a6a8a;margin-top:3px}
+.stat-card.green .value{color:#4ade80}
+.stat-card.blue .value{color:#60a5fa}
+.stat-card.yellow .value{color:#fbbf24}
+.stat-card.purple .value{color:#a78bfa}
+.card{background:#1a2540;border:1px solid #1e2d48;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{font-size:.85rem;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-wrap{height:120px;display:flex;align-items:flex-end;gap:4px;padding-top:10px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:2px;transition:height .3s}
+.bar-label{font-size:.5rem;color:#4a6a8a;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{text-align:left;padding:8px 10px;color:#4a6a8a;font-weight:600;font-size:.68rem;text-transform:uppercase;border-bottom:1px solid #1e2d48}
+td{padding:8px 10px;border-bottom:1px solid #131d30;color:#c8d8f0}
+tr:hover td{background:#1e2d48}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.62rem;font-weight:700}
+.badge.on{background:#14532d;color:#4ade80}
+.badge.off{background:#3b1515;color:#f87171}
+.form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.form-row label{font-size:.72rem;color:#6a8aaa}
+.form-row input,.form-row select,.form-row textarea{padding:9px 12px;background:#0f1520;border:1.5px solid #2a3a5a;border-radius:8px;color:#c8d8f0;font-size:.82rem;outline:none;font-family:inherit}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:#2878c8}
+.form-row textarea{min-height:70px;resize:vertical}
+.btn{padding:9px 18px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(40,120,200,.4)}
+.btn.red{background:linear-gradient(135deg,#c83030,#a82020)}
+.btn.green{background:linear-gradient(135deg,#2a8a4a,#1a6a36)}
+.btn.ghost{background:transparent;border:1.5px solid #2a3a5a;color:#6a8aaa}
+.btn.ghost:hover{border-color:#2878c8;color:#c8d8f0}
+.toggle{position:relative;display:inline-block;width:42px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#2a3a5a;border-radius:24px;cursor:pointer;transition:.3s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#6a8aaa;border-radius:50%;transition:.3s}
+.toggle input:checked + .toggle-slider{background:#2878c8}
+.toggle input:checked + .toggle-slider:before{transform:translateX(18px);background:#fff}
+.ad-slot{border:1.5px solid #1e2d48;border-radius:10px;padding:16px;margin-bottom:12px}
+.ad-slot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ad-slot-name{font-size:.82rem;font-weight:700;color:#c8d8f0}
+.ad-preview{background:#0f1520;border-radius:8px;padding:12px;margin-top:10px;font-size:.72rem;color:#6a8aaa;border:1px dashed #2a3a5a}
+.promo-row{display:flex;gap:8px;align-items:center;padding:8px 10px;background:#0f1520;border-radius:8px;margin-bottom:6px}
+.promo-code{font-family:monospace;font-size:.85rem;color:#60a5fa;font-weight:700;min-width:100px}
+.export-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1e2d48;border:1px solid #2a3a5a;border-radius:7px;color:#c8d8f0;font-size:.72rem;cursor:pointer;text-decoration:none}
+.toast{position:fixed;bottom:24px;right:24px;background:#2878c8;color:#fff;padding:10px 18px;border-radius:9px;font-size:.78rem;font-weight:600;z-index:1000;animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sep{height:1px;background:#1e2d48;margin:20px 0}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h1>🌀 Адмін-панель</h1>
+    <p>Колесо Життя · Управління</p>
+    <input type="password" id="pwdInput" placeholder="Пароль адміністратора" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Увійти</button>
+    <p id="loginErr" style="color:#f87171;font-size:.72rem;margin-top:10px;display:none">Невірний пароль</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appWrap">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌀 Адмін</h2>
+      <span>Колесо Життя</span>
+    </div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span> Дашборд</div>
+    <div class="nav-item" onclick="showPage('ads',this)"><span class="icon">📢</span> Реклама</div>
+    <div class="nav-item" onclick="showPage('emails',this)"><span class="icon">📧</span> Email-база</div>
+    <div class="nav-item" onclick="showPage('settings',this)"><span class="icon">⚙️</span> Налаштування</div>
+    <div class="nav-item" onclick="showPage('promos',this)"><span class="icon">🎁</span> Промокоди</div>
+    <div class="nav-item" style="margin-top:auto" onclick="window.open('/')"><span class="icon">🌐</span> Відкрити сайт</div>
+    <div class="nav-item" onclick="doLogout()"><span class="icon">🚪</span> Вийти</div>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">📊 Дашборд</div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="card">
+        <h3>📈 Активність за 14 днів</h3>
+        <div style="display:flex;gap:16px;margin-bottom:8px">
+          <span style="display:flex;align-items:center;gap:5px;font-size:.68rem"><span style="width:10px;height:10px;background:#60a5fa;border-radius:2px;display:inline-block"></span>Відвідувачі</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:.68rem"><span style="width:10px;height:10px;background:#4ade80;border-radius:2px;display:inline-block"></span>Аналізи</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:.68rem"><span style="width:10px;height:10px;background:#fbbf24;border-radius:2px;display:inline-block"></span>Оплати</span>
+        </div>
+        <div class="chart-wrap" id="chartWrap"></div>
+      </div>
+      <div class="card">
+        <h3>📋 Останні події</h3>
+        <table><thead><tr><th>Час</th><th>Подія</th><th>IP</th></tr></thead>
+        <tbody id="eventsTbl"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ADS -->
+    <div class="page" id="page-ads">
+      <div class="page-title">📢 Управління рекламою</div>
+      <div class="card">
+        <h3>ℹ️ Типи реклами</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.75rem;color:#6a8aaa">
+          <div style="padding:10px;background:#0f1520;border-radius:8px"><b style="color:#c8d8f0">Банер</b><br>Зображення + текст + посилання. Виглядає як класична реклама.</div>
+          <div style="padding:10px;background:#0f1520;border-radius:8px"><b style="color:#c8d8f0">Нативна</b><br>Виглядає як рекомендація від сайту. Вищий CTR.</div>
+          <div style="padding:10px;background:#0f1520;border-radius:8px"><b style="color:#c8d8f0">Google AdSense</b><br>Вставити код від Google — автоматичні оголошення.</div>
+          <div style="padding:10px;background:#0f1520;border-radius:8px"><b style="color:#c8d8f0">Affiliate</b><br>Посилання з UTM/реф-тегом. Оплата за продаж.</div>
+        </div>
+      </div>
+      <div id="adSlotsWrap"></div>
+    </div>
+
+    <!-- EMAILS -->
+    <div class="page" id="page-emails">
+      <div class="page-title">📧 Email-база</div>
+      <div class="card">
+        <h3>📋 Підписники <span id="emailCount" style="color:#4a6a8a;font-weight:400"></span>
+          <a class="export-btn" id="exportCsvBtn" style="margin-left:auto">⬇ Завантажити CSV</a>
+        </h3>
+        <table><thead><tr><th>Email</th><th>Дата</th><th>IP</th></tr></thead>
+        <tbody id="emailsTbl"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-title">⚙️ Налаштування</div>
+      <div class="card">
+        <h3>💰 Монетизація</h3>
+        <div class="form-row">
+          <label>Ціна аналізу ($)</label>
+          <input type="number" id="priceInput" min="0" step="0.5" value="2">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <label class="toggle"><input type="checkbox" id="paywallToggle"><span class="toggle-slider"></span></label>
+          <span style="font-size:.8rem">Paywall увімкнено</span>
+        </div>
+        <button class="btn" onclick="saveSettings()">💾 Зберегти налаштування</button>
+      </div>
+      <div class="card">
+        <h3>🔑 Зміна пароля адміна</h3>
+        <p style="font-size:.72rem;color:#4a6a8a;margin-bottom:12px">Щоб змінити пароль — встанови змінну середовища <code style="color:#60a5fa">ADMIN_PASSWORD</code> на Vercel.</p>
+        <div style="padding:10px 14px;background:#0f1520;border-radius:8px;font-size:.72rem;color:#4a6a8a">
+          Vercel → Settings → Environment Variables → <b style="color:#60a5fa">ADMIN_PASSWORD</b> = твій_пароль
+        </div>
+      </div>
+    </div>
+
+    <!-- PROMOS -->
+    <div class="page" id="page-promos">
+      <div class="page-title">🎁 Промокоди</div>
+      <div class="card">
+        <h3>➕ Створити промокод</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="form-row">
+            <label>Код (латиниця)</label>
+            <input type="text" id="promoCode" placeholder="COACH50" style="text-transform:uppercase">
+          </div>
+          <div class="form-row">
+            <label>Знижка (%)</label>
+            <input type="number" id="promoDiscount" min="1" max="100" value="50">
+          </div>
+          <div class="form-row">
+            <label>Макс. використань (0 = ∞)</label>
+            <input type="number" id="promoMaxUses" min="0" value="0">
+          </div>
+        </div>
+        <button class="btn green" onclick="addPromo()">➕ Додати промокод</button>
+      </div>
+      <div class="card">
+        <h3>📋 Активні промокоди</h3>
+        <div id="promosList"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let adminPwd = '';
+let statsData = null;
+
+// ── LOGIN ──
+function doLogin(){
+  const pwd = document.getElementById('pwdInput').value;
+  if(!pwd) return;
+  adminPwd = pwd;
+  fetch('/api/admin/stats', { headers: { 'x-admin-password': pwd } })
+    .then(r => {
+      if(!r.ok) throw new Error('wrong');
+      return r.json();
+    })
+    .then(data => {
+      statsData = data;
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('appWrap').style.display = 'block';
+      renderDashboard(data);
+      loadEmails();
+    })
+    .catch(() => {
+      document.getElementById('loginErr').style.display = 'block';
+    });
+}
+
+function doLogout(){
+  adminPwd = '';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('appWrap').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+}
+
+function api(path, method, body){
+  return fetch(path, {
+    method: method || 'GET',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPwd },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(r => r.json());
+}
+
+function showToast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ── NAVIGATION ──
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(id === 'emails') loadEmails();
+  if(id === 'ads' && statsData) renderAds(statsData.ads);
+  if(id === 'settings' && statsData) renderSettings(statsData.settings);
+  if(id === 'promos' && statsData) renderPromos(statsData.settings);
+}
+
+// ── DASHBOARD ──
+function renderDashboard(d){
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = [
+    { label: 'Відвідувачів сьогодні', value: d.visitors.today, sub: 'Всього: '+d.visitors.total, cls:'blue' },
+    { label: 'Аналізів сьогодні', value: d.analyses.today, sub: 'Всього: '+d.analyses.total, cls:'purple' },
+    { label: 'Оплат сьогодні', value: d.payments.today, sub: 'Всього: '+d.payments.total, cls:'yellow' },
+    { label: 'Дохід сьогодні', value: '$'+d.revenue.today.toFixed(2), sub: 'За місяць: $'+d.revenue.month.toFixed(2), cls:'green' },
+    { label: 'Всього дохід', value: '$'+d.revenue.total.toFixed(2), sub: 'Email-база: '+d.emails, cls:'green' },
+    { label: 'Конверсія', value: d.visitors.total ? Math.round(d.payments.total/d.visitors.total*100)+'%' : '0%', sub: 'Оплати/відвідувачі', cls:'yellow' },
+  ].map(s => `<div class="stat-card ${s.cls}">
+    <div class="label">${s.label}</div>
+    <div class="value">${s.value}</div>
+    <div class="sub">${s.sub}</div>
+  </div>`).join('');
+
+  // Chart
+  const maxV = Math.max(...d.chart.map(c => c.visitors), 1);
+  document.getElementById('chartWrap').innerHTML = d.chart.map(c => `
+    <div class="bar-group">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;width:100%">
+        <div class="bar" style="height:${Math.round(c.visitors/maxV*90)}px;background:#60a5fa22;border:1px solid #60a5fa44" title="Відвідувачів: ${c.visitors}"></div>
+        <div class="bar" style="height:${Math.round(c.analyses/maxV*90)}px;background:#4ade8044" title="Аналізів: ${c.analyses}"></div>
+        <div class="bar" style="height:${Math.round(c.payments/maxV*90)}px;background:#fbbf2466" title="Оплат: ${c.payments}"></div>
+      </div>
+      <div class="bar-label">${c.date}</div>
+    </div>`).join('');
+
+  // Events table (last 20)
+  document.getElementById('eventsTbl').innerHTML = (d.chart || []).length
+    ? '<tr><td colspan="3" style="color:#4a6a8a;text-align:center;padding:20px">Деталі подій завантажуються...</td></tr>'
+    : '';
+
+  renderSettings(d.settings);
+  renderAds(d.ads);
+  renderPromos(d.settings);
+}
+
+// ── ADS ──
+const AD_SLOT_LABELS = {
+  after_analysis: '📊 Після результатів аналізу',
+  sidebar: '◀ У лівій колонці (між сферами)',
+  bottom_banner: '⬇ Банер внизу сторінки',
+  native_reco: '💡 Нативна рекомендація після аналізу',
+};
+
+function renderAds(ads){
+  if(!ads) return;
+  const wrap = document.getElementById('adSlotsWrap');
+  wrap.innerHTML = Object.entries(ads).map(([slot, ad]) => `
+    <div class="ad-slot">
+      <div class="ad-slot-header">
+        <span class="ad-slot-name">${AD_SLOT_LABELS[slot]||slot}</span>
+        <span class="badge ${ad.enabled?'on':'off'}">${ad.enabled?'УВІМКНЕНО':'ВИМКНЕНО'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-row">
+          <label>Тип реклами</label>
+          <select id="ad_${slot}_type" onchange="updateAdPreview('${slot}')">
+            <option value="banner" ${ad.type==='banner'?'selected':''}>Банер (зображення+текст)</option>
+            <option value="native" ${ad.type==='native'?'selected':''}>Нативна рекомендація</option>
+            <option value="adsense" ${ad.type==='adsense'?'selected':''}>Google AdSense</option>
+            <option value="affiliate" ${ad.type==='affiliate'?'selected':''}>Affiliate-посилання</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Заголовок</label>
+          <input type="text" id="ad_${slot}_title" value="${ad.title||''}" placeholder="Рекомендуємо">
+        </div>
+        <div class="form-row" style="grid-column:1/-1">
+          <label>Текст / Опис</label>
+          <input type="text" id="ad_${slot}_text" value="${ad.text||''}" placeholder="Опис або рекламний текст">
+        </div>
+        <div class="form-row">
+          <label>URL посилання</label>
+          <input type="text" id="ad_${slot}_url" value="${ad.url||''}" placeholder="https://...">
+        </div>
+        <div class="form-row">
+          <label>URL зображення (для банера)</label>
+          <input type="text" id="ad_${slot}_image" value="${ad.image||''}" placeholder="https://...image.jpg">
+        </div>
+        <div class="form-row" style="grid-column:1/-1">
+          <label>AdSense код (вставити якщо тип — AdSense)</label>
+          <textarea id="ad_${slot}_adsense" placeholder="&lt;ins class=&quot;adsbygoogle&quot;...&gt;">${ad.adsense_code||''}</textarea>
+        </div>
+      </div>
+      <div class="ad-preview" id="adPreview_${slot}">
+        ${ad.enabled && ad.title ? renderAdPreview(ad) : '<span style="color:#2a3a5a">Попередній перегляд з\'явиться після заповнення</span>'}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn" onclick="saveAd('${slot}',true)">✅ Увімкнути та зберегти</button>
+        <button class="btn ghost" onclick="saveAd('${slot}',false)">💾 Зберегти (вимкнено)</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderAdPreview(ad){
+  if(ad.type === 'adsense') return '<span style="color:#60a5fa">📢 AdSense блок буде показано тут</span>';
+  if(ad.type === 'native') return `<div style="color:#c8d8f0"><span style="color:#fbbf24">💡 ${ad.title}</span><br><span style="color:#6a8aaa">${ad.text}</span>${ad.url?'<br><a href="'+ad.url+'" style="color:#60a5fa;font-size:.65rem">'+ad.url.slice(0,40)+'...</a>':''}</div>`;
+  return `<div style="color:#c8d8f0">${ad.image?'<img src="'+ad.image+'" style="max-height:40px;border-radius:4px;margin-bottom:6px">':''}${ad.title?'<b>'+ad.title+'</b> — ':''}<span style="color:#6a8aaa">${ad.text}</span></div>`;
+}
+
+function updateAdPreview(slot){
+  const ad = {
+    type: document.getElementById('ad_'+slot+'_type').value,
+    title: document.getElementById('ad_'+slot+'_title').value,
+    text: document.getElementById('ad_'+slot+'_text').value,
+    url: document.getElementById('ad_'+slot+'_url').value,
+    image: document.getElementById('ad_'+slot+'_image').value,
+  };
+  document.getElementById('adPreview_'+slot).innerHTML = renderAdPreview(ad);
+}
+
+function saveAd(slot, enabled){
+  const ad = {
+    enabled,
+    type: document.getElementById('ad_'+slot+'_type').value,
+    title: document.getElementById('ad_'+slot+'_title').value,
+    text: document.getElementById('ad_'+slot+'_text').value,
+    url: document.getElementById('ad_'+slot+'_url').value,
+    image: document.getElementById('ad_'+slot+'_image').value,
+    adsense_code: document.getElementById('ad_'+slot+'_adsense').value,
+  };
+  api('/api/admin/ads', 'POST', { slot, ad }).then(() => {
+    showToast('✅ Рекламу збережено');
+    if(statsData) statsData.ads[slot] = ad;
+    document.querySelector(`#adSlotsWrap .ad-slot:nth-child(${Object.keys(AD_SLOT_LABELS).indexOf(slot)+1}) .badge`).textContent = enabled?'УВІМКНЕНО':'ВИМКНЕНО';
+    document.querySelector(`#adSlotsWrap .ad-slot:nth-child(${Object.keys(AD_SLOT_LABELS).indexOf(slot)+1}) .badge`).className = 'badge '+(enabled?'on':'off');
+  });
+}
+
+// ── EMAILS ──
+function loadEmails(){
+  api('/api/admin/emails').then(emails => {
+    document.getElementById('emailCount').textContent = '('+emails.length+')';
+    document.getElementById('emailsTbl').innerHTML = emails.length
+      ? emails.map(e => `<tr><td>${e.email}</td><td>${new Date(e.ts).toLocaleDateString('uk-UA')}</td><td style="color:#4a6a8a">${e.ip}</td></tr>`).join('')
+      : '<tr><td colspan="3" style="color:#4a6a8a;text-align:center;padding:20px">Email-ів поки немає</td></tr>';
+
+    document.getElementById('exportCsvBtn').onclick = () => {
+      const csv = 'Email,Дата\n' + emails.map(e => e.email+','+new Date(e.ts).toLocaleDateString('uk-UA')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'emails_'+new Date().toISOString().slice(0,10)+'.csv';
+      a.click();
+    };
+  });
+}
+
+// ── SETTINGS ──
+function renderSettings(s){
+  if(!s) return;
+  document.getElementById('priceInput').value = s.price || 2;
+  document.getElementById('paywallToggle').checked = s.paywall_enabled !== false;
+}
+
+function saveSettings(){
+  const price = parseFloat(document.getElementById('priceInput').value);
+  const paywall_enabled = document.getElementById('paywallToggle').checked;
+  api('/api/admin/settings', 'POST', { price, paywall_enabled }).then(() => {
+    showToast('✅ Налаштування збережено');
+    if(statsData) { statsData.settings.price = price; statsData.settings.paywall_enabled = paywall_enabled; }
+  });
+}
+
+// ── PROMO CODES ──
+function renderPromos(s){
+  const codes = (s && s.promo_codes) || [];
+  const wrap = document.getElementById('promosList');
+  if(!codes.length){ wrap.innerHTML = '<div style="color:#4a6a8a;font-size:.78rem;text-align:center;padding:20px">Промокодів поки немає</div>'; return; }
+  wrap.innerHTML = codes.map((p,i) => `
+    <div class="promo-row">
+      <span class="promo-code">${p.code}</span>
+      <span style="font-size:.75rem;color:#4ade80">-${p.discount}%${p.discount>=100?' (БЕЗКОШТОВНО)':''}</span>
+      <span style="font-size:.68rem;color:#4a6a8a">${p.uses||0}${p.max_uses?' / '+p.max_uses:' / ∞'} використань</span>
+      <span class="badge ${p.enabled!==false?'on':'off'}" style="margin-left:auto">${p.enabled!==false?'АКТИВНИЙ':'ВИМКНЕНО'}</span>
+      <button class="btn ghost" style="padding:4px 10px;font-size:.68rem" onclick="togglePromo(${i})">${p.enabled!==false?'Вимкнути':'Увімкнути'}</button>
+      <button class="btn red" style="padding:4px 10px;font-size:.68rem" onclick="deletePromo(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addPromo(){
+  const code = document.getElementById('promoCode').value.trim().toUpperCase();
+  const discount = parseInt(document.getElementById('promoDiscount').value);
+  const max_uses = parseInt(document.getElementById('promoMaxUses').value) || 0;
+  if(!code || !discount) return showToast('⚠️ Заповни код та знижку');
+  api('/api/admin/stats').then(d => {
+    const codes = d.settings.promo_codes || [];
+    if(codes.find(p => p.code === code)) return showToast('⚠️ Такий код вже існує');
+    codes.push({ code, discount, max_uses: max_uses||null, uses: 0, enabled: true });
+    return api('/api/admin/settings', 'POST', { promo_codes: codes });
+  }).then(() => {
+    showToast('✅ Промокод '+document.getElementById('promoCode').value.toUpperCase()+' створено');
+    document.getElementById('promoCode').value = '';
+    return api('/api/admin/stats');
+  }).then(d => { statsData = d; renderPromos(d.settings); });
+}
+
+function togglePromo(i){
+  api('/api/admin/stats').then(d => {
+    const codes = d.settings.promo_codes || [];
+    if(codes[i]) codes[i].enabled = !codes[i].enabled;
+    return api('/api/admin/settings', 'POST', { promo_codes: codes });
+  }).then(() => api('/api/admin/stats')).then(d => { statsData = d; renderPromos(d.settings); showToast('✅ Збережено'); });
+}
+
+function deletePromo(i){
+  if(!confirm('Видалити цей промокод?')) return;
+  api('/api/admin/stats').then(d => {
+    const codes = (d.settings.promo_codes||[]).filter((_,j) => j!==i);
+    return api('/api/admin/settings', 'POST', { promo_codes: codes });
+  }).then(() => api('/api/admin/stats')).then(d => { statsData = d; renderPromos(d.settings); showToast('🗑 Промокод видалено'); });
+}
+
+// Enter key on login
+document.getElementById('pwdInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>

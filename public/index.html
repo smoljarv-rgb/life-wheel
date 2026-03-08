@@ -12,7 +12,10 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-XXXXXXXXXX');
 function trackEvent(action,category,label){
-  gtag('event',action,{event_category:category,event_label:label});
+  try{
+    if(window.gtag) gtag('event',action,{event_category:category,event_label:label});
+    fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:action,data:{category,label}})}).catch(function(){});
+  }catch(e){}
 }
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -308,12 +311,82 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   #printWheelWrap img,#printWheelWrap canvas{max-width:340px!important;height:auto!important}
 }
 
+/* ── TABLET ── */
 @media(max-width:960px){
   .wrapper{grid-template-columns:1fr;grid-template-rows:auto}
   .left-col,.right-col{max-height:none;overflow:visible}
-  .left-col{display:grid;grid-template-columns:repeat(3,1fr)}
+  .left-col{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
   .page-title{display:none}
   canvas#wheel{max-width:360px}
+  .analysis-row{margin:0 8px 16px!important;padding:16px!important;border-radius:12px}
+}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  body{font-size:14px}
+  .mood-pill{top:8px;right:8px;font-size:.62rem;padding:4px 10px}
+  .wrapper{padding-top:44px;display:flex;flex-direction:column}
+  .left-col{display:flex!important;flex-wrap:wrap;gap:6px;padding:10px 10px 6px;overflow-x:auto;scrollbar-width:none}
+  .left-col::-webkit-scrollbar{display:none}
+  .sphere-btn{min-width:120px;flex:0 0 auto}
+  .center-col{padding:8px 10px}
+  .right-col{padding:8px 10px}
+  canvas#wheel{max-width:100%;width:100%!important}
+  .glass{border-radius:10px}
+  .btn-row{flex-direction:column;gap:6px}
+  .btn-advice{padding:13px 10px;font-size:.75rem}
+  .btn-print{width:100%;justify-content:center}
+
+  /* Analysis results — centered on mobile */
+  .analysis-row{
+    margin:0 0 16px!important;
+    padding:14px 12px!important;
+    border-radius:0!important;
+    text-align:center
+  }
+  #analysisContent{text-align:left}
+  .algo-title{text-align:center;justify-content:center}
+
+  /* Algo grid — single column on mobile */
+  #analysisContent > div:first-child{
+    grid-template-columns:1fr!important
+  }
+
+  /* Advice area — center headings */
+  #adviceArea .panel-title,
+  #adviceArea .adv-overview{text-align:left}
+
+  /* Summary table scrollable */
+  .adv-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .adv-table{min-width:460px}
+
+  /* Save button full width */
+  #analysisContent button[onclick="exportPDF()"]{
+    width:100%!important;
+    padding:14px 16px!important;
+    font-size:.82rem!important
+  }
+
+  /* Return CTA */
+  #returnCta .flex{flex-direction:column}
+  #returnCta button{width:100%}
+
+  /* Picker */
+  .picker-chips{gap:6px}
+  .picker-chip{font-size:.7rem}
+
+  /* Modal */
+  .modal{padding:20px 16px;margin:10px}
+  .modal h2{font-size:1.4rem}
+
+  /* Progress bar */
+  #analysisContent > div{padding:20px 14px!important}
+}
+
+/* ── VERY SMALL ── */
+@media(max-width:380px){
+  .sphere-btn{min-width:100px}
+  .left-col{gap:4px;padding:8px 8px 4px}
 }
 </style>
 </head>
@@ -376,6 +449,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 
   <!-- RIGHT -->
   <div class="right-col" id="rightCol">
+    <div id="adSlotNativeReco" style="display:none"></div>
 
     <!-- score summary -->
     <div class="glass" style="padding:14px 16px">
@@ -540,6 +614,15 @@ function buildNav(){
     btn.onclick=()=>{active=s;buildNav();buildDetail();drawWheel();};
     nav.appendChild(btn);
   });
+
+  // Sidebar ad slot
+  const existAdSidebar = nav.querySelector('#adSlotSidebar');
+  if(!existAdSidebar){
+    const adDiv = document.createElement('div');
+    adDiv.id = 'adSlotSidebar';
+    adDiv.style.cssText = 'display:none;margin-top:8px';
+    nav.appendChild(adDiv);
+  }
 }
 
 /* ── DETAIL ── */
@@ -684,6 +767,50 @@ cv.addEventListener('click',e=>{
 let lastParsed=null;
 let selectedSpheres=new Set();
 let isPremiumUnlocked=false; // true after payment or promo
+let siteConfig={price:2,paywall_enabled:true,ads:{}};
+(async function loadConfig(){
+  try{
+    const r=await fetch('/api/config');
+    if(r.ok){
+      siteConfig=await r.json();
+      // Show persistent ads (sidebar, bottom) immediately
+      showAd('sidebar','adSlotSidebar');
+      showAd('bottom_banner','adSlotBottom');
+    }
+  }catch(e){}
+})();
+
+function showAd(slot, elId){
+  try{
+    const ad=siteConfig && siteConfig.ads && siteConfig.ads[slot];
+    const el=document.getElementById(elId);
+    if(!ad || !ad.enabled || !el) return;
+    el.style.display='block';
+    if(ad.type==='adsense' && ad.adsense_code){
+      el.innerHTML=ad.adsense_code;
+      return;
+    }
+    const isNative=ad.type==='native'||ad.type==='affiliate';
+    if(isNative){
+      el.innerHTML=`<div style="padding:12px 14px;background:var(--sf2);border:1.5px solid var(--sb);border-radius:12px;font-size:.75rem;transition:all 3s">
+        <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tl);margin-bottom:5px;transition:color 3s">💡 Рекомендація</div>
+        ${ad.title?'<div style="font-weight:700;color:var(--td);margin-bottom:3px;transition:color 3s">'+ad.title+'</div>':''}
+        ${ad.text?'<div style="color:var(--tm);line-height:1.5;transition:color 3s">'+ad.text+'</div>':''}
+        ${ad.url?'<a href="'+ad.url+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:7px;padding:5px 12px;background:var(--ac);color:#fff;border-radius:7px;font-size:.68rem;font-weight:700;text-decoration:none">'+(ad.type==='affiliate'?'Дізнатися →':'Перейти →')+'</a>':''}
+      </div>`;
+    } else {
+      // Banner
+      el.innerHTML=`<div style="border-radius:12px;overflow:hidden;border:1px solid var(--sb);transition:all 3s">
+        ${ad.image?'<a href="'+(ad.url||'#')+'" target="_blank" rel="noopener"><img src="'+ad.image+'" style="width:100%;display:block;max-height:120px;object-fit:cover" alt="'+ad.title+'"></a>':''}
+        ${(ad.title||ad.text)?`<div style="padding:10px 12px;background:var(--sf2);transition:all 3s">
+          ${ad.title?'<div style="font-size:.75rem;font-weight:700;color:var(--td);transition:color 3s">'+ad.title+'</div>':''}
+          ${ad.text?'<div style="font-size:.68rem;color:var(--tm);margin-top:2px;transition:color 3s">'+ad.text+'</div>':''}
+          ${ad.url?'<a href="'+ad.url+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;padding:4px 10px;background:var(--ac);color:#fff;border-radius:6px;font-size:.65rem;font-weight:700;text-decoration:none">Детальніше →</a>':''}
+        </div>`:''}
+      </div>`;
+    }
+  }catch(e){}
+}
 
 // ── Check if already paid (session) ──
 try{ if(sessionStorage.getItem('premium_unlocked')==='1') isPremiumUnlocked=true; }catch(e){}
@@ -706,6 +833,14 @@ try{ if(sessionStorage.getItem('premium_unlocked')==='1') isPremiumUnlocked=true
 
 // ── Paywall ──
 function showPaywall(){
+  // Update price from config
+  const priceEl=document.getElementById('payPrice');
+  const paywallEl=document.getElementById('paywallPrice');
+  if(priceEl) priceEl.textContent=(siteConfig.price||2).toFixed(2).replace('.00','');
+  if(paywallEl) paywallEl.textContent=(siteConfig.price||2).toFixed(2).replace('.00','');
+  // If paywall disabled — auto-unlock
+  if(siteConfig.paywall_enabled===false){ isPremiumUnlocked=true; runAnalysis(); return; }
+
   trackEvent('paywall_shown','monetization','ai_analysis');
   const overlay=document.createElement('div');
   overlay.className='paywall-overlay';
@@ -722,7 +857,12 @@ function showPaywall(){
         <li>Ціль на 30 днів + шлях до 10/10</li>
         <li>PDF-звіт для друку</li>
       </ul>
-      <button class="pay-btn" onclick="processPayment()">💳 Отримати план — $2</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="promoInput" placeholder="Промокод (якщо є)" style="flex:1;padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:.75rem;outline:none;font-family:'Nunito',sans-serif">
+        <button onclick="applyPromo()" style="padding:8px 14px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700">Застосувати</button>
+      </div>
+      <div id="promoMsg" style="font-size:.7rem;margin-bottom:8px;display:none"></div>
+      <button class="pay-btn" id="payBtn" onclick="processPayment()">💳 Отримати план — $<span id="payPrice">2</span></button>
       <button class="pay-btn-free" onclick="closePaywall()">Пізніше</button>
     </div>`;
   document.body.appendChild(overlay);
@@ -732,6 +872,38 @@ function showPaywall(){
 function closePaywall(){
   const el=document.getElementById('paywallOverlay');
   if(el) el.remove();
+}
+
+function applyPromo(){
+  const code=document.getElementById('promoInput').value.trim();
+  if(!code) return;
+  fetch('/api/promo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      const msg=document.getElementById('promoMsg');
+      msg.style.display='block';
+      if(d.valid){
+        if(d.free){
+          msg.style.color='#4ade80';
+          msg.textContent='✅ Промокод '+code.toUpperCase()+' — безкоштовний доступ!';
+          document.getElementById('payBtn').textContent='✅ Активувати безкоштовно';
+          document.getElementById('payBtn').onclick=function(){
+            fetch('/api/promo/use',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})}).catch(function(){});
+            isPremiumUnlocked=true;
+            document.getElementById('paywallOverlay').style.display='none';
+            runAnalysis();
+          };
+        } else {
+          const newPrice=(siteConfig.price*(1-d.discount/100)).toFixed(2);
+          msg.style.color='#fbbf24';
+          msg.textContent='🎁 Знижка '+d.discount+'%! Ціна: $'+newPrice;
+          document.getElementById('payPrice').textContent=newPrice;
+        }
+      } else {
+        msg.style.color='#f87171';
+        msg.textContent='❌ Невірний або недійсний промокод';
+      }
+    }).catch(function(){});
 }
 
 function processPayment(){
@@ -744,6 +916,7 @@ function processPayment(){
   // Видали цей блок після підключення Stripe:
   isPremiumUnlocked=true;
   try{ sessionStorage.setItem('premium_unlocked','1'); }catch(e){}
+  fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).catch(function(){});
   closePaywall();
   runAnalysis();
   // window.open(stripeUrl,'_blank'); // розкоментуй після налаштування Stripe
@@ -767,7 +940,7 @@ function submitEmail(){
     localStorage.setItem('email_leads',JSON.stringify(list));
   }catch(e){}
   // TODO: надіслати на сервер — розкоментуй після налаштування endpoint:
-  // fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}).catch(()=>{});
   msg.style.display='block';
   msg.style.color='#2878c8';
   msg.textContent='✓ Дякуємо! Перевір пошту.';
@@ -941,7 +1114,7 @@ async function runAnalysis(){
 Сфера: ${s.name} (${s.avg}/10): ${s.subs}
 
 Відповідай ТІЛЬКИ JSON (без коментарів, без markdown):
-{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"1 речення чому важливо","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія і фіксація результату","duration":"15 хв"}],"week2_habit":"коротка щоденна звичка на тижні 2-4","month_goal":"вимірювана ціль за 30 днів","to_10":"шлях до ідеалу"}`;
+{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"1 речення чому важливо","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","how_to":"1-2 речення як саме виконувати: техніка або підхід","resource":"назва книги або статті (автор або сайт)","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія і фіксація результату","how_to":"запиши 3 результати тижня у щоденник","resource":"","duration":"15 хв"}],"week2_habit":"коротка щоденна звичка на тижні 2-4","month_goal":"вимірювана ціль за 30 днів","to_10":"шлях до ідеалу"}`;
       const data=await callAI(prompt);
       results.push(data);
     }
@@ -1041,22 +1214,25 @@ function renderAdvice(parsed){
         <span style="font-size:.62rem;color:var(--tl);margin-left:auto">${sc}/10 · +${gap.toFixed(0)} до ідеалу</span>
       </div>
       ${a.priority_reason?`<div style="font-size:.67rem;color:var(--tm);font-style:italic;margin-bottom:8px;padding:5px 9px;background:${color}0a;border-radius:6px;line-height:1.5">${a.priority_reason}</div>`:''}
-      <table style="width:100%;border-collapse:collapse;font-size:.68rem">
-        <thead><tr style="background:${color}18">
-          <th style="padding:5px 7px;text-align:left;color:${color};border-bottom:1.5px solid ${color}33;width:55px">День</th>
-          <th style="padding:5px 7px;text-align:left;color:${color};border-bottom:1.5px solid ${color}33;width:90px">Фокус</th>
-          <th style="padding:5px 7px;text-align:left;color:${color};border-bottom:1.5px solid ${color}33">Завдання</th>
-          <th style="padding:5px 7px;text-align:center;color:${color};border-bottom:1.5px solid ${color}33;width:45px">Час</th>
-        </tr></thead>
-        <tbody>
-          ${days.map((d,di)=>`<tr style="background:${di%2?color+'06':'transparent'}">
-            <td style="padding:5px 7px;font-weight:700;color:${color};white-space:nowrap">${d.day}</td>
-            <td style="padding:5px 7px;font-weight:600;color:var(--td)">${d.title||''}</td>
-            <td style="padding:5px 7px;color:var(--tm);line-height:1.45">${d.task||''}</td>
-            <td style="padding:5px 7px;text-align:center;color:var(--tl);white-space:nowrap">${d.duration||''}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${days.map((d,di)=>`
+        <div style="background:${di%2?color+'08':'var(--sf)'};border-radius:9px;padding:10px 12px;border-left:3px solid ${color};transition:all 3s">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+            <span style="font-size:.65rem;font-weight:800;color:#fff;background:${color};padding:2px 8px;border-radius:12px;white-space:nowrap">${d.day}</span>
+            <span style="font-size:.75rem;font-weight:700;color:${color}">${d.title||''}</span>
+            <span style="font-size:.62rem;color:var(--tl);margin-left:auto;white-space:nowrap;transition:color 3s">⏱ ${d.duration||''}</span>
+          </div>
+          <div style="font-size:.72rem;color:var(--td);font-weight:600;margin-bottom:4px;line-height:1.4;transition:color 3s">
+            📌 ${d.task||''}
+          </div>
+          ${d.how_to?`<div style="font-size:.67rem;color:var(--tm);line-height:1.5;padding:5px 8px;background:${color}10;border-radius:6px;margin-bottom:4px;transition:all 3s">
+            💡 <em>${d.how_to}</em>
+          </div>`:''}
+          ${d.resource?`<div style="font-size:.62rem;color:var(--ac);display:flex;align-items:center;gap:4px;transition:color 3s">
+            📖 ${d.resource}
+          </div>`:''}
+        </div>`).join('')}
+      </div>
       ${a.week2_habit?`<div style="font-size:.65rem;color:var(--tm);margin-top:8px;padding:5px 9px;background:${color}0d;border-radius:6px;border-left:2px solid ${color}66;line-height:1.5">
         🔄 <strong style="color:${color}">Тижні 2–4:</strong> ${a.week2_habit}</div>`:''}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
@@ -1136,6 +1312,12 @@ function renderAdvice(parsed){
     analysisRow.style.display='block';
     setTimeout(()=>analysisRow.scrollIntoView({behavior:'smooth',block:'nearest'}),300);
   }
+
+  // ── Show ads ──
+  showAd('after_analysis','adSlotAfterAnalysis');
+  showAd('native_reco','adSlotNativeReco');
+  showAd('sidebar','adSlotSidebar');
+  showAd('bottom_banner','adSlotBottom');
 }
 
 /* ══════════════════════════════════════════════
@@ -1629,8 +1811,13 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
 
 <!-- FULL-WIDTH ANALYSIS ROW -->
 <div class="analysis-row glass" id="analysisRow" style="display:none;padding:20px 28px;margin:0 16px 24px;border-radius:16px">
+<!-- AFTER ANALYSIS AD SLOT -->
+<div id="adSlotAfterAnalysis" style="display:none;margin-bottom:16px"></div>
   <div id="analysisContent"></div>
 </div>
+
+<!-- BOTTOM BANNER AD SLOT -->
+<div id="adSlotBottom" style="display:none;padding:0 16px;margin-bottom:12px"></div>
 
 <!-- COOKIE BANNER -->
 <div class="cookie-banner" id="cookieBanner">
