@@ -701,13 +701,16 @@ function buildDetail(){
   const dupBtn = document.createElement('div');
   dupBtn.className = 'no-print';
   dupBtn.style.cssText = 'margin-top:14px;padding-top:12px;border-top:1px solid var(--sb)';
-  dupBtn.innerHTML = `<button onclick="showPicker()"
-    style="width:100%;padding:13px 10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:11px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px"
-    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(40,120,200,.55)'"
-    onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(40,120,200,.4)'">
-    ✦ Отримати план до балансу
-  </button>
-  <div style="text-align:center;font-size:.6rem;color:var(--tl);margin-top:5px;transition:color 3s">AI-аналіз і покроковий план дій</div>`;
+  const isFreeAvail=!freeAnalysisUsed&&(siteConfig.paywall_enabled!==false);
+  dupBtn.innerHTML = '<button onclick="showPicker()"'
+    +' style="width:100%;padding:13px 10px;background:'+(isFreeAvail?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';color:#fff;border:none;border-radius:11px;font-family:\'Nunito\',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px '+(isFreeAvail?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)')+';transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px"'
+    +' onmouseover="this.style.transform=\'translateY(-2px)\'"'
+    +' onmouseout="this.style.transform=\'\'"> '
+    +(isFreeAvail?'🆓 Спробувати безкоштовно':'✦ Отримати план до балансу')
+    +'</button>'
+    +'<div style="text-align:center;font-size:.6rem;color:var(--tl);margin-top:5px;transition:color 3s">'
+    +(isFreeAvail?'Перша сфера безкоштовно — без реєстрації':'AI-аналіз і покроковий план дій')
+    +'</div>';
   list.appendChild(dupBtn);
 }
 
@@ -806,6 +809,8 @@ cv.addEventListener('click',e=>{
 let lastParsed=null;
 let selectedSpheres=new Set();
 let isPremiumUnlocked=false; // true after payment or promo
+let freeAnalysisUsed=false; // 1 free sphere analysis per session
+try{ freeAnalysisUsed=localStorage.getItem('free_used')==='1'; }catch(e){}
 let siteConfig={price:2,paywall_enabled:true,ads:{}};
 (async function loadConfig(){
   try{
@@ -1104,10 +1109,13 @@ function showPreAnalysisModal(){
       <!-- Action buttons -->
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button id="modalStartBtn" onclick="_startFromModal()"
-          style="flex:1;min-width:160px;padding:14px 18px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;letter-spacing:.04em;font-family:'Nunito',sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s"
+          style="flex:1;min-width:160px;padding:14px 18px;background:${!freeAnalysisUsed && siteConfig.paywall_enabled!==false?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)'};color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;letter-spacing:.04em;font-family:'Nunito',sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s"
           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(40,120,200,.55)'"
           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(40,120,200,.4)'">
-          ✦ Аналізувати <span id="modalSelCount">${selectedSpheres.size||3}</span> сфери
+          ${!freeAnalysisUsed && siteConfig.paywall_enabled!==false
+            ? '🆓 Спробувати безкоштовно'
+            : '✦ Аналізувати <span id="modalSelCount">${selectedSpheres.size||3}</span> сфери'
+          }
         </button>
         <button onclick="document.getElementById('preAnalysisModal').remove()"
           style="padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .3s"
@@ -1116,8 +1124,19 @@ function showPreAnalysisModal(){
           Скасувати
         </button>
       </div>
-      <div style="font-size:.6rem;color:var(--tl);margin-top:8px;text-align:center;transition:color 3s">
-        ${siteConfig.paywall_enabled===false?'🆓 Аналіз безкоштовний':'🔒 Після вибору відкриється форма оплати'}
+      <div style="font-size:.62rem;margin-top:10px;text-align:center;padding:8px 12px;border-radius:8px;transition:all 3s;${
+        siteConfig.paywall_enabled===false
+          ? 'background:rgba(32,112,64,.12);color:#207040'
+          : !freeAnalysisUsed
+            ? 'background:rgba(40,120,200,.10);color:var(--ac)'
+            : 'background:rgba(200,80,40,.08);color:#c05030'
+      }">
+        ${siteConfig.paywall_enabled===false
+          ? '🆓 Монетизацію вимкнено — аналіз безкоштовний'
+          : !freeAnalysisUsed
+            ? '🎁 Перший аналіз <strong>безкоштовно</strong> — AI проаналізує 1 найкритичнішу сферу'
+            : '🔒 Безкоштовний аналіз вже використано — далі $' + (siteConfig.price||2)
+        }
       </div>
     </div>
   </div>`;
@@ -1165,13 +1184,37 @@ function _toggleModalSphere(id){
 function _startFromModal(){
   const modal=document.getElementById('preAnalysisModal');
   if(modal) modal.remove();
-  // Check paywall
+
+  // Paywall disabled — always free
+  if(siteConfig.paywall_enabled===false){
+    isPremiumUnlocked=true;
+    _doShowPicker();
+    runAnalysis();
+    return;
+  }
+
+  // First analysis FREE (max 1 sphere)
+  if(!freeAnalysisUsed && !isPremiumUnlocked){
+    // Limit to 1 sphere for free
+    if(selectedSpheres.size > 1){
+      // Keep only the lowest-scored selected sphere
+      const scores=[...selectedSpheres].map(id=>({id,score:parseFloat(avg(id).toFixed(1))})).sort((a,b)=>a.score-b.score);
+      selectedSpheres=new Set([scores[0].id]);
+    }
+    freeAnalysisUsed=true;
+    try{ localStorage.setItem('free_used','1'); }catch(e){}
+    isPremiumUnlocked=true;
+    _doShowPicker();
+    runAnalysis();
+    return;
+  }
+
+  // Paid analysis
   if(!isPremiumUnlocked){
     showPaywall();
     return;
   }
   _doShowPicker();
-  // Immediately run analysis since sphere selection done in modal
   runAnalysis();
 }
 
@@ -1540,6 +1583,31 @@ function renderAdvice(parsed){
   showAd('native_reco','adSlotNativeReco');
   showAd('sidebar','adSlotSidebar');
   showAd('bottom_banner','adSlotBottom');
+
+  // ── Upsell after free analysis ──
+  if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){
+    const upsell=document.createElement('div');
+    upsell.style.cssText='margin-top:16px;padding:18px 20px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:14px;color:#fff;text-align:center';
+    upsell.innerHTML=`
+      <div style="font-size:1rem;font-weight:800;margin-bottom:6px">🎯 Сподобався результат?</div>
+      <div style="font-size:.75rem;opacity:.9;line-height:1.6;margin-bottom:14px">
+        Це лише <strong>1 із 12 сфер</strong> твого Колеса Життя.<br>
+        Отримай повний аналіз усіх критичних сфер і 7-денний план для кожної.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Аналіз 3–12 сфер</div>
+        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Повний PDF-звіт</div>
+        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Стратегія до 10/10</div>
+      </div>
+      <button onclick="showPaywall()"
+        style="padding:13px 28px;background:#fff;color:#1a3a6a;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:all .3s"
+        onmouseover="this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.transform=''">
+        💳 Повний аналіз — $${siteConfig.price||2}
+      </button>
+      <div style="font-size:.6rem;opacity:.7;margin-top:8px">Одноразовий платіж · Без підписки</div>`;
+    document.getElementById('analysisContent').appendChild(upsell);
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -2035,6 +2103,16 @@ function showPrivacyPolicy(){
 
 /* ── INIT ── */
 buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
+// Update CTA button label based on free status
+(function updateCtaLabel(){
+  const btn=document.getElementById('btnAdv');
+  if(!btn) return;
+  if(!freeAnalysisUsed && siteConfig.paywall_enabled!==false){
+    btn.innerHTML='🆓 Спробувати безкоштовно';
+    btn.style.background='linear-gradient(135deg,#207040,#158030)';
+    btn.style.boxShadow='0 6px 20px rgba(32,112,64,.4)';
+  }
+})();
 </script>
 
 
