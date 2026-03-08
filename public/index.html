@@ -442,7 +442,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <div class="center-col">
     <div class="wheel-card glass">
       <canvas id="wheel" width="480" height="480"></canvas>
-      <div class="wheel-hint">Натисни на сектор · Оціни підкатегорії</div>
+      <div class="wheel-hint">👆 Клікни на сферу · Пересув повзунок для оцінки</div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
   </div>
@@ -639,6 +639,9 @@ function buildDetail(){
       <div class="det-score" style="color:${s.color}">${a.toFixed(1)}</div>
       <div class="det-score-lbl">середній бал</div>
     </div>
+  </div>
+  <div style="font-size:.62rem;color:var(--tl);padding:6px 10px 2px;display:flex;align-items:center;gap:5px;transition:color 3s">
+    <span style="font-size:.8rem">👆</span> Пересув повзунок щоб виставити оцінку від 1 до 10
   </div>
   <div class="sub-list" id="subList"></div>`;
   const list=document.getElementById('subList');
@@ -1360,10 +1363,16 @@ function exportPDF(){
     const color=SPHERES.find(s=>s.name===a.sphere)?.color||'#4080c0';
     const days=Array.isArray(a.days)?a.days:[];
     const dayRows=days.map((d,di)=>`<tr style="background:${di%2?'#f5f9ff':'#fff'}">
-      <td style="font-weight:800;color:${color};white-space:nowrap">${d.day}</td>
-      <td style="font-weight:600">${d.title||''}</td>
-      <td style="line-height:1.5">${d.task||''}</td>
-      <td style="text-align:center;color:#5a80aa;white-space:nowrap">${d.duration||''}</td>
+      <td style="font-weight:800;color:${color};white-space:nowrap;padding:5px 7px;vertical-align:top">${d.day}</td>
+      <td style="font-weight:600;padding:5px 7px;vertical-align:top">${d.title||''}</td>
+      <td style="padding:5px 7px;vertical-align:top">
+        <div style="line-height:1.5;margin-bottom:${d.how_to?'3px':'0'}">${d.task||''}</div>
+        ${d.how_to?`<div style="font-size:9px;color:#2878c8;font-style:italic;line-height:1.4;padding:3px 6px;background:#f0f7ff;border-radius:4px;margin-top:2px">💡 ${d.how_to}</div>`:''}
+      </td>
+      <td style="padding:5px 7px;vertical-align:top">
+        ${d.resource?`<div style="font-size:9px;color:#5a7090;line-height:1.4">📖 ${d.resource}</div>`:'<span style="color:#bbb">—</span>'}
+      </td>
+      <td style="text-align:center;color:#5a80aa;white-space:nowrap;padding:5px 7px;vertical-align:top">${d.duration||''}</td>
     </tr>`).join('');
     return `<div style="margin-bottom:18px;page-break-inside:avoid">
       <div style="background:${color};color:#fff;padding:8px 14px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:10px">
@@ -1374,10 +1383,11 @@ function exportPDF(){
       ${a.priority_reason?`<div style="padding:6px 12px;background:${color}18;border-left:3px solid ${color};font-size:10px;font-style:italic;line-height:1.5">${a.priority_reason}</div>`:''}
       <table style="width:100%;border-collapse:collapse;border:1px solid ${color}33;font-size:10px">
         <thead><tr style="background:${color}18">
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:55px">День</th>
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:100px">Фокус</th>
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color}">Завдання</th>
-          <th style="padding:5px 8px;text-align:center;color:${color};border-bottom:2px solid ${color};width:50px">Час</th>
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:48px">День</th>
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:80px">Фокус</th>
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color}">Завдання + Як виконувати</th>
+          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:110px">Джерело / Ресурс</th>
+          <th style="padding:5px 8px;text-align:center;color:${color};border-bottom:2px solid ${color};width:40px">Час</th>
         </tr></thead>
         <tbody>${dayRows}</tbody>
       </table>
