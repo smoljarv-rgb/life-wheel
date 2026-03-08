@@ -701,16 +701,19 @@ function buildDetail(){
   const dupBtn = document.createElement('div');
   dupBtn.className = 'no-print';
   dupBtn.style.cssText = 'margin-top:14px;padding-top:12px;border-top:1px solid var(--sb)';
-  const isFreeAvail=!freeAnalysisUsed&&(siteConfig.paywall_enabled!==false);
-  dupBtn.innerHTML = '<button onclick="showPicker()"'
-    +' style="width:100%;padding:13px 10px;background:'+(isFreeAvail?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';color:#fff;border:none;border-radius:11px;font-family:\'Nunito\',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px '+(isFreeAvail?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)')+';transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px"'
-    +' onmouseover="this.style.transform=\'translateY(-2px)\'"'
-    +' onmouseout="this.style.transform=\'\'"> '
-    +(isFreeAvail?'🆓 Спробувати безкоштовно':'✦ Отримати план до балансу')
-    +'</button>'
-    +'<div style="text-align:center;font-size:.6rem;color:var(--tl);margin-top:5px;transition:color 3s">'
-    +(isFreeAvail?'Перша сфера безкоштовно — без реєстрації':'AI-аналіз і покроковий план дій')
-    +'</div>';
+  // Read live state every time buildDetail runs
+  const _fa = !freeAnalysisUsed && (siteConfig.paywall_enabled!==false);
+  const _b = document.createElement('button');
+  _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:Nunito,sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
+  _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Отримати план до балансу';
+  _b.onclick = showPicker;
+  _b.onmouseover = function(){this.style.transform='translateY(-2px)';};
+  _b.onmouseout = function(){this.style.transform='';};
+  const _s = document.createElement('div');
+  _s.style.cssText = 'text-align:center;font-size:.6rem;color:var(--tl);margin-top:5px;transition:color 3s';
+  _s.textContent = _fa ? 'Перша сфера безкоштовно — без реєстрації' : 'AI-аналіз і покроковий план дій';
+  dupBtn.appendChild(_b);
+  dupBtn.appendChild(_s);
   list.appendChild(dupBtn);
 }
 
