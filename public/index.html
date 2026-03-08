@@ -810,7 +810,7 @@ let lastParsed=null;
 let selectedSpheres=new Set();
 let isPremiumUnlocked=false; // true after payment or promo
 let freeAnalysisUsed=false; // 1 free sphere analysis per session
-try{ freeAnalysisUsed=localStorage.getItem('free_used')==='1'; }catch(e){}
+try{ freeAnalysisUsed=sessionStorage.getItem('free_used')==='1'; }catch(e){}
 let siteConfig={price:2,paywall_enabled:true,ads:{}};
 (async function loadConfig(){
   try{
@@ -1106,48 +1106,74 @@ function showPreAnalysisModal(){
       <div id="modalPickerChips" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px"></div>
       <div style="font-size:.63rem;color:var(--tl);margin-bottom:14px;transition:color 3s">💡 Рекомендуємо 1–3 сфери за раз для глибокого аналізу</div>
 
-      <!-- Action buttons -->
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button id="modalStartBtn" onclick="_startFromModal()"
-          style="flex:1;min-width:160px;padding:14px 18px;background:${!freeAnalysisUsed && siteConfig.paywall_enabled!==false?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)'};color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;letter-spacing:.04em;font-family:'Nunito',sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s"
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(40,120,200,.55)'"
-          onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(40,120,200,.4)'">
-          ${!freeAnalysisUsed && siteConfig.paywall_enabled!==false
-            ? '🆓 Спробувати безкоштовно'
-            : '✦ Аналізувати <span id="modalSelCount">${selectedSpheres.size||3}</span> сфери'
-          }
-        </button>
-        <button onclick="document.getElementById('preAnalysisModal').remove()"
-          style="padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .3s"
-          onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'"
-          onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
-          Скасувати
-        </button>
-      </div>
-      <div style="font-size:.62rem;margin-top:10px;text-align:center;padding:8px 12px;border-radius:8px;transition:all 3s;${
-        siteConfig.paywall_enabled===false
-          ? 'background:rgba(32,112,64,.12);color:#207040'
-          : !freeAnalysisUsed
-            ? 'background:rgba(40,120,200,.10);color:var(--ac)'
-            : 'background:rgba(200,80,40,.08);color:#c05030'
-      }">
-        ${siteConfig.paywall_enabled===false
-          ? '🆓 Монетизацію вимкнено — аналіз безкоштовний'
-          : !freeAnalysisUsed
-            ? '🎁 Перший аналіз <strong>безкоштовно</strong> — AI проаналізує 1 найкритичнішу сферу'
-            : '🔒 Безкоштовний аналіз вже використано — далі $' + (siteConfig.price||2)
-        }
-      </div>
+      <!-- Action buttons — injected by JS after modal appended -->
+      <div id="modalActionArea" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>`;
 
   document.body.appendChild(modal);
+
+  // Render action area with correct labels based on live state
+  _renderModalActions();
 
   // Render chips inside modal
   _renderModalChips();
 
   // Close on backdrop click
   modal.addEventListener('click',e=>{if(e.target===modal) modal.remove();});
+}
+
+function _renderModalActions(){
+  const area = document.getElementById('modalActionArea');
+  if(!area) return;
+  const isFree = !freeAnalysisUsed && siteConfig.paywall_enabled !== false;
+  const isFreeDisabled = siteConfig.paywall_enabled === false;
+  const selCount = selectedSpheres.size || 3;
+
+  const btnBg = isFree
+    ? 'linear-gradient(135deg,#207040,#158030)'
+    : 'linear-gradient(135deg,#2878c8,#1a58a8)';
+  const btnLabel = isFree
+    ? '🆓 Спробувати безкоштовно — 1 сфера'
+    : '✦ Аналізувати ' + selCount + ' ' + (selCount===1?'сферу':selCount<5?'сфери':'сфер');
+
+  const footerBg = isFreeDisabled
+    ? 'rgba(32,112,64,.12)' : isFree
+    ? 'rgba(40,120,200,.10)' : 'rgba(200,80,40,.08)';
+  const footerColor = isFreeDisabled ? '#207040' : isFree ? 'var(--ac)' : '#c05030';
+  const footerText = isFreeDisabled
+    ? '🆓 Монетизацію вимкнено — аналіз безкоштовний'
+    : isFree
+    ? '🎁 Перший аналіз безкоштовно — AI проаналізує 1 найкритичнішу сферу'
+    : '🔒 Безкоштовний аналіз вже використано — далі $' + (siteConfig.price||2);
+
+  // Build via DOM to avoid quote hell
+  area.innerHTML='';
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px';
+
+  const startBtn=document.createElement('button');
+  startBtn.id='modalStartBtn';
+  startBtn.style.cssText='flex:1;min-width:160px;padding:14px 18px;background:'+btnBg+';color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s';
+  startBtn.innerHTML=btnLabel;
+  startBtn.onclick=_startFromModal;
+  startBtn.onmouseover=function(){this.style.transform='translateY(-2px)';};
+  startBtn.onmouseout=function(){this.style.transform='';};
+  row.appendChild(startBtn);
+
+  const cancelBtn=document.createElement('button');
+  cancelBtn.style.cssText='padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:Nunito,sans-serif;transition:all .3s';
+  cancelBtn.textContent='Скасувати';
+  cancelBtn.onclick=function(){const m=document.getElementById('preAnalysisModal');if(m)m.remove();};
+  cancelBtn.onmouseover=function(){this.style.borderColor='var(--ac)';this.style.color='var(--ac)';};
+  cancelBtn.onmouseout=function(){this.style.borderColor='var(--sb)';this.style.color='var(--tm)';};
+  row.appendChild(cancelBtn);
+  area.appendChild(row);
+
+  const footer=document.createElement('div');
+  footer.style.cssText='font-size:.62rem;text-align:center;padding:8px 12px;border-radius:8px;background:'+footerBg+';color:'+footerColor;
+  footer.innerHTML=footerText;
+  area.appendChild(footer);
 }
 
 function _renderModalChips(){
@@ -1175,10 +1201,7 @@ function _toggleModalSphere(id){
   if(selectedSpheres.has(id)) selectedSpheres.delete(id);
   else selectedSpheres.add(id);
   _renderModalChips();
-  const cnt=document.getElementById('modalSelCount');
-  if(cnt) cnt.textContent=selectedSpheres.size;
-  const btn=document.getElementById('modalStartBtn');
-  if(btn) btn.disabled=selectedSpheres.size===0;
+  _renderModalActions(); // refresh button count and label
 }
 
 function _startFromModal(){
@@ -1196,7 +1219,7 @@ function _startFromModal(){
   // First analysis FREE (max 1 sphere)
   if(!freeAnalysisUsed && !isPremiumUnlocked){
     freeAnalysisUsed=true;
-    try{ localStorage.setItem('free_used','1'); }catch(e){}
+    try{ sessionStorage.setItem('free_used','1'); }catch(e){}
     isPremiumUnlocked=true;
     window._freeRunActive=true; // signal runAnalysis to cap at 1 sphere
     _doShowPicker();
@@ -2120,6 +2143,8 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
 (function updateCtaLabel(){
   const btn=document.getElementById('btnAdv');
   if(!btn) return;
+  // Re-read from sessionStorage in case page just loaded
+  try{ freeAnalysisUsed=sessionStorage.getItem('free_used')==='1'; }catch(e){}
   if(!freeAnalysisUsed && siteConfig.paywall_enabled!==false){
     btn.innerHTML='🆓 Спробувати безкоштовно';
     btn.style.background='linear-gradient(135deg,#207040,#158030)';
