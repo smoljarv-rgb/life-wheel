@@ -106,7 +106,7 @@ body.mood-sunny   .cloud{opacity:.92;filter:blur(0)}
 .wheel-card{width:100%;max-width:500px;padding:16px;position:relative}
 canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-shadow(0 4px 16px rgba(0,0,0,.22)) drop-shadow(0 0 2px rgba(255,255,255,.8));transition:filter 3s}
 body.mood-storm canvas#wheel{filter:drop-shadow(0 4px 22px rgba(0,0,0,.55)) drop-shadow(0 0 1px rgba(80,140,200,.3))}
-.wheel-hint{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tl);text-align:center;margin-top:4px;transition:color 3s}
+.wheel-hint{font-size:.78rem;font-weight:700;color:var(--ac);text-align:center;margin-top:8px;padding:7px 14px;background:rgba(40,120,200,.10);border-radius:20px;border:1.5px solid rgba(40,120,200,.25);display:inline-block;transition:all 3s;animation:hintPulse 3s ease-in-out infinite}
 .detail-box{width:100%;max-width:500px;padding:18px 20px}
 .det-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:13px;border-bottom:1.5px solid var(--sb);transition:border-color 3s}
 .det-stripe{width:4px;height:42px;border-radius:3px;flex-shrink:0}
@@ -195,6 +195,7 @@ input[type=range].srange::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .loading span:nth-child(2){animation-delay:.2s}.loading span:nth-child(3){animation-delay:.4s}
 @keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 @keyframes spinRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes hintPulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
 @keyframes pulseCta{0%,100%{box-shadow:0 6px 20px rgba(40,120,200,.4)}50%{box-shadow:0 6px 28px rgba(40,120,200,.7),0 0 0 6px rgba(40,120,200,.15)}}
 .btn-advice:not(:disabled){animation:pulseCta 2.5s ease-in-out infinite}
 .btn-advice:not(:disabled):hover{animation:none}
@@ -442,7 +443,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <div class="center-col">
     <div class="wheel-card glass">
       <canvas id="wheel" width="480" height="480"></canvas>
-      <div class="wheel-hint">👆 Клікни на сферу · Пересув повзунок для оцінки</div>
+      <div style="text-align:center;margin-top:6px"><div class="wheel-hint">👆 Клікни на сферу · Пересув повзунок для оцінки</div></div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
   </div>
@@ -640,8 +641,12 @@ function buildDetail(){
       <div class="det-score-lbl">середній бал</div>
     </div>
   </div>
-  <div style="font-size:.62rem;color:var(--tl);padding:6px 10px 2px;display:flex;align-items:center;gap:5px;transition:color 3s">
-    <span style="font-size:.8rem">👆</span> Пересув повзунок щоб виставити оцінку від 1 до 10
+  <div style="margin:6px 0 8px;padding:9px 13px;background:linear-gradient(135deg,rgba(40,120,200,.12),rgba(40,120,200,.06));border:1.5px solid rgba(40,120,200,.25);border-radius:10px;display:flex;align-items:center;gap:8px;transition:all 3s">
+    <span style="font-size:1.2rem">👆</span>
+    <div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--ac);transition:color 3s">Пересув повзунок для оцінки</div>
+      <div style="font-size:.65rem;color:var(--tm);margin-top:1px;transition:color 3s">1 = дуже погано · 5 = середньо · 10 = ідеально</div>
+    </div>
   </div>
   <div class="sub-list" id="subList"></div>`;
   const list=document.getElementById('subList');
