@@ -1386,13 +1386,15 @@ JSON: {"overview":"2 речення про загальну картину","bal
     lastParsed={overview:summary.overview,advice:results,balance_roadmap:summary.balance_roadmap};
     renderAdvice(lastParsed);
     btn.style.display='';
-    // Update CTA button label based on free/paid state
+    // Update top CTA button
     if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){
       btn.innerHTML='✦ Отримати план до балансу';
       btn.style.background='linear-gradient(135deg,#2878c8,#1a58a8)';
       btn.style.boxShadow='0 6px 20px rgba(40,120,200,.4)';
       btn.onclick=showPicker;
     }
+    // Force rebuild detail panel so dup button also updates
+    buildDetail();
 
 
 
