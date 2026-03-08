@@ -1195,15 +1195,10 @@ function _startFromModal(){
 
   // First analysis FREE (max 1 sphere)
   if(!freeAnalysisUsed && !isPremiumUnlocked){
-    // Limit to 1 sphere for free
-    if(selectedSpheres.size > 1){
-      // Keep only the lowest-scored selected sphere
-      const scores=[...selectedSpheres].map(id=>({id,score:parseFloat(avg(id).toFixed(1))})).sort((a,b)=>a.score-b.score);
-      selectedSpheres=new Set([scores[0].id]);
-    }
     freeAnalysisUsed=true;
     try{ localStorage.setItem('free_used','1'); }catch(e){}
     isPremiumUnlocked=true;
+    window._freeRunActive=true; // signal runAnalysis to cap at 1 sphere
     _doShowPicker();
     runAnalysis();
     return;
@@ -1264,6 +1259,24 @@ async function runAnalysis(){
   btn.style.display='none';
 
   const allData=SPHERES.map(s=>({id:s.id,name:s.name,avg:avg(s.id).toFixed(1),subs:s.sub.map(sub=>sub.n+':'+state[s.id][sub.k]).join('; ')}));
+
+  // FREE TIER: enforce max 1 sphere
+  let isFreeRun=false;
+  if(freeAnalysisUsed && siteConfig.paywall_enabled!==false && selectedSpheres.size>1){
+    // Was marked as used just before this call — means it was a free run
+    // Actually check: free run = freeAnalysisUsed was just set to true
+    // We track this via _isFreeRun flag set in _startFromModal
+  }
+  if(window._freeRunActive){
+    window._freeRunActive=false;
+    isFreeRun=true;
+    // Keep only worst sphere
+    const worst=allData.filter(s=>selectedSpheres.has(s.id)).sort((a,b)=>parseFloat(a.avg)-parseFloat(b.avg));
+    if(worst.length>1){
+      selectedSpheres=new Set([worst[0].id]);
+    }
+  }
+
   const chosen=allData.filter(s=>selectedSpheres.has(s.id));
   const context=allData.map(s=>s.name+':'+s.avg).join(', ');
 
