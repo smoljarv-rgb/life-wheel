@@ -1220,8 +1220,16 @@ function _startFromModal(){
   if(!freeAnalysisUsed && !isPremiumUnlocked){
     freeAnalysisUsed=true;
     try{ sessionStorage.setItem('free_used','1'); }catch(e){}
+    // Cut to 1 worst sphere RIGHT NOW before anything else runs
+    const allScores=SPHERES.map(s=>({id:s.id,score:parseFloat(avg(s.id).toFixed(1))}));
+    const selected=[...selectedSpheres];
+    // If nothing selected, pick the single worst sphere overall
+    const candidates=selected.length>0
+      ? allScores.filter(s=>selected.includes(s.id))
+      : allScores;
+    const worst=candidates.sort((a,b)=>a.score-b.score)[0];
+    selectedSpheres=new Set([worst.id]);
     isPremiumUnlocked=true;
-    window._freeRunActive=true; // signal runAnalysis to cap at 1 sphere
     _doShowPicker();
     runAnalysis();
     return;
@@ -1282,23 +1290,6 @@ async function runAnalysis(){
   btn.style.display='none';
 
   const allData=SPHERES.map(s=>({id:s.id,name:s.name,avg:avg(s.id).toFixed(1),subs:s.sub.map(sub=>sub.n+':'+state[s.id][sub.k]).join('; ')}));
-
-  // FREE TIER: enforce max 1 sphere
-  let isFreeRun=false;
-  if(freeAnalysisUsed && siteConfig.paywall_enabled!==false && selectedSpheres.size>1){
-    // Was marked as used just before this call — means it was a free run
-    // Actually check: free run = freeAnalysisUsed was just set to true
-    // We track this via _isFreeRun flag set in _startFromModal
-  }
-  if(window._freeRunActive){
-    window._freeRunActive=false;
-    isFreeRun=true;
-    // Keep only worst sphere
-    const worst=allData.filter(s=>selectedSpheres.has(s.id)).sort((a,b)=>parseFloat(a.avg)-parseFloat(b.avg));
-    if(worst.length>1){
-      selectedSpheres=new Set([worst[0].id]);
-    }
-  }
 
   const chosen=allData.filter(s=>selectedSpheres.has(s.id));
   const context=allData.map(s=>s.name+':'+s.avg).join(', ');
@@ -1391,9 +1382,17 @@ JSON: {"overview":"2 речення про загальну картину","bal
 
     lastParsed={overview:summary.overview,advice:results,balance_roadmap:summary.balance_roadmap};
     renderAdvice(lastParsed);
+    // Update button based on free/paid state
     btn.style.display='';
-    btn.textContent='✦ Змінити вибір сфер';
-    btn.onclick=showPicker;
+    if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){
+      btn.innerHTML='💳 Повний аналіз — $'+(siteConfig.price||2);
+      btn.style.background='linear-gradient(135deg,#207040,#158030)';
+      btn.onclick=showPaywall;
+    } else {
+      btn.innerHTML='✦ Новий аналіз';
+      btn.style.background='';
+      btn.onclick=showPicker;
+    }
 
 
 
@@ -1406,7 +1405,8 @@ JSON: {"overview":"2 речення про загальну картину","bal
     </div>`;
     console.error('API error:', err);
     btn.style.display='';
-    btn.textContent='✦ Спробувати знову';
+    btn.innerHTML='↩ Спробувати знову';
+    btn.style.background='';
     btn.onclick=showPicker;
   }
 }
