@@ -1383,7 +1383,13 @@ JSON: {"overview":"2 речення про загальну картину","bal
     lastParsed={overview:summary.overview,advice:results,balance_roadmap:summary.balance_roadmap};
     renderAdvice(lastParsed);
     btn.style.display='';
-    updateCtaBtn(); // always reflect current free/paid state
+    // Update CTA button label based on free/paid state
+    if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){
+      btn.innerHTML='✦ Отримати план до балансу';
+      btn.style.background='linear-gradient(135deg,#2878c8,#1a58a8)';
+      btn.style.boxShadow='0 6px 20px rgba(40,120,200,.4)';
+      btn.onclick=showPicker;
+    }
 
 
 
@@ -2131,22 +2137,16 @@ function showPrivacyPolicy(){
 /* ── INIT ── */
 buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
 // Update CTA button label based on free status
-function updateCtaBtn(){
+// Set green free button on page load if free not yet used
+(function(){
   const btn=document.getElementById('btnAdv');
   if(!btn) return;
   if(!freeAnalysisUsed && siteConfig.paywall_enabled!==false){
     btn.innerHTML='🆓 Спробувати безкоштовно';
     btn.style.background='linear-gradient(135deg,#207040,#158030)';
     btn.style.boxShadow='0 6px 20px rgba(32,112,64,.4)';
-    btn.onclick=showPicker;
-  } else {
-    btn.innerHTML='✦ Отримати план до балансу';
-    btn.style.background='';
-    btn.style.boxShadow='';
-    btn.onclick=showPicker;
   }
-}
-updateCtaBtn();
+})();
 </script>
 
 
