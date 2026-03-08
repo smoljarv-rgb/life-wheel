@@ -595,6 +595,24 @@ function updateMood(){
   document.getElementById('totalBig').textContent=g.toFixed(1);
 }
 
+/* ── ACCORDION ── */
+function toggleAlgo(bodyId, cardId, color, forceOpen){
+  const body = document.getElementById(bodyId);
+  const arr  = document.getElementById('arr_'+bodyId);
+  const card = document.getElementById(cardId);
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  if(forceOpen || isOpen){
+    body.style.display = forceOpen ? 'block' : 'none';
+    if(arr) arr.style.transform = forceOpen ? 'rotate(180deg)' : '';
+    if(forceOpen) setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  } else {
+    body.style.display = 'block';
+    if(arr) arr.style.transform = 'rotate(180deg)';
+    setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }
+}
+
 /* ── NAV ── */
 function buildNav(){
   const nav=document.getElementById('leftNav');
@@ -1218,8 +1236,29 @@ function renderAdvice(parsed){
   }
 
   // ══ ALGO HTML (full-width row) ══
-  let algoHTML=`<div class="algo-title" style="font-size:1.1rem;margin-bottom:16px">📅 Щоденний алгоритм — покроковий план по днях</div>`;
-  algoHTML+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px">`;
+  // ── Sticky sphere nav ──
+  const sphereNavItems = parsed.advice.map((a,ai)=>{
+    const color=colorMap[a.sphere]||'#4080c0';
+    const sc=parseFloat(a.score)||5;
+    return `<button onclick="document.getElementById('algo_${ai}').scrollIntoView({behavior:'smooth',block:'start'})"
+      style="padding:5px 11px;background:${color}22;color:${color};border:1.5px solid ${color}55;border-radius:20px;font-size:.65rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;transition:all .2s"
+      onmouseover="this.style.background='${color}44'" onmouseout="this.style.background='${color}22'">
+      ${a.sphere} ${sc}/10
+    </button>`;
+  }).join('');
+
+  let algoHTML=`
+  <div class="algo-title" style="font-size:1.1rem;margin-bottom:12px">📅 Щоденний алгоритм — покроковий план по днях</div>
+
+  <!-- Sticky sphere nav -->
+  <div style="position:sticky;top:0;z-index:10;background:var(--sf2);backdrop-filter:blur(12px);padding:8px 0 10px;margin-bottom:14px;border-bottom:1px solid var(--sb);transition:all 3s">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:.62rem;color:var(--tl);white-space:nowrap;transition:color 3s">Перейти:</span>
+      ${sphereNavItems}
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px">`;
 
   parsed.advice.forEach((a,ai)=>{
     const color=colorMap[a.sphere]||'#4080c0';
@@ -1227,40 +1266,58 @@ function renderAdvice(parsed){
     const gap=parseFloat(a.gap)||(10-sc);
     const pc=getPrio(sc);
     const days=Array.isArray(a.days)?a.days:[];
+    const cardId=`algo_${ai}`;
+    const bodyId=`algo_body_${ai}`;
 
-    algoHTML+=`<div style="background:var(--sf2);border:1.5px solid var(--sb);border-radius:12px;padding:14px;transition:all 3s">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid ${color}33">
-        <span class="badge ${pc.cls}">${pc.lbl}</span>
-        <span style="font-size:.92rem;font-weight:700;color:${color}">${a.sphere}</span>
-        <span style="font-size:.62rem;color:var(--tl);margin-left:auto">${sc}/10 · +${gap.toFixed(0)} до ідеалу</span>
+    algoHTML+=`
+    <div id="${cardId}" style="background:var(--sf2);border:1.5px solid ${color}55;border-radius:14px;overflow:hidden;transition:all 3s">
+
+      <!-- Accordion header — always visible -->
+      <div onclick="toggleAlgo('${bodyId}','${cardId}','${color}')"
+        style="display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none;transition:background .2s"
+        onmouseover="this.style.background='${color}0a'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;flex-shrink:0">${ai+1}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.9rem;font-weight:800;color:${color}">${a.sphere}</div>
+          <div style="font-size:.62rem;color:var(--tl);transition:color 3s">${sc}/10 · +${gap.toFixed(0)} до ідеалу · ${days.length} днів</div>
+        </div>
+        <span class="badge ${pc.cls}" style="flex-shrink:0">${pc.lbl}</span>
+        <span id="arr_${bodyId}" style="font-size:.8rem;color:${color};transition:transform .3s;flex-shrink:0">▼</span>
       </div>
-      ${a.priority_reason?`<div style="font-size:.67rem;color:var(--tm);font-style:italic;margin-bottom:8px;padding:5px 9px;background:${color}0a;border-radius:6px;line-height:1.5">${a.priority_reason}</div>`:''}
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${days.map((d,di)=>`
-        <div style="background:${di%2?color+'08':'var(--sf)'};border-radius:9px;padding:10px 12px;border-left:3px solid ${color};transition:all 3s">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
-            <span style="font-size:.65rem;font-weight:800;color:#fff;background:${color};padding:2px 8px;border-radius:12px;white-space:nowrap">${d.day}</span>
-            <span style="font-size:.75rem;font-weight:700;color:${color}">${d.title||''}</span>
-            <span style="font-size:.62rem;color:var(--tl);margin-left:auto;white-space:nowrap;transition:color 3s">⏱ ${d.duration||''}</span>
-          </div>
-          <div style="font-size:.72rem;color:var(--td);font-weight:600;margin-bottom:4px;line-height:1.4;transition:color 3s">
-            📌 ${d.task||''}
-          </div>
-          ${d.how_to?`<div style="font-size:.67rem;color:var(--tm);line-height:1.5;padding:5px 8px;background:${color}10;border-radius:6px;margin-bottom:4px;transition:all 3s">
-            💡 <em>${d.how_to}</em>
-          </div>`:''}
-          ${d.resource?`<div style="font-size:.62rem;color:var(--ac);display:flex;align-items:center;gap:4px;transition:color 3s">
-            📖 ${d.resource}
-          </div>`:''}
-        </div>`).join('')}
-      </div>
-      ${a.week2_habit?`<div style="font-size:.65rem;color:var(--tm);margin-top:8px;padding:5px 9px;background:${color}0d;border-radius:6px;border-left:2px solid ${color}66;line-height:1.5">
-        🔄 <strong style="color:${color}">Тижні 2–4:</strong> ${a.week2_habit}</div>`:''}
-      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-        ${a.month_goal?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid ${color};line-height:1.5;transition:all 3s">
-          <strong style="color:${color};display:block;margin-bottom:2px">📌 Ціль 30 днів</strong>${a.month_goal}</div>`:''}
-        ${a.to_10?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid var(--ac);line-height:1.5;transition:all 3s">
-          <strong style="color:var(--ac);display:block;margin-bottom:2px">🎯 До 10/10</strong>${a.to_10}</div>`:''}
+
+      <!-- Accordion body -->
+      <div id="${bodyId}" style="padding:0 14px 14px;display:${ai===0?'block':'none'}">
+        ${a.priority_reason?`<div style="font-size:.67rem;color:var(--tm);font-style:italic;margin-bottom:10px;padding:6px 10px;background:${color}0a;border-radius:7px;border-left:2px solid ${color};line-height:1.5">${a.priority_reason}</div>`:''}
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${days.map((d,di)=>`
+          <div style="background:${di%2?color+'08':'var(--sf)'};border-radius:9px;padding:10px 12px;border-left:3px solid ${color};transition:all 3s">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+              <span style="font-size:.65rem;font-weight:800;color:#fff;background:${color};padding:2px 8px;border-radius:12px;white-space:nowrap">${d.day}</span>
+              <span style="font-size:.75rem;font-weight:700;color:${color}">${d.title||''}</span>
+              <span style="font-size:.62rem;color:var(--tl);margin-left:auto;white-space:nowrap;transition:color 3s">⏱ ${d.duration||''}</span>
+            </div>
+            <div style="font-size:.72rem;color:var(--td);font-weight:600;margin-bottom:4px;line-height:1.4;transition:color 3s">📌 ${d.task||''}</div>
+            ${d.how_to?`<div style="font-size:.67rem;color:var(--tm);line-height:1.5;padding:5px 8px;background:${color}10;border-radius:6px;margin-bottom:4px;transition:all 3s">💡 <em>${d.how_to}</em></div>`:''}
+            ${d.resource?`<div style="font-size:.62rem;color:var(--ac);display:flex;align-items:center;gap:4px;transition:color 3s">📖 ${d.resource}</div>`:''}
+          </div>`).join('')}
+        </div>
+
+        ${a.week2_habit?`<div style="font-size:.65rem;color:var(--tm);margin-top:10px;padding:6px 10px;background:${color}0d;border-radius:7px;border-left:2px solid ${color}66;line-height:1.5">🔄 <strong style="color:${color}">Тижні 2–4:</strong> ${a.week2_habit}</div>`:''}
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          ${a.month_goal?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid ${color};line-height:1.5;transition:all 3s"><strong style="color:${color};display:block;margin-bottom:2px">📌 Ціль 30 днів</strong>${a.month_goal}</div>`:''}
+          ${a.to_10?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid var(--ac);line-height:1.5;transition:all 3s"><strong style="color:var(--ac);display:block;margin-bottom:2px">🎯 До 10/10</strong>${a.to_10}</div>`:''}
+        </div>
+
+        <!-- Next sphere button -->
+        ${ai < parsed.advice.length-1 ? `<div style="text-align:right;margin-top:12px">
+          <button onclick="toggleAlgo('algo_body_${ai+1}','algo_${ai+1}','${colorMap[parsed.advice[ai+1].sphere]||'#4080c0'}',true)"
+            style="padding:6px 14px;background:transparent;border:1.5px solid var(--sb);border-radius:8px;font-size:.68rem;color:var(--tm);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s"
+            onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'"
+            onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
+            Наступна сфера: ${parsed.advice[ai+1].sphere} →
+          </button>
+        </div>` : ''}
       </div>
     </div>`;
   });
