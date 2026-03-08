@@ -1416,7 +1416,7 @@ async function runAnalysis(){
 Сфера: ${s.name} (${s.avg}/10): ${s.subs}
 
 Відповідай ТІЛЬКИ JSON (без коментарів, без markdown):
-{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"1 речення чому важливо","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","how_to":"1-2 речення як саме виконувати: техніка або підхід","resource":"назва книги або статті (автор або сайт)","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія і фіксація результату","how_to":"запиши 3 результати тижня у щоденник","resource":"","duration":"15 хв"}],"week2_habit":"коротка щоденна звичка на тижні 2-4","month_goal":"вимірювана ціль за 30 днів","to_10":"шлях до ідеалу"}`;
+{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"1 речення чому важливо","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","how_to":"1-2 речення як саме виконувати: техніка або підхід","resource":"назва книги або статті (автор або сайт)","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія і фіксація результату","how_to":"запиши 3 результати тижня у щоденник","resource":"","duration":"15 хв"}],"week2_habit":"коротка щоденна звичка на тижні 2-4","month_goal":"вимірювана ціль за 30 днів","to_10":"шлях до ідеалу","goal":"1 ключова зміна яка найбільше підніме цю сферу (до 12 слів)","quick_win":"одна конкретна мікродія яку можна зробити сьогодні за 5-10 хвилин (до 10 слів)"}`;
       const data=await callAI(prompt);
       results.push(data);
     }
@@ -1465,38 +1465,123 @@ function renderAdvice(parsed){
 
   // ══ SUMMARY HTML (right column) ══
   let summaryHTML=`<div class="adv-overview">${parsed.overview}</div>`;
+
+  // ── Sort all spheres by score for ranking ──
+  const allSphereScores = SPHERES.map(s=>({
+    name:s.name, color:s.color,
+    score:parseFloat(avg(s.id).toFixed(1))
+  })).sort((a,b)=>a.score-b.score);
+
+  // ── Find quick win (lowest score from analysed spheres) ──
+  const adviceMap={};
+  parsed.advice.forEach(a=>{ adviceMap[a.sphere]=a; });
+
+  // ── Dashboard header stats ──
+  const allScores=SPHERES.map(s=>parseFloat(avg(s.id).toFixed(1)));
+  const totalAvg=(allScores.reduce((a,b)=>a+b,0)/allScores.length).toFixed(1);
+  const critCount=allScores.filter(s=>s<4).length;
+  const strongCount=allScores.filter(s=>s>=8).length;
+  const maxGap=parsed.advice.reduce((mx,a)=>{
+    const g=10-parseFloat(a.score||5); return g>mx?g:mx;
+  },0);
+
   summaryHTML+=`
-  <div style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tl);margin-bottom:6px;margin-top:2px;transition:color 3s">
-    📊 Таблиця балансу
+  <!-- ═══ DASHBOARD STATS ROW ═══ -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+    <div style="text-align:center;padding:10px 6px;background:linear-gradient(135deg,rgba(40,120,200,.1),rgba(40,120,200,.05));border:1.5px solid rgba(40,120,200,.2);border-radius:12px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--ac);line-height:1">${totalAvg}</div>
+      <div style="font-size:.55rem;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;transition:color 3s">Загальний бал</div>
+    </div>
+    <div style="text-align:center;padding:10px 6px;background:linear-gradient(135deg,rgba(200,50,50,.08),rgba(200,50,50,.04));border:1.5px solid rgba(200,50,50,.18);border-radius:12px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:#c03030;line-height:1">${critCount}</div>
+      <div style="font-size:.55rem;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;transition:color 3s">Критичних сфер</div>
+    </div>
+    <div style="text-align:center;padding:10px 6px;background:linear-gradient(135deg,rgba(32,112,64,.1),rgba(32,112,64,.05));border:1.5px solid rgba(32,112,64,.2);border-radius:12px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:#207040;line-height:1">${strongCount}</div>
+      <div style="font-size:.55rem;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;transition:color 3s">Сильних сфер</div>
+    </div>
   </div>
-  <div class="adv-table-wrap">
-  <table class="adv-table" style="min-width:260px">
-    <thead><tr>
-      <th>Сфера</th><th style="text-align:center">Бал</th>
-      <th style="text-align:center">До 10</th><th>Пріоритет</th>
-    </tr></thead>
-    <tbody>
-    ${parsed.advice.map((a,i)=>{
-      const color=colorMap[a.sphere]||'#4080c0';
-      const sc=parseFloat(a.score)||5;
-      const gap=parseFloat(a.gap)||(10-sc);
-      const pc=getPrio(sc);
-      const scCol=sc<4?'#c03030':sc<6?'#9a6010':sc<8?'#207040':'#1860a0';
-      const bar=Math.round(sc*10);
-      return `<tr>
-        <td class="col-sphere" style="color:${color}">${a.sphere}</td>
-        <td class="col-score" style="text-align:center">
-          <div style="color:${scCol};font-size:.82rem;font-weight:700">${sc}/10</div>
-          <div style="height:4px;background:#eef;border-radius:2px;margin-top:3px;overflow:hidden">
-            <div style="width:${bar}%;height:100%;background:${color};border-radius:2px"></div>
-          </div>
-        </td>
-        <td class="col-gap" style="text-align:center;color:#e8935c;font-weight:700">+${gap.toFixed(0)}</td>
-        <td><span class="badge ${pc.cls}">${pc.lbl}</span></td>
-      </tr>`;
-    }).join('')}
-    </tbody>
-  </table>
+
+  <!-- ═══ SPHERE CARDS ═══ -->
+  <div style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tl);margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color 3s">
+    <span>📊</span> Результати по сферах
+    <span style="margin-left:auto;font-size:.55rem;opacity:.7">#1 = найкритичніша</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+  ${parsed.advice.map((a,i)=>{
+    const color=colorMap[a.sphere]||'#4080c0';
+    const sc=parseFloat(a.score)||5;
+    const gap=parseFloat(a.gap)||(10-sc);
+    const pc=getPrio(sc);
+    const scCol=sc<4?'#c03030':sc<6?'#b06000':sc<8?'#207040':'#1860a0';
+    const bgCol=sc<4?'rgba(200,50,50,.06)':sc<6?'rgba(180,100,0,.05)':sc<8?'rgba(32,112,64,.05)':'rgba(24,96,160,.05)';
+    const borderCol=sc<4?'rgba(200,50,50,.25)':sc<6?'rgba(180,100,0,.2)':sc<8?'rgba(32,112,64,.2)':'rgba(24,96,160,.2)';
+    const barW=Math.round(sc*10);
+    const adv=adviceMap[a.sphere];
+    const quickWin=adv&&adv.quick_win?adv.quick_win:(adv&&adv.days&&adv.days[0]?adv.days[0].task:'');
+    const goal=adv&&adv.goal?adv.goal:'';
+    const rankNum=i+1;
+    const rankLabel=rankNum===1?'🥇':rankNum===2?'🥈':rankNum===3?'🥉':'#'+rankNum;
+
+    // ── prev comparison per-sphere (stored by sphere name) ──
+    let prevHtml='';
+    try{
+      const prevAll=JSON.parse(localStorage.getItem('prev_spheres')||'{}');
+      if(prevAll[a.sphere]!==undefined){
+        const prevSc=parseFloat(prevAll[a.sphere]);
+        const diff=(sc-prevSc).toFixed(1);
+        const diffNum=parseFloat(diff);
+        if(diffNum!==0){
+          const dCol=diffNum>0?'#16a34a':'#dc2626';
+          const dIcon=diffNum>0?'↑':'↓';
+          prevHtml=`<span style="font-size:.58rem;font-weight:700;color:${dCol};margin-left:4px">${dIcon}${Math.abs(diffNum)}</span>`;
+        } else {
+          prevHtml=`<span style="font-size:.55rem;color:var(--tl);margin-left:4px">→</span>`;
+        }
+      }
+    }catch(e){}
+
+    return `
+    <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:13px;padding:11px 13px;transition:all 3s">
+
+      <!-- Row 1: rank + name + score + delta -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-size:.72rem;flex-shrink:0;width:24px;text-align:center">${rankLabel}</div>
+        <div style="font-weight:700;color:var(--td);flex:1;font-size:.78rem;transition:color 3s">${a.sphere}</div>
+        <div style="display:flex;align-items:baseline;gap:2px">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:${scCol};line-height:1">${sc}</span>
+          <span style="font-size:.52rem;color:var(--tl);transition:color 3s">/10</span>
+          ${prevHtml}
+        </div>
+      </div>
+
+      <!-- Row 2: progress bar -->
+      <div style="margin-bottom:7px">
+        <div style="height:8px;background:rgba(128,160,200,.15);border-radius:4px;overflow:hidden;position:relative">
+          <div style="width:${barW}%;height:100%;background:linear-gradient(90deg,${color}99,${color});border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)"></div>
+          <div style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:.45rem;color:rgba(255,255,255,.8);font-weight:700;pointer-events:none">${sc}/10</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span style="font-size:.52rem;color:var(--tl);transition:color 3s">0</span>
+          <span style="font-size:.55rem;color:#e8935c;font-weight:700">+${gap.toFixed(0)} до ідеалу</span>
+          <span style="font-size:.52rem;color:var(--tl);transition:color 3s">10</span>
+        </div>
+      </div>
+
+      <!-- Row 3: Goal -->
+      ${goal?`<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;padding:6px 8px;background:rgba(40,120,200,.07);border-radius:8px">
+        <span style="font-size:.68rem;flex-shrink:0">🎯</span>
+        <div style="font-size:.63rem;color:var(--tm);line-height:1.45;font-style:italic;transition:color 3s">${goal}</div>
+      </div>`:''}
+
+      <!-- Row 4: Quick win + priority -->
+      <div style="display:flex;align-items:flex-start;gap:6px">
+        <span class="badge ${pc.cls}" style="flex-shrink:0;font-size:.48rem;padding:2px 6px">${pc.lbl.replace(/🔴|🟡|🔵|🟢/g,'').trim()}</span>
+        ${quickWin?`<div style="font-size:.61rem;color:var(--tl);line-height:1.4;transition:color 3s">⚡ ${quickWin}</div>`:''}
+      </div>
+    </div>`;
+  }).join('')}
   </div>`;
 
   if(parsed.balance_roadmap){
@@ -1648,6 +1733,10 @@ function renderAdvice(parsed){
       </div>`;
     }
     localStorage.setItem('prev_result',JSON.stringify({avg:avgNow,date:new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'})}));
+    // Save per-sphere scores for next comparison
+    const sphereSnapshot={};
+    parsed.advice.forEach(a=>{ sphereSnapshot[a.sphere]=parseFloat(a.score)||5; });
+    localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
   }catch(e){}
 
   // ── Write overview + summary to RIGHT COL (adviceArea) ──
