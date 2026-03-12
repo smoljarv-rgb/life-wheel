@@ -147,13 +147,20 @@ app.post('/api/analyze', async function(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY не налаштовано' });
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 55000);
-
-    // Use streaming to avoid Vercel 10s timeout on hobby plan
+    // Send SSE headers — keeps connection alive on Vercel
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Send keepalive pings every 5s while waiting for Groq
+    let done = false;
+    const keepalive = setInterval(() => {
+      if (!done) try { res.write(': keepalive\n\n'); } catch(e) {}
+    }, 4000);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55000);
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -168,42 +175,21 @@ app.post('/api/analyze', async function(req, res) {
         max_tokens: 4000,
         temperature: 0.3,
         response_format: { type: 'json_object' },
-        stream: true,
       }),
     });
     clearTimeout(timeoutId);
+    done = true;
+    clearInterval(keepalive);
 
+    const data = await response.json();
     if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      res.write(`data: ${JSON.stringify({ error: (errData.error && errData.error.message) || 'Groq error ' + response.status })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: (data.error && data.error.message) || 'Groq error ' + response.status })}\n\n`);
       return res.end();
     }
-
-    let fullText = '';
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const data = line.slice(6).trim();
-        if (data === '[DONE]') continue;
-        try {
-          const parsed = JSON.parse(data);
-          const delta = parsed.choices?.[0]?.delta?.content || '';
-          if (delta) {
-            fullText += delta;
-            // Send keepalive ping every ~500 chars to prevent timeout
-            if (fullText.length % 500 < delta.length) {
-              res.write(': ping\n\n');
-            }
-          }
-        } catch (e) {}
-      }
+    const text = (data.choices?.[0]?.message?.content) || '';
+    if (!text) {
+      res.write(`data: ${JSON.stringify({ error: 'Порожня відповідь від Groq' })}\n\n`);
+      return res.end();
     }
 
     const db = loadDB();
@@ -211,11 +197,11 @@ app.post('/api/analyze', async function(req, res) {
     if (db.events.length > 10000) db.events = db.events.slice(-5000);
     saveDB(db);
 
-    res.write(`data: ${JSON.stringify({ text: fullText })}\n\n`);
+    res.write(`data: ${JSON.stringify({ text })}\n\n`);
     res.end();
   } catch (err) {
     try {
-      res.write(`data: ${JSON.stringify({ error: 'Помилка сервера: ' + err.message })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: 'Помилка: ' + err.message })}\n\n`);
       res.end();
     } catch(e) {}
   }

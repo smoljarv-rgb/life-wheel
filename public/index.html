@@ -1300,61 +1300,73 @@ function toggleSphere(id){
   if(window._reRenderPicker) window._reRenderPicker();
 }
 
-// ── Groq key cache ──
-let _groqKey='';
-async function _getGroqKey(){
-  if(_groqKey) return _groqKey;
-  const r=await fetch('/api/groq-key');
-  if(!r.ok) throw new Error('Не вдалося отримати ключ');
-  const d=await r.json();
-  _groqKey=d.key||'';
-  return _groqKey;
-}
-
 async function callAI(prompt, attempt=1){
   try{
-    const key=await _getGroqKey();
     const controller=new AbortController();
     const tid=setTimeout(()=>controller.abort(),90000);
 
-    // Call Groq directly from browser — no Vercel timeout!
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    // Try direct Groq call via server proxy that streams
+    const res=await fetch('/api/analyze',{
       method:'POST',
       signal:controller.signal,
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body:JSON.stringify({
-        model:'llama-3.3-70b-versatile',
-        messages:[
-          {role:'system',content:'You are a JSON API. Respond ONLY with valid complete JSON. Never truncate. Never add comments or markdown.'},
-          {role:'user',content:prompt}
-        ],
-        max_tokens:4000,
-        temperature:0.3,
-        response_format:{type:'json_object'}
-      })
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
     });
     clearTimeout(tid);
 
     if(!res.ok){
-      const e=await res.json().catch(()=>({}));
-      throw new Error((e.error&&e.error.message)||'Groq error '+res.status);
+      const e=await res.text().catch(()=>'');
+      throw new Error('Помилка сервера '+res.status+(e?' — '+e.slice(0,120):''));
     }
-    const data=await res.json();
-    const text=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
-    if(!text) throw new Error('Порожня відповідь від AI');
-    const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
-    const start=clean.indexOf('{');
-    const end=clean.lastIndexOf('}');
-    if(start===-1||end===-1) throw new Error('Невірний формат відповіді');
-    return JSON.parse(clean.slice(start,end+1));
+
+    const ct=res.headers.get('content-type')||'';
+
+    // SSE streaming response
+    if(ct.includes('text/event-stream')){
+      const reader=res.body.getReader();
+      const decoder=new TextDecoder();
+      let buf='';
+      while(true){
+        const {done,value}=await reader.read();
+        if(done) break;
+        buf+=decoder.decode(value,{stream:true});
+        const lines=buf.split('\n');
+        buf=lines.pop()||'';
+        for(const line of lines){
+          if(!line.startsWith('data: ')) continue;
+          const raw=line.slice(6).trim();
+          if(!raw||raw===': ping') continue;
+          try{
+            const obj=JSON.parse(raw);
+            if(obj.error) throw new Error(obj.error);
+            if(obj.text!==undefined) return _parseAIText(obj.text);
+          }catch(pe){ if(pe.message&&!pe.message.startsWith('JSON')) throw pe; }
+        }
+      }
+      throw new Error('Відповідь не отримана');
+    }
+
+    // Regular JSON response (fallback)
+    const raw=await res.json();
+    if(raw.error) throw new Error(raw.error);
+    return _parseAIText(raw.text||'');
+
   }catch(err){
-    if(attempt<2 && err.name!=='SyntaxError'){
-      await new Promise(r=>setTimeout(r,1500));
+    if(attempt<2 && err.name!=='SyntaxError' && !err.message.includes('Невірний')){
+      await new Promise(r=>setTimeout(r,2000));
       return callAI(prompt,attempt+1);
     }
     if(err.name==='AbortError') throw new Error('Перевищено час очікування. Спробуй ще раз.');
     throw err;
   }
+}
+
+function _parseAIText(text){
+  const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
+  const start=clean.indexOf('{');
+  const end=clean.lastIndexOf('}');
+  if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI');
+  return JSON.parse(clean.slice(start,end+1));
 }
 
 async function runAnalysis(){
