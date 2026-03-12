@@ -132,39 +132,83 @@ app.post('/api/analyze', async function(req, res) {
 
   const { prompt } = req.body;
   if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'Відсутній prompt' });
-  if (prompt.length > 4000) return res.status(400).json({ error: 'Запит надто довгий' });
+  if (prompt.length > 8000) return res.status(400).json({ error: 'Запит надто довгий' });
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY не налаштовано' });
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55000);
+
+    // Use streaming to avoid Vercel 10s timeout on hobby plan
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Accel-Buffering', 'no');
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
+      signal: controller.signal,
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
-          { role: 'system', content: 'You are a JSON API. Always respond with valid JSON only.' },
+          { role: 'system', content: 'You are a JSON API. Respond ONLY with valid complete JSON. Never truncate. Never add comments or markdown.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 2000,
+        max_tokens: 4000,
         temperature: 0.3,
         response_format: { type: 'json_object' },
+        stream: true,
       }),
     });
-    const data = await response.json();
-    if (!response.ok) return res.status(response.status).json({ error: (data && data.error && data.error.message) || 'Groq error' });
-    const text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
-    if (!text) return res.status(500).json({ error: 'Порожня відповідь від Groq' });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      res.write(`data: ${JSON.stringify({ error: (errData.error && errData.error.message) || 'Groq error ' + response.status })}\n\n`);
+      return res.end();
+    }
+
+    let fullText = '';
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content || '';
+          if (delta) {
+            fullText += delta;
+            // Send keepalive ping every ~500 chars to prevent timeout
+            if (fullText.length % 500 < delta.length) {
+              res.write(': ping\n\n');
+            }
+          }
+        } catch (e) {}
+      }
+    }
 
     const db = loadDB();
     db.events.push({ ts: Date.now(), type: 'analysis_completed', ip, data: {} });
     if (db.events.length > 10000) db.events = db.events.slice(-5000);
     saveDB(db);
 
-    res.json({ text });
+    res.write(`data: ${JSON.stringify({ text: fullText })}\n\n`);
+    res.end();
   } catch (err) {
-    res.status(500).json({ error: 'Помилка сервера: ' + err.message });
+    try {
+      res.write(`data: ${JSON.stringify({ error: 'Помилка сервера: ' + err.message })}\n\n`);
+      res.end();
+    } catch(e) {}
   }
 });
 

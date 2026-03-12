@@ -1311,24 +1311,43 @@ async function callAI(prompt, attempt=1){
       body:JSON.stringify({prompt})
     });
     clearTimeout(tid);
-    if(!res.ok){
-      const e=await res.text();
-      throw new Error('Сервер помилка '+res.status+': '+e.slice(0,200));
+    if(!res.ok) throw new Error('Сервер помилка '+res.status);
+
+    // Read SSE stream
+    const reader=res.body.getReader();
+    const decoder=new TextDecoder();
+    let buffer='';
+    while(true){
+      const {done,value}=await reader.read();
+      if(done) break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');
+      buffer=lines.pop()||'';
+      for(const line of lines){
+        if(!line.startsWith('data: ')) continue;
+        const raw=line.slice(6).trim();
+        if(!raw||raw===': ping') continue;
+        try{
+          const obj=JSON.parse(raw);
+          if(obj.error) throw new Error(obj.error);
+          if(obj.text!==undefined){
+            const text=obj.text||'';
+            const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
+            const start=clean.indexOf('{');
+            const end=clean.lastIndexOf('}');
+            if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI');
+            return JSON.parse(clean.slice(start,end+1));
+          }
+        }catch(pe){ if(pe.message.includes('Невірний') || pe.message.includes('JSON')) throw pe; }
+      }
     }
-    const raw=await res.json();
-    if(raw.error) throw new Error(raw.error);
-    const text=raw.text||'';
-    const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
-    const start=clean.indexOf('{');
-    const end=clean.lastIndexOf('}');
-    if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI: '+clean.slice(0,100));
-    return JSON.parse(clean.slice(start,end+1));
+    throw new Error('Порожня відповідь від AI');
   }catch(err){
-    if(attempt<2 && (err.name==='AbortError'||err.message.includes('500')||err.message.includes('network'))){
+    if(attempt<2 && err.name!=='SyntaxError' && !err.message.includes('Невірний')){
       await new Promise(r=>setTimeout(r,2000));
       return callAI(prompt, attempt+1);
     }
-    if(err.name==='AbortError') throw new Error('Перевищено час очікування (60с). Спробуй ще раз.');
+    if(err.name==='AbortError') throw new Error('Перевищено час очікування. Спробуй ще раз.');
     throw err;
   }
 }
