@@ -1420,15 +1420,18 @@ Sphere: ${s.name} (${s.avg}/10). Context: ${context}. Subcategories: ${s.subs}
       results.push(data);
     }
 
-    // Get overview + roadmap separately
-    showProgress(chosen.length,chosen.length,'Загальний висновок');
-    const summaryPrompt=`ICF coach. Короткий висновок.
-Проаналізовані сфери: ${results.map(r=>r.sphere+':'+r.score).join(', ')}
-Всі бали: ${context}
-JSON: {"overview":"2 речення про загальну картину","balance_roadmap":"2 речення стратегія 100% балансу"}`;
-    const summary=await callAI(summaryPrompt);
+    // Hide loader NOW — no more AI calls
+    area.innerHTML='';
 
-    lastParsed={overview:summary.overview,advice:results,balance_roadmap:summary.balance_roadmap};
+    // Generate overview locally — no extra AI call needed
+    const avgAll=(results.reduce((s,r)=>s+parseFloat(r.score||5),0)/results.length).toFixed(1);
+    const worst=results[0];
+    const best=results[results.length-1];
+    const critCount=results.filter(r=>parseFloat(r.score)<4).length;
+    const localOverview=`Загальний бал: ${avgAll}/10. ${critCount>0?`Критичних сфер: ${critCount}.`:''} Найбільша увага потрібна сфері «${worst.sphere}» (${worst.score}/10) — ${worst.priority_reason||'потребує роботи'}.`;
+    const localRoadmap=results[0]?.to_10||`Почни з «${worst.sphere}», це дасть найбільший приріст якості життя. Через 30 днів переоціни всі сфери.`;
+
+    lastParsed={overview:localOverview,advice:results,balance_roadmap:localRoadmap};
     renderAdvice(lastParsed);
     btn.style.display='';
     // Update top CTA button
