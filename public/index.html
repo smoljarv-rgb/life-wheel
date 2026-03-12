@@ -1393,7 +1393,7 @@ async function callAI(prompt, attempt=1){
             method:'POST',signal:ctrl2.signal,
             headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
             body:JSON.stringify({
-              model:'llama-3.3-70b-versatile',
+              model:'llama-3.1-8b-instant',
               messages:[
                 {role:'system',content:'JSON API. Return ONLY valid JSON. No markdown.'},
                 {role:'user',content:prompt}
