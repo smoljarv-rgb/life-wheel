@@ -1302,53 +1302,44 @@ function toggleSphere(id){
 
 let _groqKey='';
 async function callAI(prompt, attempt=1){
+  // Get key once
+  if(!_groqKey){
+    try{
+      const kr=await fetch('/api/groq-key');
+      if(kr.ok){const kd=await kr.json();_groqKey=kd.key||'';}
+    }catch(e){}
+  }
+
   try{
     const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),12000); // 12s — just under Vercel limit
-    const res=await fetch('/api/analyze',{
-      method:'POST',
-      signal:controller.signal,
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
+    const tid=setTimeout(()=>controller.abort(),90000);
+
+    // Call Groq directly from browser — no Vercel timeout
+    const gr=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',signal:controller.signal,
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[
+          {role:'system',content:'JSON API. Return ONLY valid JSON object. No markdown. No truncation.'},
+          {role:'user',content:prompt}
+        ],
+        max_tokens:4000,temperature:0.3,response_format:{type:'json_object'}
+      })
     });
     clearTimeout(tid);
-    const data=await res.json();
-    if(!res.ok||data.error) throw new Error(data.error||'Помилка сервера '+res.status);
-    return _parseAIText(data.text||'');
+    if(!gr.ok){
+      const e=await gr.json().catch(()=>({}));
+      throw new Error((e.error&&e.error.message)||'Groq error '+gr.status);
+    }
+    const gd=await gr.json();
+    const gt=gd.choices?.[0]?.message?.content||'';
+    if(!gt) throw new Error('Порожня відповідь від AI');
+    return _parseAIText(gt);
   }catch(err){
-    // ── Fallback: прямо на Groq з браузера ──
-    if(attempt===1){
-      try{
-        if(!_groqKey){
-          const kr=await fetch('/api/groq-key').catch(()=>null);
-          if(kr&&kr.ok){const kd=await kr.json();_groqKey=kd.key||'';}
-        }
-        if(_groqKey){
-          const ctrl2=new AbortController();
-          const tid2=setTimeout(()=>ctrl2.abort(),85000);
-          const gr=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-            method:'POST',signal:ctrl2.signal,
-            headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
-            body:JSON.stringify({
-              model:'llama-3.3-70b-versatile',
-              messages:[
-                {role:'system',content:'JSON API. Return ONLY valid JSON. No markdown.'},
-                {role:'user',content:prompt}
-              ],
-              max_tokens:4000,temperature:0.3,response_format:{type:'json_object'}
-            })
-          });
-          clearTimeout(tid2);
-          const gd=await gr.json();
-          if(gd.error) throw new Error(gd.error.message||'Groq error');
-          const gt=gd.choices?.[0]?.message?.content||'';
-          if(gt) return _parseAIText(gt);
-        }
-      }catch(fe){
-        // якщо і прямий запит впав — спробуємо сервер ще раз
-        await new Promise(r=>setTimeout(r,1500));
-        return callAI(prompt,2);
-      }
+    if(attempt<2 && err.name!=='SyntaxError'){
+      await new Promise(r=>setTimeout(r,2000));
+      return callAI(prompt,2);
     }
     if(err.name==='AbortError') throw new Error('Перевищено час очікування. Спробуй ще раз.');
     throw err;
