@@ -1411,12 +1411,20 @@ async function runAnalysis(){
       const s=chosen[i];
       showProgress(i,chosen.length,s.name);
       const sc=parseFloat(s.avg);
-      const prompt=`ICF life coach. Одна сфера.
-Контекст: ${context}
-Сфера: ${s.name} (${s.avg}/10): ${s.subs}
+      const prompt=`Ти — сертифікований ICF life coach. Дай ДЕТАЛЬНИЙ практичний план для конкретної сфери.
 
-Відповідай ТІЛЬКИ JSON (без коментарів, без markdown):
-{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"1 речення чому важливо","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","how_to":"1-2 речення як саме виконувати: техніка або підхід","resource":"назва книги або статті (автор або сайт)","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","resource":"джерело","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія і фіксація результату","how_to":"запиши 3 результати тижня у щоденник","resource":"","duration":"15 хв"}],"week2_habit":"коротка щоденна звичка на тижні 2-4","month_goal":"вимірювана ціль за 30 днів","to_10":"шлях до ідеалу","goal":"1 ключова зміна яка найбільше підніме цю сферу (до 12 слів)","quick_win":"одна конкретна мікродія яку можна зробити сьогодні за 5-10 хвилин (до 10 слів)"}`;
+Контекст людини (всі сфери): ${context}
+Аналізуємо: ${s.name} (${s.avg}/10)
+Підкатегорії: ${s.subs}
+
+Вимоги до кожного дня:
+• task — конкретна дія (до 10 слів)
+• how_to — ДЕТАЛЬНИЙ опис виконання (4-5 речень): що робити крок за кроком, на що звертати увагу, як уникнути помилок
+• technique — назва психологічної/коучингової техніки (Метод Помодоро, SMART, 5-4-3-2-1, рефреймінг тощо) + 2-3 речення як саме її застосувати в цьому завданні
+• resource — конкретна книга або курс (Назва — Автор)
+
+Відповідай ТІЛЬКИ JSON без markdown:
+{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"2 речення чому ця сфера критична і як впливає на інші","days":[{"day":"День 1","title":"фокус дня","task":"конкретна дія до 10 слів","how_to":"покроковий детальний опис 4-5 речень: кроки порядок нюанси помилки","technique":"Назва техніки — як застосувати тут 2-3 речення","resource":"Книга: Назва — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"детальний опис 4-5 речень","technique":"техніка + застосування","resource":"Книга: Назва — Автор","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"детальний опис 4-5 речень","technique":"техніка + застосування","resource":"Книга: Назва — Автор","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"детальний опис 4-5 речень","technique":"техніка + застосування","resource":"Книга: Назва — Автор","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"детальний опис 4-5 речень","technique":"техніка + застосування","resource":"Книга: Назва — Автор","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"детальний опис 4-5 речень","technique":"техніка + застосування","resource":"Книга: Назва — Автор","duration":"хв"},{"day":"День 7","title":"Підсумок тижня","task":"рефлексія і планування наступного тижня","how_to":"Сядь у тихому місці без телефону. Відкрий зошит і запиши відповіді на 3 питання: 1) Що вийшло найкраще цього тижня — конкретно? 2) Що було найскладніше і чому саме? 3) Який 1 головний крок зроблю наступного тижня? Перечитай записи вголос — це фіксує досвід у довготривалій памяті і підсилює мотивацію.","technique":"Weekly Review (Тижневий огляд) — метод GTD: переглянь всі завдання тижня, відзнач виконані галочкою, незавершені перенеси з поясненням чому, визнач 3 головні пріоритети на наступний тиждень і запиши їх першими у списку.","resource":"Як привести справи до ладу — Девід Аллен","duration":"20 хв"}],"week2_habit":"конкретна щоденна мікро-звичка на тижні 2-4 (займає 2-5 хв)","month_goal":"вимірювана конкретна ціль за 30 днів з чітким критерієм успіху","to_10":"3 конкретні кроки які підіймуть цю сферу до 10/10","goal":"1 ключова зміна яка найбільше підніме цю сферу (до 12 слів)","quick_win":"одна мікродія яку можна зробити сьогодні за 5-10 хвилин (до 10 слів)","science":"1-2 речення: наукове дослідження або психологічний факт який доводить ефективність цього плану"}`;
       const data=await callAI(prompt);
       results.push(data);
     }
@@ -1643,7 +1651,8 @@ function renderAdvice(parsed){
 
       <!-- Accordion body -->
       <div id="${bodyId}" style="padding:0 14px 14px;display:${ai===0?'block':'none'}">
-        ${a.priority_reason?`<div style="font-size:.67rem;color:var(--tm);font-style:italic;margin-bottom:10px;padding:6px 10px;background:${color}0a;border-radius:7px;border-left:2px solid ${color};line-height:1.5">${a.priority_reason}</div>`:''}
+        ${a.priority_reason?`<div style="font-size:.68rem;color:var(--tm);font-style:italic;margin-bottom:8px;padding:7px 10px;background:${color}0a;border-radius:8px;border-left:3px solid ${color};line-height:1.6">${a.priority_reason}</div>`:''}
+        ${a.science?`<div style="font-size:.65rem;color:#5a7090;margin-bottom:12px;padding:7px 10px;background:rgba(90,112,144,.07);border-radius:8px;border-left:3px solid rgba(90,112,144,.4);line-height:1.55;transition:all 3s">🔬 <em>${a.science}</em></div>`:''}
 
         <div style="display:flex;flex-direction:column;gap:8px">
           ${days.map((d,di)=>`
@@ -1653,9 +1662,25 @@ function renderAdvice(parsed){
               <span style="font-size:.75rem;font-weight:700;color:${color}">${d.title||''}</span>
               <span style="font-size:.62rem;color:var(--tl);margin-left:auto;white-space:nowrap;transition:color 3s">⏱ ${d.duration||''}</span>
             </div>
-            <div style="font-size:.72rem;color:var(--td);font-weight:600;margin-bottom:4px;line-height:1.4;transition:color 3s">📌 ${d.task||''}</div>
-            ${d.how_to?`<div style="font-size:.67rem;color:var(--tm);line-height:1.5;padding:5px 8px;background:${color}10;border-radius:6px;margin-bottom:4px;transition:all 3s">💡 <em>${d.how_to}</em></div>`:''}
-            ${d.resource?`<div style="font-size:.62rem;color:var(--ac);display:flex;align-items:center;gap:4px;transition:color 3s">📖 ${d.resource}</div>`:''}
+            <!-- Task -->
+            <div style="font-size:.74rem;color:var(--td);font-weight:700;margin-bottom:7px;line-height:1.4;transition:color 3s">📌 ${d.task||''}</div>
+
+            <!-- How to -->
+            ${d.how_to?`
+            <div style="margin-bottom:7px">
+              <div style="font-size:.54rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${color};margin-bottom:4px">💡 Як виконувати</div>
+              <div style="font-size:.69rem;color:var(--tm);line-height:1.65;padding:8px 11px;background:${color}0d;border-radius:9px;border-left:3px solid ${color}55;transition:all 3s">${d.how_to}</div>
+            </div>`:''}
+
+            <!-- Technique -->
+            ${d.technique?`
+            <div style="margin-bottom:7px;padding:9px 11px;background:linear-gradient(135deg,rgba(100,60,200,.08),rgba(100,60,200,.03));border:1.5px solid rgba(100,60,200,.2);border-radius:9px;transition:all 3s">
+              <div style="font-size:.54rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6a3cc8;margin-bottom:4px">🧠 Техніка удосконалення</div>
+              <div style="font-size:.69rem;color:var(--tm);line-height:1.65;transition:color 3s">${d.technique}</div>
+            </div>`:''}
+
+            <!-- Resource -->
+            ${d.resource?`<div style="font-size:.63rem;color:var(--ac);display:flex;align-items:center;gap:5px;padding:3px 0;transition:color 3s">📖 <em>${d.resource}</em></div>`:''}
           </div>`).join('')}
         </div>
 
