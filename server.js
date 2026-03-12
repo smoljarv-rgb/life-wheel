@@ -124,7 +124,16 @@ app.get('/api/config', (req, res) => {
 });
 
 // ══════════════════════════════════════════
-//  GROQ AI PROXY
+//  GROQ KEY (browser-side direct calls)
+// ══════════════════════════════════════════
+app.get('/api/groq-key', (req, res) => {
+  const key = process.env.GROQ_API_KEY || '';
+  if (!key) return res.status(500).json({ error: 'Key not set' });
+  res.json({ key });
+});
+
+// ══════════════════════════════════════════
+//  GROQ AI PROXY (fallback)
 // ══════════════════════════════════════════
 app.post('/api/analyze', async function(req, res) {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();

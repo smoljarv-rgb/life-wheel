@@ -1300,52 +1300,57 @@ function toggleSphere(id){
   if(window._reRenderPicker) window._reRenderPicker();
 }
 
+// ── Groq key cache ──
+let _groqKey='';
+async function _getGroqKey(){
+  if(_groqKey) return _groqKey;
+  const r=await fetch('/api/groq-key');
+  if(!r.ok) throw new Error('Не вдалося отримати ключ');
+  const d=await r.json();
+  _groqKey=d.key||'';
+  return _groqKey;
+}
+
 async function callAI(prompt, attempt=1){
   try{
+    const key=await _getGroqKey();
     const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),58000);
-    const res=await fetch('/api/analyze',{
+    const tid=setTimeout(()=>controller.abort(),90000);
+
+    // Call Groq directly from browser — no Vercel timeout!
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       signal:controller.signal,
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[
+          {role:'system',content:'You are a JSON API. Respond ONLY with valid complete JSON. Never truncate. Never add comments or markdown.'},
+          {role:'user',content:prompt}
+        ],
+        max_tokens:4000,
+        temperature:0.3,
+        response_format:{type:'json_object'}
+      })
     });
     clearTimeout(tid);
-    if(!res.ok) throw new Error('Сервер помилка '+res.status);
 
-    // Read SSE stream
-    const reader=res.body.getReader();
-    const decoder=new TextDecoder();
-    let buffer='';
-    while(true){
-      const {done,value}=await reader.read();
-      if(done) break;
-      buffer+=decoder.decode(value,{stream:true});
-      const lines=buffer.split('\n');
-      buffer=lines.pop()||'';
-      for(const line of lines){
-        if(!line.startsWith('data: ')) continue;
-        const raw=line.slice(6).trim();
-        if(!raw||raw===': ping') continue;
-        try{
-          const obj=JSON.parse(raw);
-          if(obj.error) throw new Error(obj.error);
-          if(obj.text!==undefined){
-            const text=obj.text||'';
-            const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
-            const start=clean.indexOf('{');
-            const end=clean.lastIndexOf('}');
-            if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI');
-            return JSON.parse(clean.slice(start,end+1));
-          }
-        }catch(pe){ if(pe.message.includes('Невірний') || pe.message.includes('JSON')) throw pe; }
-      }
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      throw new Error((e.error&&e.error.message)||'Groq error '+res.status);
     }
-    throw new Error('Порожня відповідь від AI');
+    const data=await res.json();
+    const text=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
+    if(!text) throw new Error('Порожня відповідь від AI');
+    const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
+    const start=clean.indexOf('{');
+    const end=clean.lastIndexOf('}');
+    if(start===-1||end===-1) throw new Error('Невірний формат відповіді');
+    return JSON.parse(clean.slice(start,end+1));
   }catch(err){
-    if(attempt<2 && err.name!=='SyntaxError' && !err.message.includes('Невірний')){
-      await new Promise(r=>setTimeout(r,2000));
-      return callAI(prompt, attempt+1);
+    if(attempt<2 && err.name!=='SyntaxError'){
+      await new Promise(r=>setTimeout(r,1500));
+      return callAI(prompt,attempt+1);
     }
     if(err.name==='AbortError') throw new Error('Перевищено час очікування. Спробуй ще раз.');
     throw err;
