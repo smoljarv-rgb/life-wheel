@@ -10,6 +10,11 @@ const DB_FILE = process.env.DB_FILE || path.join('/tmp', 'lifewheel_db.json');
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/favicon.svg', function(req, res) {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.send('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#0e0e1a"/><ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity=".4" transform="rotate(0 40 40)"/><ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity=".4" transform="rotate(60 40 40)"/><ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity=".4" transform="rotate(120 40 40)"/><circle cx="40" cy="40" r="6" fill="#c4a882"/><circle cx="40" cy="40" r="2.5" fill="#0e0e1a"/></svg>');
+});
+
 // ══════════════════════════════════════════
 //  DATABASE (JSON file)
 // ══════════════════════════════════════════
@@ -147,18 +152,6 @@ app.post('/api/analyze', async function(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY не налаштовано' });
 
   try {
-    // Send SSE headers — keeps connection alive on Vercel
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
-    // Send keepalive pings every 5s while waiting for Groq
-    let done = false;
-    const keepalive = setInterval(() => {
-      if (!done) try { res.write(': keepalive\n\n'); } catch(e) {}
-    }, 4000);
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 55000);
 
@@ -178,32 +171,23 @@ app.post('/api/analyze', async function(req, res) {
       }),
     });
     clearTimeout(timeoutId);
-    done = true;
-    clearInterval(keepalive);
 
     const data = await response.json();
-    if (!response.ok) {
-      res.write(`data: ${JSON.stringify({ error: (data.error && data.error.message) || 'Groq error ' + response.status })}\n\n`);
-      return res.end();
-    }
+    if (!response.ok) return res.status(500).json({ error: (data.error && data.error.message) || 'Groq error ' + response.status });
+
     const text = (data.choices?.[0]?.message?.content) || '';
-    if (!text) {
-      res.write(`data: ${JSON.stringify({ error: 'Порожня відповідь від Groq' })}\n\n`);
-      return res.end();
-    }
+    if (!text) return res.status(500).json({ error: 'Порожня відповідь від Groq' });
 
-    const db = loadDB();
-    db.events.push({ ts: Date.now(), type: 'analysis_completed', ip, data: {} });
-    if (db.events.length > 10000) db.events = db.events.slice(-5000);
-    saveDB(db);
-
-    res.write(`data: ${JSON.stringify({ text })}\n\n`);
-    res.end();
-  } catch (err) {
     try {
-      res.write(`data: ${JSON.stringify({ error: 'Помилка: ' + err.message })}\n\n`);
-      res.end();
+      const db = loadDB();
+      db.events.push({ ts: Date.now(), type: 'analysis_completed', ip, data: {} });
+      if (db.events.length > 10000) db.events = db.events.slice(-5000);
+      saveDB(db);
     } catch(e) {}
+
+    res.json({ text });
+  } catch (err) {
+    res.status(500).json({ error: 'Помилка: ' + (err.message || String(err)) });
   }
 });
 

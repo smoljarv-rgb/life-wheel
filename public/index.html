@@ -1367,7 +1367,7 @@ let _groqKey='';
 async function callAI(prompt, attempt=1){
   try{
     const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),12000); // 12s — just under Vercel limit
+    const tid=setTimeout(()=>controller.abort(),58000); // 58s timeout
     const res=await fetch('/api/analyze',{
       method:'POST',
       signal:controller.signal,
