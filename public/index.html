@@ -1300,24 +1300,37 @@ function toggleSphere(id){
   if(window._reRenderPicker) window._reRenderPicker();
 }
 
-async function callAI(prompt){
-  const res=await fetch('/api/analyze',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({prompt})
-  });
-  if(!res.ok){
-    const e=await res.text();
-    throw new Error('Сервер помилка '+res.status+': '+e.slice(0,200));
+async function callAI(prompt, attempt=1){
+  try{
+    const controller=new AbortController();
+    const tid=setTimeout(()=>controller.abort(),58000);
+    const res=await fetch('/api/analyze',{
+      method:'POST',
+      signal:controller.signal,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    clearTimeout(tid);
+    if(!res.ok){
+      const e=await res.text();
+      throw new Error('Сервер помилка '+res.status+': '+e.slice(0,200));
+    }
+    const raw=await res.json();
+    if(raw.error) throw new Error(raw.error);
+    const text=raw.text||'';
+    const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
+    const start=clean.indexOf('{');
+    const end=clean.lastIndexOf('}');
+    if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI: '+clean.slice(0,100));
+    return JSON.parse(clean.slice(start,end+1));
+  }catch(err){
+    if(attempt<2 && (err.name==='AbortError'||err.message.includes('500')||err.message.includes('network'))){
+      await new Promise(r=>setTimeout(r,2000));
+      return callAI(prompt, attempt+1);
+    }
+    if(err.name==='AbortError') throw new Error('Перевищено час очікування (60с). Спробуй ще раз.');
+    throw err;
   }
-  const raw=await res.json();
-  if(raw.error) throw new Error(raw.error);
-  const text=raw.text||'';
-  const clean=text.replace(/```json/g,'').replace(/```/g,'').trim();
-  const start=clean.indexOf('{');
-  const end=clean.lastIndexOf('}');
-  if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI');
-  return JSON.parse(clean.slice(start,end+1));
 }
 
 async function runAnalysis(){
@@ -1448,10 +1461,11 @@ Sphere: ${s.name} (${s.avg}/10). Context: ${context}. Subcategories: ${s.subs}
 
   }catch(err){
     const msg=err.message||String(err);
-    area.innerHTML=`<div style="padding:12px;background:#fff5f5;border:1px solid #ffcccc;border-radius:8px;margin:8px 0">
-      <div style="font-size:.75rem;font-weight:700;color:#c03030;margin-bottom:6px">⚠️ Помилка аналізу</div>
-      <div style="font-size:.68rem;color:#804040;line-height:1.6;word-break:break-word">${msg}</div>
-      <button onclick="showPicker()" style="margin-top:10px;padding:6px 14px;background:#c03030;color:white;border:none;border-radius:6px;font-size:.65rem;cursor:pointer;font-weight:600">↩ Спробувати знову</button>
+    const isTimeout=msg.includes('60с')||msg.includes('AbortError')||msg.includes('timeout');
+    area.innerHTML=`<div style="padding:14px;background:#fff5f5;border:1px solid #ffcccc;border-radius:10px;margin:8px 0">
+      <div style="font-size:.8rem;font-weight:800;color:#c03030;margin-bottom:8px">${isTimeout?'⏱ Час вийшов':'⚠️ Помилка аналізу'}</div>
+      <div style="font-size:.7rem;color:#804040;line-height:1.6;margin-bottom:10px">${isTimeout?'Groq AI відповідав надто довго. Натисни «Спробувати знову» — зазвичай другий раз працює швидше.':msg}</div>
+      <button onclick="showPicker()" style="padding:8px 18px;background:#c03030;color:white;border:none;border-radius:8px;font-size:.7rem;cursor:pointer;font-weight:700">↩ Спробувати знову</button>
     </div>`;
     console.error('API error:', err);
     btn.style.display='';
