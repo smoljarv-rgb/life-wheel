@@ -656,6 +656,7 @@ function toggleAlgo(bodyId, cardId, color, forceOpen){
     body.style.display = 'block';
     if(arr) arr.style.transform = 'rotate(180deg)';
     setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
+    setTimeout(_restoreChecklists, 80);
   }
 }
 
@@ -1654,16 +1655,43 @@ function renderAdvice(parsed){
         ${a.priority_reason?`<div style="font-size:.68rem;color:var(--tm);font-style:italic;margin-bottom:8px;padding:7px 10px;background:${color}0a;border-radius:8px;border-left:3px solid ${color};line-height:1.6">${a.priority_reason}</div>`:''}
         ${a.science?`<div style="font-size:.65rem;color:#5a7090;margin-bottom:12px;padding:7px 10px;background:rgba(90,112,144,.07);border-radius:8px;border-left:3px solid rgba(90,112,144,.4);line-height:1.55;transition:all 3s">🔬 <em>${a.science}</em></div>`:''}
 
+        <!-- Progress bar for checklist completion -->
+        <div id="prog_wrap_${ai}" style="margin-bottom:10px;padding:8px 12px;background:${color}0a;border-radius:10px;border:1px solid ${color}22">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:.6rem;font-weight:700;color:${color};letter-spacing:.06em;text-transform:uppercase">✅ Прогрес виконання</span>
+            <span id="prog_label_${ai}" style="font-size:.65rem;font-weight:800;color:${color}">0 / ${days.length} завдань</span>
+          </div>
+          <div style="height:6px;background:rgba(128,160,200,.15);border-radius:3px;overflow:hidden">
+            <div id="prog_bar_${ai}" style="height:100%;width:0%;background:linear-gradient(90deg,${color}88,${color});border-radius:3px;transition:width .5s ease"></div>
+          </div>
+        </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           ${days.map((d,di)=>`
           <div style="background:${di%2?color+'08':'var(--sf)'};border-radius:9px;padding:10px 12px;border-left:3px solid ${color};transition:all 3s">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+            <!-- Header: day + title + duration -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
               <span style="font-size:.65rem;font-weight:800;color:#fff;background:${color};padding:2px 8px;border-radius:12px;white-space:nowrap">${d.day}</span>
               <span style="font-size:.75rem;font-weight:700;color:${color}">${d.title||''}</span>
               <span style="font-size:.62rem;color:var(--tl);margin-left:auto;white-space:nowrap;transition:color 3s">⏱ ${d.duration||''}</span>
             </div>
-            <!-- Task -->
-            <div style="font-size:.74rem;color:var(--td);font-weight:700;margin-bottom:7px;line-height:1.4;transition:color 3s">📌 ${d.task||''}</div>
+
+            <!-- ✅ CHECKLIST ROW — головне завдання -->
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:8px;padding:8px 10px;background:${color}0d;border-radius:8px;transition:background .2s"
+              onmouseover="this.style.background='${color}18'" onmouseout="this.style.background='${color}0d'">
+              <input type="checkbox" id="chk_${ai}_${di}"
+                onchange="(function(el,key){
+                  try{
+                    const d=JSON.parse(localStorage.getItem('checklist')||'[]');
+                    if(el.checked){if(!d.includes(key))d.push(key);}else{const i=d.indexOf(key);if(i>-1)d.splice(i,1);}
+                    localStorage.setItem('checklist',JSON.stringify(d));
+                    el.closest('label').style.textDecoration=el.checked?'line-through':'none';
+                    el.closest('label').style.opacity=el.checked?'.6':'1';
+                    _updateProgress('${ai}');
+                  }catch(e){}
+                })(this,'${ai}_${di}')"
+                style="width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:${color};cursor:pointer">
+              <span style="font-size:.74rem;color:var(--td);font-weight:700;line-height:1.45;transition:color 3s">📌 ${d.task||''}</span>
+            </label>
 
             <!-- How to -->
             ${d.how_to?`
@@ -1766,6 +1794,7 @@ function renderAdvice(parsed){
 
   // ── Write overview + summary to RIGHT COL (adviceArea) ──
   document.getElementById('adviceArea').innerHTML=summaryHTML;
+  setTimeout(_restoreChecklists,100);
 
   // ── Write algorithm + roadmap to FULL-WIDTH ROW ──
   const analysisRow=document.getElementById('analysisRow');
@@ -1847,39 +1876,98 @@ function exportPDF(){
     const gap=(10-sc).toFixed(0);
     const color=SPHERES.find(s=>s.name===a.sphere)?.color||'#4080c0';
     const days=Array.isArray(a.days)?a.days:[];
-    const dayRows=days.map((d,di)=>`<tr style="background:${di%2?'#f5f9ff':'#fff'}">
-      <td style="font-weight:800;color:${color};white-space:nowrap;padding:5px 7px;vertical-align:top">${d.day}</td>
-      <td style="font-weight:600;padding:5px 7px;vertical-align:top">${d.title||''}</td>
-      <td style="padding:5px 7px;vertical-align:top">
-        <div style="line-height:1.5;margin-bottom:${d.how_to?'3px':'0'}">${d.task||''}</div>
-        ${d.how_to?`<div style="font-size:9px;color:#2878c8;font-style:italic;line-height:1.4;padding:3px 6px;background:#f0f7ff;border-radius:4px;margin-top:2px">💡 ${d.how_to}</div>`:''}
-      </td>
-      <td style="padding:5px 7px;vertical-align:top">
-        ${d.resource?`<div style="font-size:9px;color:#5a7090;line-height:1.4">📖 ${d.resource}</div>`:'<span style="color:#bbb">—</span>'}
-      </td>
-      <td style="text-align:center;color:#5a80aa;white-space:nowrap;padding:5px 7px;vertical-align:top">${d.duration||''}</td>
-    </tr>`).join('');
-    return `<div style="margin-bottom:18px;page-break-inside:avoid">
-      <div style="background:${color};color:#fff;padding:8px 14px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:10px">
-        <b style="font-size:14px">${ai+1}. ${a.sphere}</b>
-        <span style="font-size:10px;opacity:.85">${sc}/10 · +${gap} до 10/10</span>
-        <span style="margin-left:auto;background:rgba(0,0,0,.2);padding:2px 8px;border-radius:8px;font-size:9px">${prioLabel(sc)}</span>
+    // ── 7-денний чек-лист ──
+    const checkRows=days.map((d,di)=>`
+      <tr style="background:${di%2?color+'08':'#fff'};page-break-inside:avoid">
+        <td style="padding:6px 8px;vertical-align:middle;text-align:center;border-bottom:1px solid ${color}22">
+          <div style="width:13px;height:13px;border:1.5px solid ${color};border-radius:3px;margin:0 auto;display:inline-block"></div>
+        </td>
+        <td style="padding:6px 8px;vertical-align:top;border-bottom:1px solid ${color}22;white-space:nowrap">
+          <span style="font-size:9px;font-weight:800;color:#fff;background:${color};padding:1px 6px;border-radius:8px">${d.day}</span>
+        </td>
+        <td style="padding:6px 8px;vertical-align:top;border-bottom:1px solid ${color}22">
+          <div style="font-weight:700;font-size:10px;color:#1a2e48;margin-bottom:2px">${d.task||''}</div>
+          ${d.how_to?`<div style="font-size:9px;color:#2878c8;line-height:1.45;padding:3px 6px;background:#f0f6ff;border-radius:3px;margin-top:2px;border-left:2px solid ${color}">💡 ${d.how_to}</div>`:''}
+        </td>
+        <td style="padding:6px 8px;vertical-align:top;border-bottom:1px solid ${color}22">
+          ${d.technique?`<div style="font-size:9px;color:#6a3cc8;line-height:1.4;padding:3px 6px;background:#f5f0ff;border-radius:3px;border-left:2px solid #9b72e8">🧠 ${d.technique}</div>`:'<span style="color:#ccc;font-size:9px">—</span>'}
+        </td>
+        <td style="padding:6px 8px;vertical-align:top;border-bottom:1px solid ${color}22">
+          ${d.resource?`<div style="font-size:9px;color:#1060b0;line-height:1.4">📖 ${d.resource}</div>`:'<span style="color:#ccc;font-size:9px">—</span>'}
+        </td>
+        <td style="padding:6px 8px;vertical-align:middle;text-align:center;border-bottom:1px solid ${color}22;white-space:nowrap">
+          <span style="font-size:9px;color:#5a80aa">⏱ ${d.duration||''}</span>
+        </td>
+      </tr>`).join('');
+
+    // ── 30-денний трекер ──
+    const habit=a.week2_habit||'Щоденна практика';
+    const trackerCells=Array.from({length:30},(_,i)=>{
+      const day=i+1;
+      const weekMark=day%7===0?`style="background:${color}15;border:1.5px solid ${color}55"`:'';
+      return `<td ${weekMark} style="width:28px;height:28px;text-align:center;vertical-align:middle;border:1px solid #dde8f8;font-size:8px;color:#8aabcc;padding:0">
+        <div style="width:18px;height:18px;border:1.5px solid ${color}55;border-radius:3px;margin:0 auto"></div>
+        <div style="font-size:7px;color:#aac0d8;margin-top:1px">${day}</div>
+      </td>`;
+    });
+    const trackerRows=[];
+    for(let r=0;r<5;r++) trackerRows.push(`<tr>${trackerCells.slice(r*6,(r+1)*6).join('')}</tr>`);
+
+    return `<div style="margin-bottom:22px;page-break-before:${ai>0?'always':'auto'}">
+      <!-- Заголовок сфери -->
+      <div style="background:${color};color:#fff;padding:9px 14px;border-radius:7px 7px 0 0;display:flex;align-items:center;gap:10px">
+        <div style="width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0">${ai+1}</div>
+        <div>
+          <div style="font-size:14px;font-weight:800">${a.sphere}</div>
+          <div style="font-size:9px;opacity:.85">${sc}/10 · потенціал зростання: +${gap} балів</div>
+        </div>
+        <span style="margin-left:auto;background:rgba(0,0,0,.22);padding:3px 10px;border-radius:10px;font-size:9px;font-weight:700">${prioLabel(sc)}</span>
       </div>
-      ${a.priority_reason?`<div style="padding:6px 12px;background:${color}18;border-left:3px solid ${color};font-size:10px;font-style:italic;line-height:1.5">${a.priority_reason}</div>`:''}
-      <table style="width:100%;border-collapse:collapse;border:1px solid ${color}33;font-size:10px">
+
+      <!-- Причина пріоритету -->
+      ${a.priority_reason?`<div style="padding:7px 13px;background:${color}12;border-left:4px solid ${color};font-size:10px;font-style:italic;line-height:1.6;color:#2a4060">${a.priority_reason}</div>`:''}
+
+      <!-- ══ ЧЕК-ЛИСТ 7 ДНІВ ══ -->
+      <div style="padding:7px 10px;background:#edf4ff;border-left:4px solid #2878c8;font-size:9px;font-weight:800;color:#16478a;text-transform:uppercase;letter-spacing:.08em;margin-top:8px">
+        ✅ Чек-лист — 7 днів практики
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:10px;border:1px solid ${color}33">
         <thead><tr style="background:${color}18">
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:48px">День</th>
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:80px">Фокус</th>
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color}">Завдання + Як виконувати</th>
-          <th style="padding:5px 8px;text-align:left;color:${color};border-bottom:2px solid ${color};width:110px">Джерело / Ресурс</th>
-          <th style="padding:5px 8px;text-align:center;color:${color};border-bottom:2px solid ${color};width:40px">Час</th>
+          <th style="padding:5px 8px;color:${color};border-bottom:2px solid ${color};width:20px;text-align:center">☐</th>
+          <th style="padding:5px 8px;color:${color};border-bottom:2px solid ${color};width:46px">День</th>
+          <th style="padding:5px 8px;color:${color};border-bottom:2px solid ${color}">Завдання + Як виконувати</th>
+          <th style="padding:5px 8px;color:#6a3cc8;border-bottom:2px solid ${color};width:130px">🧠 Техніка</th>
+          <th style="padding:5px 8px;color:#1060b0;border-bottom:2px solid ${color};width:110px">📖 Ресурс</th>
+          <th style="padding:5px 8px;color:${color};border-bottom:2px solid ${color};width:38px;text-align:center">⏱</th>
         </tr></thead>
-        <tbody>${dayRows}</tbody>
+        <tbody>${checkRows}</tbody>
       </table>
-      ${a.week2_habit?`<div style="padding:5px 10px;background:#f0f8ff;border-left:3px solid ${color};font-size:10px;margin-top:3px"><b style="color:${color}">Тижні 2–4:</b> ${a.week2_habit}</div>`:''}
+
+      <!-- Тижні 2-4 -->
+      ${a.week2_habit?`<div style="padding:6px 12px;background:#f0f8ff;border-left:3px solid ${color};font-size:10px;margin-top:4px;line-height:1.55"><b style="color:${color}">🔄 Тижні 2–4:</b> ${a.week2_habit}</div>`:''}
+
+      <!-- Цілі -->
       <div style="display:flex;gap:6px;margin-top:5px">
-        ${a.month_goal?`<div style="flex:1;padding:7px 9px;border-left:3px solid ${color};background:#f8faff;font-size:10px;line-height:1.5;border-radius:2px"><b style="color:${color}">Ціль 30 днів:</b> ${a.month_goal}</div>`:''}
-        ${a.to_10?`<div style="flex:1;padding:7px 9px;border-left:3px solid #2878c8;background:#f8faff;font-size:10px;line-height:1.5;border-radius:2px"><b style="color:#1060b0">До 10/10:</b> ${a.to_10}</div>`:''}
+        ${a.month_goal?`<div style="flex:1;padding:7px 10px;border-left:3px solid ${color};background:#f8faff;font-size:10px;line-height:1.55;border-radius:0 4px 4px 0"><b style="color:${color};display:block;margin-bottom:2px">📌 Ціль 30 днів</b>${a.month_goal}</div>`:''}
+        ${a.to_10?`<div style="flex:1;padding:7px 10px;border-left:3px solid #2878c8;background:#f8faff;font-size:10px;line-height:1.55;border-radius:0 4px 4px 0"><b style="color:#1060b0;display:block;margin-bottom:2px">🎯 До 10/10</b>${a.to_10}</div>`:''}
+      </div>
+
+      <!-- ══ 30-ДЕННИЙ ТРЕКЕР ══ -->
+      <div style="margin-top:10px;padding:8px 12px;background:#f8faff;border:1.5px solid ${color}44;border-radius:6px;page-break-inside:avoid">
+        <div style="font-size:9px;font-weight:800;color:#16478a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">
+          📅 30-денний трекер звички — відмічай щодня ✓
+        </div>
+        <div style="font-size:9px;color:#5a7090;font-style:italic;margin-bottom:7px;line-height:1.4">
+          Звичка: <b style="color:${color}">${habit}</b>
+        </div>
+        <table style="border-collapse:collapse;width:100%">
+          ${trackerRows.join('')}
+        </table>
+        <div style="display:flex;gap:14px;margin-top:6px;font-size:8px;color:#8aabcc">
+          <span>□ = не виконано</span>
+          <span style="color:${color}">■ = виконано (закрась)</span>
+          <span style="color:#888">Виділені клітинки = кінець тижня</span>
+        </div>
       </div>
     </div>`;
   }).join(''):'';
@@ -1902,6 +1990,126 @@ const roadmap=lastParsed&&lastParsed.balance_roadmap
 
   const overview=lastParsed&&lastParsed.overview
     ?`<div style="margin-bottom:12px;padding:9px 13px;background:#f0f8ff;border-left:4px solid #2878c8;border-radius:0 8px 8px 0;font-size:11px;color:#2a4060;font-style:italic;line-height:1.65">${lastParsed.overview}</div>`:'';
+
+  // ── CHECKLIST HTML ──
+  const checklistHTML = lastParsed && lastParsed.advice ? (()=>{
+    const sphereSections = lastParsed.advice.map((a, ai)=>{
+      const color = SPHERES.find(s=>s.name===a.sphere)?.color || '#4080c0';
+      const sc = parseFloat(a.score)||5;
+      const days = Array.isArray(a.days) ? a.days : [];
+
+      // 7-day rows
+      const week1Rows = days.map((d,di)=>`
+        <tr style="background:${di%2?'#f7fafe':'#fff'}">
+          <td style="padding:5px 8px;text-align:center;vertical-align:middle">
+            <div style="width:14px;height:14px;border:1.5px solid ${color};border-radius:3px;margin:0 auto"></div>
+          </td>
+          <td style="padding:5px 8px;font-weight:700;color:${color};white-space:nowrap;vertical-align:top">${d.day}</td>
+          <td style="padding:5px 8px;vertical-align:top">
+            <div style="font-weight:600;color:#1a2e48;margin-bottom:2px">${d.task||''}</div>
+            ${d.technique?`<div style="font-size:9px;color:#6a3cc8;margin-top:2px">🧠 ${d.technique.split('.')[0]}</div>`:''}
+          </td>
+          <td style="padding:5px 8px;text-align:center;color:#5a80aa;white-space:nowrap;vertical-align:top">${d.duration||'—'}</td>
+          <td style="padding:5px 8px;vertical-align:top;font-size:9px;color:#5a7090">${d.resource||'—'}</td>
+        </tr>`).join('');
+
+      // 30-day habit rows (тижні 2–4 = 3 рядки)
+      const habit = a.week2_habit || '';
+      const monthGoal = a.month_goal || '';
+      const week2to4Rows = habit ? [2,3,4].map(wk=>`
+        <tr style="background:${wk%2?'#f7fafe':'#fff'}">
+          <td style="padding:5px 8px;text-align:center;vertical-align:middle">
+            <div style="width:14px;height:14px;border:1.5px solid ${color};border-radius:3px;margin:0 auto"></div>
+          </td>
+          <td style="padding:5px 8px;font-weight:700;color:${color};white-space:nowrap;vertical-align:top">Тиждень ${wk}</td>
+          <td style="padding:5px 8px;vertical-align:top;color:#1a2e48">${habit}</td>
+          <td style="padding:5px 8px;text-align:center;color:#5a80aa;vertical-align:top">щодня</td>
+          <td style="padding:5px 8px;vertical-align:top;font-size:9px;color:#5a7090">—</td>
+        </tr>`).join('') : '';
+
+      return `
+      <div style="margin-bottom:20px;page-break-inside:avoid">
+        <!-- Sphere header -->
+        <div style="background:${color};color:#fff;padding:7px 12px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:10px">
+          <b style="font-size:12px">${a.sphere}</b>
+          <span style="font-size:9px;opacity:.85">${sc}/10</span>
+          ${monthGoal?`<span style="margin-left:auto;font-size:9px;opacity:.9">🎯 ${monthGoal}</span>`:''}
+        </div>
+
+        <!-- 7-day checklist -->
+        <table style="width:100%;border-collapse:collapse;border:1px solid ${color}33;font-size:10px">
+          <thead>
+            <tr style="background:${color}18">
+              <th style="padding:4px 8px;color:${color};width:24px;text-align:center">✓</th>
+              <th style="padding:4px 8px;color:${color};text-align:left;width:52px">День</th>
+              <th style="padding:4px 8px;color:${color};text-align:left">Завдання · Техніка</th>
+              <th style="padding:4px 8px;color:${color};text-align:center;width:42px">Час</th>
+              <th style="padding:4px 8px;color:${color};text-align:left;width:110px">Ресурс</th>
+            </tr>
+          </thead>
+          <tbody>${week1Rows}${week2to4Rows}</tbody>
+        </table>
+
+        ${monthGoal?`<div style="margin-top:4px;padding:5px 10px;background:#f8faff;border-left:3px solid ${color};font-size:10px;color:#1a2e48;line-height:1.5"><b style="color:${color}">📌 Ціль місяця:</b> ${monthGoal}</div>`:''}
+      </div>`;
+    }).join('');
+
+    return `
+    <div style="margin-top:18px;page-break-before:always">
+      <!-- Header -->
+      <div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:4px">
+        ✅ Чек-лист практики — 7 днів + 30 днів
+      </div>
+      <div style="font-size:9px;color:#5a80aa;margin-bottom:12px;padding:0 2px">
+        Відмічай виконані завдання · Тижень 1 = детальний план · Тижні 2–4 = щоденна мікрозвичка
+      </div>
+      ${sphereSections}
+
+      <!-- 30-day tracker grid -->
+      <div style="margin-top:14px;page-break-inside:avoid">
+        <div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:8px">
+          📅 Трекер 30 днів — щоденні відмітки
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:9px">
+          <tbody>
+            <tr>
+              ${Array.from({length:30},(_,i)=>`
+                <td style="text-align:center;padding:3px 1px;border:1px solid #dde8f8;width:${100/30}%">
+                  <div style="font-size:8px;color:#8aabcc;margin-bottom:2px">${i+1}</div>
+                  <div style="width:14px;height:14px;border:1.5px solid #2878c844;border-radius:3px;margin:0 auto"></div>
+                </td>`).join('')}
+            </tr>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:#8aabcc;margin-top:3px;padding:0 2px">
+          <span>День 1</span><span>Тиждень 2</span><span>Тиждень 3</span><span>Тиждень 4</span><span>День 30</span>
+        </div>
+      </div>
+
+      <!-- Reflection box -->
+      <div style="margin-top:12px;padding:10px 14px;border:1.5px solid #2878c844;border-radius:8px;page-break-inside:avoid">
+        <div style="font-weight:800;font-size:10px;color:#16478a;margin-bottom:8px">🪞 Рефлексія через 30 днів</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div style="font-size:9px;color:#5a80aa;margin-bottom:3px">Мій бал зараз:</div>
+            <div style="height:24px;border-bottom:1.5px solid #ccd8e8"></div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:#5a80aa;margin-bottom:3px">Мій бал через 30 днів:</div>
+            <div style="height:24px;border-bottom:1.5px solid #ccd8e8"></div>
+          </div>
+          <div style="grid-column:1/-1">
+            <div style="font-size:9px;color:#5a80aa;margin-bottom:3px">Що змінилось найбільше:</div>
+            <div style="height:32px;border-bottom:1.5px solid #ccd8e8"></div>
+          </div>
+          <div style="grid-column:1/-1">
+            <div style="font-size:9px;color:#5a80aa;margin-bottom:3px">Яку звичку продовжу:</div>
+            <div style="height:32px;border-bottom:1.5px solid #ccd8e8"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  })() : '';
 
   const printDoc=`<!DOCTYPE html><html lang="uk"><head>
 <meta charset="UTF-8"><title>Колесо Життя — ${now}</title>
@@ -1937,8 +2145,9 @@ ${overview}
   </tr></thead>
   <tbody>${summaryRows}</tbody>
 </table>
-${algoHTML?`<div style="font-weight:800;color:#16478a;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:10px">Щоденний алгоритм — покроковий план</div>${algoHTML}`:''}
+${algoHTML?`<div style="font-weight:800;color:#16478a;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:8px 12px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:12px">✅ Покрокові чек-листи та 30-денні трекери по сферах</div>${algoHTML}`:''}
 ${roadmap}
+${checklistHTML}
 ${affiliateHTML}
 <div style="margin-top:14px;padding:12px 15px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:8px;color:#fff;text-align:center">
   <b style="display:block;font-size:12px;margin-bottom:4px">📅 Повернись через 30 днів і виміряй прогрес!</b>
