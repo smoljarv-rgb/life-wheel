@@ -1300,12 +1300,11 @@ function toggleSphere(id){
   if(window._reRenderPicker) window._reRenderPicker();
 }
 
+let _groqKey='';
 async function callAI(prompt, attempt=1){
   try{
     const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),90000);
-
-    // Try direct Groq call via server proxy that streams
+    const tid=setTimeout(()=>controller.abort(),12000); // 12s — just under Vercel limit
     const res=await fetch('/api/analyze',{
       method:'POST',
       signal:controller.signal,
@@ -1313,48 +1312,43 @@ async function callAI(prompt, attempt=1){
       body:JSON.stringify({prompt})
     });
     clearTimeout(tid);
-
-    if(!res.ok){
-      const e=await res.text().catch(()=>'');
-      throw new Error('Помилка сервера '+res.status+(e?' — '+e.slice(0,120):''));
-    }
-
-    const ct=res.headers.get('content-type')||'';
-
-    // SSE streaming response
-    if(ct.includes('text/event-stream')){
-      const reader=res.body.getReader();
-      const decoder=new TextDecoder();
-      let buf='';
-      while(true){
-        const {done,value}=await reader.read();
-        if(done) break;
-        buf+=decoder.decode(value,{stream:true});
-        const lines=buf.split('\n');
-        buf=lines.pop()||'';
-        for(const line of lines){
-          if(!line.startsWith('data: ')) continue;
-          const raw=line.slice(6).trim();
-          if(!raw||raw===': ping') continue;
-          try{
-            const obj=JSON.parse(raw);
-            if(obj.error) throw new Error(obj.error);
-            if(obj.text!==undefined) return _parseAIText(obj.text);
-          }catch(pe){ if(pe.message&&!pe.message.startsWith('JSON')) throw pe; }
-        }
-      }
-      throw new Error('Відповідь не отримана');
-    }
-
-    // Regular JSON response (fallback)
-    const raw=await res.json();
-    if(raw.error) throw new Error(raw.error);
-    return _parseAIText(raw.text||'');
-
+    const data=await res.json();
+    if(!res.ok||data.error) throw new Error(data.error||'Помилка сервера '+res.status);
+    return _parseAIText(data.text||'');
   }catch(err){
-    if(attempt<2 && err.name!=='SyntaxError' && !err.message.includes('Невірний')){
-      await new Promise(r=>setTimeout(r,2000));
-      return callAI(prompt,attempt+1);
+    // ── Fallback: прямо на Groq з браузера ──
+    if(attempt===1){
+      try{
+        if(!_groqKey){
+          const kr=await fetch('/api/groq-key').catch(()=>null);
+          if(kr&&kr.ok){const kd=await kr.json();_groqKey=kd.key||'';}
+        }
+        if(_groqKey){
+          const ctrl2=new AbortController();
+          const tid2=setTimeout(()=>ctrl2.abort(),85000);
+          const gr=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+            method:'POST',signal:ctrl2.signal,
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
+            body:JSON.stringify({
+              model:'llama-3.3-70b-versatile',
+              messages:[
+                {role:'system',content:'JSON API. Return ONLY valid JSON. No markdown.'},
+                {role:'user',content:prompt}
+              ],
+              max_tokens:4000,temperature:0.3,response_format:{type:'json_object'}
+            })
+          });
+          clearTimeout(tid2);
+          const gd=await gr.json();
+          if(gd.error) throw new Error(gd.error.message||'Groq error');
+          const gt=gd.choices?.[0]?.message?.content||'';
+          if(gt) return _parseAIText(gt);
+        }
+      }catch(fe){
+        // якщо і прямий запит впав — спробуємо сервер ще раз
+        await new Promise(r=>setTimeout(r,1500));
+        return callAI(prompt,2);
+      }
     }
     if(err.name==='AbortError') throw new Error('Перевищено час очікування. Спробуй ще раз.');
     throw err;
@@ -1411,6 +1405,10 @@ async function runAnalysis(){
       if(done===0) setTimeout(()=>ar.scrollIntoView({behavior:'smooth',block:'start'}),100);
     }
     const target=ac||document.getElementById('adviceArea');
+    // Also show in adviceArea so user sees something immediately
+    if(ac && ac!==document.getElementById('adviceArea')){
+      document.getElementById('adviceArea').innerHTML='';
+    }
     target.innerHTML=`
     <div style="padding:32px 20px;text-align:center;max-width:520px;margin:0 auto">
       <!-- Spinner + Icon -->
@@ -1471,13 +1469,13 @@ async function runAnalysis(){
       return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
     }).join('\n');
 
-    const batchPrompt = `ICF coach. Respond ONLY with valid JSON array, no markdown.
+    const batchPrompt = `ICF coach. Respond ONLY with valid JSON, no markdown.
 Context: ${context}
 Analyze these ${chosen.length} sphere(s):
 ${spheresList}
 
-Return JSON array with one object per sphere:
-[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати у щоденник","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка щодня","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]`;
+Return JSON object with array:
+{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]}`;
 
     // Update progress to show "processing"
     const progInterval = setInterval(()=>{
@@ -1488,8 +1486,8 @@ Return JSON array with one object per sphere:
     const raw = await callAI(batchPrompt);
     clearInterval(progInterval);
 
-    // Handle both array response and single object
-    let results = Array.isArray(raw) ? raw : (raw.spheres || raw.advice || [raw]);
+    // Handle {advice:[...]} wrapper, plain array, or single object
+    let results = Array.isArray(raw) ? raw : (raw.advice || raw.spheres || [raw]);
 
     // Sort by score ascending (worst first)
     results.sort((a,b) => parseFloat(a.score||5) - parseFloat(b.score||5));
@@ -1528,13 +1526,16 @@ Return JSON array with one object per sphere:
 
   }catch(err){
     const msg=err.message||String(err);
-    const isTimeout=msg.includes('60с')||msg.includes('AbortError')||msg.includes('timeout');
+    const isTimeout=msg.includes('AbortError')||msg.includes('timeout')||msg.includes('Перевищено');
+    // Hide loader in all containers
+    const arEl2=document.getElementById('analysisRow');
+    if(arEl2) arEl2.style.display='none';
     area.innerHTML=`<div style="padding:14px;background:#fff5f5;border:1px solid #ffcccc;border-radius:10px;margin:8px 0">
-      <div style="font-size:.8rem;font-weight:800;color:#c03030;margin-bottom:8px">${isTimeout?'⏱ Час вийшов':'⚠️ Помилка аналізу'}</div>
-      <div style="font-size:.7rem;color:#804040;line-height:1.6;margin-bottom:10px">${isTimeout?'Groq AI відповідав надто довго. Натисни «Спробувати знову» — зазвичай другий раз працює швидше.':msg}</div>
+      <div style="font-size:.8rem;font-weight:800;color:#c03030;margin-bottom:8px">${isTimeout?'⏱ Час вийшов':'⚠️ Помилка: '+msg.slice(0,120)}</div>
+      <div style="font-size:.7rem;color:#804040;line-height:1.6;margin-bottom:10px">${isTimeout?'Groq AI відповідав надто довго. Спробуй ще раз — зазвичай другий раз працює.':'Перевір консоль браузера (F12) для деталей.'}</div>
       <button onclick="showPicker()" style="padding:8px 18px;background:#c03030;color:white;border:none;border-radius:8px;font-size:.7rem;cursor:pointer;font-weight:700">↩ Спробувати знову</button>
     </div>`;
-    console.error('API error:', err);
+    console.error('runAnalysis error:', msg, err);
     btn.style.display='';
     btn.innerHTML='↩ Спробувати знову';
     btn.style.background='';
