@@ -280,7 +280,7 @@ app.get('/admin', function(req, res) {
 });
 
 app.get('*', function(req, res) {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.send(fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8'));
 });
 
 app.listen(PORT, function() {

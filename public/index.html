@@ -634,6 +634,38 @@ function globalAvg(){return SPHERES.reduce((s,sp)=>s+avg(sp.id),0)/SPHERES.lengt
 function sDesc(v){return SCORE_DESCS[Math.min(9,Math.max(0,Math.round(v)-1))]}
 function sColor(v){return SC[Math.min(9,Math.max(0,Math.round(v)-1))]}
 
+/* ── CHECKLIST RESTORE ── */
+function _restoreChecklists(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('checklist')||'[]');
+    saved.forEach(function(key){
+      const el=document.getElementById('chk_'+key);
+      if(el){
+        el.checked=true;
+        const lbl=el.closest('label');
+        if(lbl){lbl.style.textDecoration='line-through';lbl.style.opacity='.6';}
+      }
+    });
+    // update all progress bars
+    const bars=document.querySelectorAll('[data-advice-id]');
+    bars.forEach(function(b){ _updateProgress(b.getAttribute('data-advice-id')); });
+  }catch(e){}
+}
+
+function _updateProgress(adviceId){
+  try{
+    const saved=JSON.parse(localStorage.getItem('checklist')||'[]');
+    const allBoxes=document.querySelectorAll('[id^="chk_'+adviceId+'_"]');
+    if(!allBoxes.length) return;
+    const done=Array.from(allBoxes).filter(function(b){return saved.includes(b.id.replace('chk_',''));}).length;
+    const pct=Math.round(done/allBoxes.length*100);
+    const bar=document.querySelector('[data-progress="'+adviceId+'"]');
+    if(bar) bar.style.width=pct+'%';
+    const lbl=document.querySelector('[data-progress-label="'+adviceId+'"]');
+    if(lbl) lbl.textContent=pct+'%';
+  }catch(e){}
+}
+
 /* ── MODAL ── */
 function closeModal(){
   const m=document.getElementById('modalOverlay');
