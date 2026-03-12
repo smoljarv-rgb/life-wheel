@@ -2,16 +2,14 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+  <meta name="theme-color" content="#1a3a6e">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Колесо Життя — AI-коуч для особистісного зростання</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="apple-touch-icon" href="/favicon.svg">
-<meta name="description" content="AI-коуч для особистісного зростання. Оціни 12 сфер життя і отримай персональний план балансу.">
-<meta property="og:title" content="Колесо Життя — AI-коуч">
-<meta property="og:description" content="Оціни 12 сфер життя і отримай персональний план зростання від AI-коуча.">
-<meta property="og:image" content="https://life-wheel-one.vercel.app/favicon.svg">
-<meta property="og:url" content="https://life-wheel-one.vercel.app">
-<meta name="twitter:card" content="summary">
+<title>Колесо Життя</title>
 <!-- Google Analytics — замінити G-XXXXXXXXXX на свій ID -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
@@ -441,19 +439,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <div class="modal">
     <!-- Header -->
     <div style="text-align:center;margin-bottom:24px">
-      <div style="width:64px;height:64px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 80 80">
-          <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(0 40 40)"/>
-          <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(30 40 40)"/>
-          <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(60 40 40)"/>
-          <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(90 40 40)"/>
-          <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(120 40 40)"/>
-          <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(150 40 40)"/>
-          <circle cx="40" cy="40" r="14" stroke="#c4a882" stroke-width="1" fill="none" opacity="0.4"/>
-          <circle cx="40" cy="40" r="5.5" fill="#c4a882"/>
-          <circle cx="40" cy="40" r="2.2" fill="#0e0e1a"/>
-        </svg>
-      </div>
+      <div style="width:64px;height:64px;margin:0 auto 14px;background:linear-gradient(135deg,#2878c8,#1a58a8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 8px 24px rgba(40,120,200,.35)">🌀</div>
       <h2 style="margin-bottom:6px">Колесо <em>Життя</em></h2>
       <p class="tagline">AI-коуч для особистісного зростання · 12 сфер · 5 хвилин</p>
     </div>
@@ -502,19 +488,10 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 
   <!-- LEFT -->
   <div class="left-col" id="leftNav">
-    <div class="page-title">
-      <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 80 80" style="display:block;margin:0 auto 10px" aria-hidden="true">
-        <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(0 40 40)"/>
-        <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(30 40 40)"/>
-        <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(60 40 40)"/>
-        <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(90 40 40)"/>
-        <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(120 40 40)"/>
-        <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(150 40 40)"/>
-        <circle cx="40" cy="40" r="5.5" fill="#c4a882"/>
-        <circle cx="40" cy="40" r="2.2" fill="#0e0e1a"/>
-      </svg>
-      Колесо<br><em>Життя</em>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 8px 8px;margin-bottom:4px">
+      <img src="/logo.svg" alt="Колесо Життя" style="height:44px;width:auto;flex-shrink:0">
     </div>
+    <div class="page-title">Колесо<br><em>Життя</em></div>
   </div>
 
   <!-- CENTER -->
@@ -1334,53 +1311,44 @@ function toggleSphere(id){
 
 let _groqKey='';
 async function callAI(prompt, attempt=1){
+  // Get key once
+  if(!_groqKey){
+    try{
+      const kr=await fetch('/api/groq-key');
+      if(kr.ok){const kd=await kr.json();_groqKey=kd.key||'';}
+    }catch(e){}
+  }
+
   try{
     const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),12000); // 12s — just under Vercel limit
-    const res=await fetch('/api/analyze',{
-      method:'POST',
-      signal:controller.signal,
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
+    const tid=setTimeout(()=>controller.abort(),90000);
+
+    // Call Groq directly from browser — no Vercel timeout
+    const gr=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',signal:controller.signal,
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
+      body:JSON.stringify({
+        model:'llama-3.1-8b-instant',
+        messages:[
+          {role:'system',content:'JSON API. Return ONLY valid JSON object. No markdown. No truncation.'},
+          {role:'user',content:prompt}
+        ],
+        max_tokens:4000,temperature:0.3,response_format:{type:'json_object'}
+      })
     });
     clearTimeout(tid);
-    const data=await res.json();
-    if(!res.ok||data.error) throw new Error(data.error||'Помилка сервера '+res.status);
-    return _parseAIText(data.text||'');
+    if(!gr.ok){
+      const e=await gr.json().catch(()=>({}));
+      throw new Error((e.error&&e.error.message)||'Groq error '+gr.status);
+    }
+    const gd=await gr.json();
+    const gt=gd.choices?.[0]?.message?.content||'';
+    if(!gt) throw new Error('Порожня відповідь від AI');
+    return _parseAIText(gt);
   }catch(err){
-    // ── Fallback: прямо на Groq з браузера ──
-    if(attempt===1){
-      try{
-        if(!_groqKey){
-          const kr=await fetch('/api/groq-key').catch(()=>null);
-          if(kr&&kr.ok){const kd=await kr.json();_groqKey=kd.key||'';}
-        }
-        if(_groqKey){
-          const ctrl2=new AbortController();
-          const tid2=setTimeout(()=>ctrl2.abort(),85000);
-          const gr=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-            method:'POST',signal:ctrl2.signal,
-            headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
-            body:JSON.stringify({
-              model:'llama-3.3-70b-versatile',
-              messages:[
-                {role:'system',content:'JSON API. Return ONLY valid JSON. No markdown.'},
-                {role:'user',content:prompt}
-              ],
-              max_tokens:4000,temperature:0.3,response_format:{type:'json_object'}
-            })
-          });
-          clearTimeout(tid2);
-          const gd=await gr.json();
-          if(gd.error) throw new Error(gd.error.message||'Groq error');
-          const gt=gd.choices?.[0]?.message?.content||'';
-          if(gt) return _parseAIText(gt);
-        }
-      }catch(fe){
-        // якщо і прямий запит впав — спробуємо сервер ще раз
-        await new Promise(r=>setTimeout(r,1500));
-        return callAI(prompt,2);
-      }
+    if(attempt<2 && err.name!=='SyntaxError'){
+      await new Promise(r=>setTimeout(r,2000));
+      return callAI(prompt,2);
     }
     if(err.name==='AbortError') throw new Error('Перевищено час очікування. Спробуй ще раз.');
     throw err;
