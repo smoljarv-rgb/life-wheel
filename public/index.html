@@ -1498,8 +1498,10 @@ Return JSON array with one object per sphere:
     showProgress(chosen.length, chosen.length, 'Готово');
     await new Promise(r=>setTimeout(r,300));
 
-    // Hide loader NOW — no more AI calls
+    // Hide loader — clear both possible containers
     area.innerHTML='';
+    const ac=document.getElementById('analysisContent');
+    if(ac) ac.innerHTML='';
 
     // Generate overview locally — no extra AI call needed
     const avgAll=(results.reduce((s,r)=>s+parseFloat(r.score||5),0)/results.length).toFixed(1);
