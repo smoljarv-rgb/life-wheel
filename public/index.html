@@ -1363,10 +1363,18 @@ async function callAI(prompt, attempt=1){
 
 function _parseAIText(text){
   const clean=text.replace(/```json[\s\S]*?```/g,s=>s.slice(7,-3)).replace(/```/g,'').trim();
-  const start=clean.indexOf('{');
-  const end=clean.lastIndexOf('}');
-  if(start===-1||end===-1) throw new Error('Невірний формат відповіді AI');
-  return JSON.parse(clean.slice(start,end+1));
+  // Try array first, then object
+  const arrStart=clean.indexOf('[');
+  const arrEnd=clean.lastIndexOf(']');
+  const objStart=clean.indexOf('{');
+  const objEnd=clean.lastIndexOf('}');
+  // Pick whichever comes first
+  if(arrStart!==-1 && (objStart===-1 || arrStart<objStart)){
+    if(arrEnd===-1) throw new Error('Невірний формат відповіді AI');
+    return JSON.parse(clean.slice(arrStart,arrEnd+1));
+  }
+  if(objStart===-1||objEnd===-1) throw new Error('Невірний формат відповіді AI');
+  return JSON.parse(clean.slice(objStart,objEnd+1));
 }
 
 async function runAnalysis(){
@@ -1455,19 +1463,40 @@ async function runAnalysis(){
   };
 
   try{
-    const results=[];
-    // Analyze each sphere separately — keeps JSON small and reliable
-    for(let i=0;i<chosen.length;i++){
-      const s=chosen[i];
-      showProgress(i,chosen.length,s.name);
-      const sc=parseFloat(s.avg);
-      const prompt=`ICF coach. Respond ONLY with valid JSON, no markdown.
-Sphere: ${s.name} (${s.avg}/10). Context: ${context}. Subcategories: ${s.subs}
+    // ── Single batch request for all spheres ──
+    showProgress(0, chosen.length, chosen.map(s=>s.name).join(', '));
 
-{"sphere":"${s.name}","score":${sc},"gap":${(10-sc).toFixed(1)},"priority_reason":"2 речення чому важливо і вплив на інші сфери","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"3 речення: кроки виконання і на що звертати увагу","technique":"Назва техніки: 2 речення як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"3 речення","technique":"техніка: застосування","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"3 речення","technique":"техніка: застосування","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"3 речення","technique":"техніка: застосування","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"3 речення","technique":"техніка: застосування","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"3 речення","technique":"техніка: застосування","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"Запиши у щоденник: що вийшло, що складно, 1 крок на наступний тиждень","technique":"Weekly Review: переглянь виконання, постав оцінку 1-10, визнач 3 пріоритети","resource":"Девід Аллен — Як привести справи до ладу","duration":"20 хв"}],"week2_habit":"мікрозвичка 2-5 хв щодня на тижні 2-4","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до 10/10","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні до 8 слів"}`;
-      const data=await callAI(prompt);
-      results.push(data);
-    }
+    const spheresList = chosen.map(s => {
+      const sc = parseFloat(s.avg);
+      return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
+    }).join('\n');
+
+    const batchPrompt = `ICF coach. Respond ONLY with valid JSON array, no markdown.
+Context: ${context}
+Analyze these ${chosen.length} sphere(s):
+${spheresList}
+
+Return JSON array with one object per sphere:
+[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати у щоденник","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка щодня","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]`;
+
+    // Update progress to show "processing"
+    const progInterval = setInterval(()=>{
+      const el = document.querySelector('#adviceArea strong[style*="color:var(--ac)"]');
+      // pulse animation — just keep loader visible
+    }, 1000);
+
+    const raw = await callAI(batchPrompt);
+    clearInterval(progInterval);
+
+    // Handle both array response and single object
+    let results = Array.isArray(raw) ? raw : (raw.spheres || raw.advice || [raw]);
+
+    // Sort by score ascending (worst first)
+    results.sort((a,b) => parseFloat(a.score||5) - parseFloat(b.score||5));
+
+    // Update progress dots
+    showProgress(chosen.length, chosen.length, 'Готово');
+    await new Promise(r=>setTimeout(r,300));
 
     // Hide loader NOW — no more AI calls
     area.innerHTML='';
