@@ -1,7 +1,7 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" }
+    { "src": "server.js", "use": "@vercel/node", "config": { "maxDuration": 60 } }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "server.js" },
@@ -9,10 +9,5 @@
     { "src": "/logo.svg", "dest": "/public/logo.svg" },
     { "src": "/(.*\\.(svg|png|ico|jpg|jpeg|gif|webp|css|js|woff|woff2|ttf))", "dest": "/public/$1" },
     { "src": "/(.*)", "dest": "server.js" }
-  ],
-  "functions": {
-    "server.js": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
