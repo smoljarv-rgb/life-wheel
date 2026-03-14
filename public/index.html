@@ -1979,6 +1979,14 @@ function renderAdvice(parsed){
    PDF EXPORT
 ══════════════════════════════════════════════ */
 function exportPDF(){
+  // Show loading toast
+  const toast=document.createElement('div');
+  toast.id='pdfToast';
+  toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(22,71,138,.97);color:#fff;padding:12px 24px;border-radius:12px;font-size:.8rem;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px;font-family:Nunito,sans-serif';
+  toast.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Формуємо PDF… зачекайте';
+  document.body.appendChild(toast);
+  setTimeout(()=>{ const t=document.getElementById('pdfToast'); if(t) t.remove(); }, 4000);
+
   const now=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
   const avg_score=globalAvg().toFixed(1);
 
@@ -2008,6 +2016,62 @@ function exportPDF(){
       <td style="color:#1060b0">${ai&&ai.to_10?ai.to_10:'—'}</td>
     </tr>`;
   }).join('');
+
+  // ── Зведений трекер всіх звичок ──
+  const combinedTrackerHTML=(lastParsed&&lastParsed.advice&&lastParsed.advice.length>0)?`
+  <div style="page-break-before:always">
+    <div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:9px 14px;border-radius:7px 7px 0 0;margin-bottom:0">
+      <div style="font-size:13px;font-weight:800">📅 Зведений 30-денний трекер звичок</div>
+      <div style="font-size:9px;opacity:.85;margin-top:2px">Всі мікрозвички на одній сторінці · відмічай щодня</div>
+    </div>
+    <div style="padding:8px 12px;background:#fff8e8;border:1px solid #f0c06066;border-left:4px solid #f0a020;font-size:8.5px;color:#7a5010;line-height:1.6;margin-bottom:10px">
+      <b>📖 Як користуватись:</b> Кожного дня після виконання звички — постав ✓ або закрась клітинку з номером дня.
+      Якщо пропустив день — не зупиняйся, просто продовжуй наступного. <b>Мета:</b> 21+ клітинок з 30 — стійка звичка.
+      Виділені клітинки (кожен 7-й день) — момент для мінірефлексії. <b>21 день</b> — звичка · <b>30 днів</b> — частина тебе.
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:9px">
+      <thead>
+        <tr style="background:#16478a;color:#fff">
+          <th style="padding:5px 8px;text-align:left;width:160px">Звичка / Сфера</th>
+          ${Array.from({length:7},(_,i)=>`<th style="padding:3px;text-align:center;width:28px;font-size:7px">Т${i+1}<br>${i===0?'1-7':i===1?'8-14':i===2?'15-21':'22-30'}</th>`).slice(0,4).join('')}
+          ${Array.from({length:30},(_,i)=>`<th style="padding:2px 1px;text-align:center;font-size:7px;min-width:18px;border-left:${(i)%7===0&&i>0?'2px solid rgba(255,255,255,.4)':'1px solid rgba(255,255,255,.15)'}">${i+1}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${lastParsed.advice.map((a,idx)=>{
+          const color=SPHERES.find(s=>s.name===a.sphere)?.color||'#4080c0';
+          const habit=a.week2_habit||'Щоденна практика';
+          const cells=Array.from({length:30},(_,i)=>{
+            const day=i+1;
+            const isWeekEnd=day%7===0;
+            return `<td style="padding:1px;text-align:center;border:1px solid #dde8f8;border-left:${i%7===0&&i>0?'2px solid '+color+'44':'1px solid #dde8f8'};background:${isWeekEnd?color+'12':'#fff'}">
+              <div style="width:14px;height:14px;border:1.5px solid ${color}55;border-radius:2px;margin:0 auto"></div>
+            </td>`;
+          }).join('');
+          return `<tr style="background:${idx%2?color+'06':'#fff'}">
+            <td style="padding:5px 8px;border:1px solid #dde8f8;border-left:3px solid ${color}">
+              <div style="font-weight:800;font-size:9px;color:${color}">${a.sphere}</div>
+              <div style="font-size:7.5px;color:#5a7090;line-height:1.3;margin-top:1px">${habit.length>55?habit.slice(0,55)+'…':habit}</div>
+            </td>
+            ${cells}
+          </tr>`;
+        }).join('')}
+        <tr style="background:#f8faff">
+          <td style="padding:5px 8px;border:1px solid #dde8f8;font-weight:800;font-size:8px;color:#16478a">
+            📊 Загальний прогрес<br><span style="font-size:7px;color:#8aabcc;font-weight:400">відсоток виконання</span>
+          </td>
+          ${Array.from({length:30},(_,i)=>`<td style="padding:1px;text-align:center;border:1px solid #dde8f8;border-left:${i%7===0&&i>0?'2px solid #2878c844':'1px solid #dde8f8'}">
+            <div style="font-size:6px;color:#8aabcc">${i+1}</div>
+          </td>`).join('')}
+        </tr>
+      </tbody>
+    </table>
+    <div style="display:flex;gap:12px;margin-top:6px;font-size:7.5px;color:#8aabcc;align-items:center">
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:10px;height:10px;border:1.5px solid #aac0d8;border-radius:2px"></span> не виконано</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:10px;height:10px;background:#2878c8;border-radius:2px"></span> виконано (закрась)</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:10px;height:10px;background:#2878c820;border:1.5px solid #2878c855;border-radius:2px"></span> кінець тижня — рефлексія</span>
+    </div>
+  </div>`:'';
 
   const algoHTML=lastParsed&&lastParsed.advice?lastParsed.advice.map((a,ai)=>{
     const sc=parseFloat(a.score)||5;
@@ -2286,6 +2350,7 @@ ${overview}
 ${algoHTML?`<div style="font-weight:800;color:#16478a;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:8px 12px;background:#edf4ff;border-left:4px solid #2878c8;margin-bottom:12px">✅ Покрокові чек-листи та 30-денні трекери по сферах</div>${algoHTML}`:''}
 ${roadmap}
 ${checklistHTML}
+${combinedTrackerHTML}
 ${affiliateHTML}
 <div style="margin-top:14px;padding:12px 15px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:8px;color:#fff;text-align:center">
   <b style="display:block;font-size:12px;margin-bottom:4px">📅 Повернись через 30 днів і виміряй прогрес!</b>
@@ -2304,7 +2369,7 @@ ${affiliateHTML}
     w.document.open();
     w.document.write(printDoc);
     w.document.close();
-    setTimeout(()=>w.print(),600);
+    w.document.close(); setTimeout(()=>{ try{ w.print(); }catch(e){} },150);
   } else {
     // Fallback: inject into hidden iframe and print
     const old=document.getElementById('_printFrame');
@@ -2316,10 +2381,7 @@ ${affiliateHTML}
     iframe.contentDocument.open();
     iframe.contentDocument.write(printDoc);
     iframe.contentDocument.close();
-    setTimeout(()=>{
-      iframe.contentWindow.print();
-      setTimeout(()=>iframe.remove(),2000);
-    },600);
+    setTimeout(()=>{ try{ iframe.contentWindow.print(); }catch(e){} setTimeout(()=>iframe.remove(),1500); },150);
   }
 }
 
@@ -2529,7 +2591,7 @@ function saveToGoogleDrive(avgScore){
   }
   printDoc+='<div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:7px;color:#fff;text-align:center">';
   printDoc+='<b style="display:block;font-size:12px;margin-bottom:4px">Повернись через 30 днів і виміряй прогрес!</b>';
-  printDoc+='<a href="https://life-wheel-lime.vercel.app" style="color:#fff;font-size:11px">life-wheel-lime.vercel.app</a></div>';
+  printDoc+='<a href="https://life-wheel-lime.vercel.app" style="color:#fff;font-size:11px;text-decoration:underline">life-wheel-lime.vercel.app</a></div>';
   printDoc+='<div style="margin-top:16px;text-align:center;padding:10px;border-top:1px solid #dde8f8">';
   printDoc+='<button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:9px 28px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>';
   printDoc+='<p style="margin-top:5px;font-size:9px;color:#8aabcc">Оберіть принтер «Зберегти як PDF» → OK → завантаж у Google Drive</p></div>';
