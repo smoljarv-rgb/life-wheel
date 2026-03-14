@@ -2544,7 +2544,6 @@ function saveToGoogleDrive(avgScore){
   const date=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
   const fileName='Koleso-Zhyttia-'+date.replace(/ /g,'-')+'.pdf';
 
-  setTimeout(()=>{
   _pdfProgress(15,'Малюємо колесо…');
   const tmpC=document.createElement('canvas');tmpC.width=500;tmpC.height=500;
   drawWheelOnCtx(tmpC,250,250,200,22,(Math.PI*2)/12,active.id);
