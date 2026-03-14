@@ -8,8 +8,8 @@
 <meta name="description" content="AI-коуч для особистісного зростання. Оціни 12 сфер життя і отримай персональний план балансу.">
 <meta property="og:title" content="Колесо Життя — AI-коуч">
 <meta property="og:description" content="Оціни 12 сфер життя і отримай персональний план зростання від AI-коуча.">
-<meta property="og:image" content="https://life-wheel-one.vercel.app/favicon.svg">
-<meta property="og:url" content="https://life-wheel-one.vercel.app">
+<meta property="og:image" content="https://life-wheel-lime.vercel.app/favicon.svg">
+<meta property="og:url" content="https://life-wheel-lime.vercel.app">
 <meta name="twitter:card" content="summary">
 <!-- Google Analytics — замінити G-XXXXXXXXXX на свій ID -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
@@ -1532,20 +1532,13 @@ async function runAnalysis(){
       return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
     }).join('\n');
 
-    const batchPrompt = `Ти експерт-коуч ICF рівня MCC та психолог. Відповідай ТІЛЬКИ валідним JSON, без markdown, без пояснень.
-Контекст балансу користувача: ${context}
-Проаналізуй ${chosen.length} сферу(и):
+    const batchPrompt = `ICF coach. Respond ONLY with valid JSON, no markdown.
+Context: ${context}
+Analyze these ${chosen.length} sphere(s):
 ${spheresList}
 
-ВАЖЛИВО для кожного дня тижня:
-- "task": конкретна дія (до 10 слів)
-- "how_to": детальна інструкція виконання (4-6 речень). Поясни КРОК ЗА КРОКОМ що робити, коли, скільки разів, на що звертати увагу. Будь конкретним і практичним.
-- "technique": назва психологічної або коучингової техніки + детальний опис як її застосувати саме в цій ситуації (3-4 речення). Наприклад: "Техніка 5-4-3-2-1: Назви 5 речей які бачиш, 4 які чуєш, 3 яких торкаєшся..."
-- "resource": конкретна книга або курс з поясненням чому саме вона допоможе
-- "duration": реалістичний час виконання
-
-Повертай JSON:
-{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"3-4 речення чому ця сфера критична і як вона впливає на інші сфери життя","days":[{"day":"День 1","title":"назва фокусу дня","task":"конкретна дія","how_to":"детальна покрокова інструкція 4-6 речень як виконувати завдання","technique":"Назва техніки: детальний опис як застосувати цю техніку 3-4 речення","resource":"Назва книги — Автор: чому ця книга допоможе","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 7","title":"Підсумок тижня","task":"рефлексія та планування","how_to":"Відведи 20 хвилин у тихому місці. Запиши відповіді на 3 питання: 1) Що змінилось за тиждень? 2) Який момент був найважчим і чому? 3) Що буду робити інакше наступного тижня? Оціни сферу повторно від 1 до 10.","technique":"Weekly Review (Девід Аллен): Переглянь всі нотатки тижня, відзнач виконані завдання, визнач незавершене і перенеси на наступний тиждень. Це знижує тривогу і дає відчуття контролю.","resource":"Getting Things Done — Девід Аллен: система продуктивності що звільняє розум від тривоги","duration":"20 хв"}],"week2_habit":"конкретна мікрозвичка на 2-4 тиждень (2-3 речення з часом і місцем виконання)","month_goal":"SMART-ціль на 30 днів: Specific, Measurable, Achievable, Relevant, Time-bound","to_10":"3 конкретні кроки що піднімуть сферу до 10/10 протягом 90 днів","goal":"ключова трансформація до 12 слів","quick_win":"одна мікродія яку можна зробити сьогодні за 5-10 хвилин"}]}`;
+Return JSON object with array:
+{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]}`;
 
     // Update progress to show "processing"
     const progInterval = setInterval(()=>{
@@ -2297,7 +2290,7 @@ ${affiliateHTML}
 <div style="margin-top:14px;padding:12px 15px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:8px;color:#fff;text-align:center">
   <b style="display:block;font-size:12px;margin-bottom:4px">📅 Повернись через 30 днів і виміряй прогрес!</b>
   <p style="font-size:10px;opacity:.9;margin-bottom:8px">Твій поточний середній бал зафіксовано у звіті. Після практики пройди тест знову і порівняй результат.</p>
-  <a href="https://life-wheel-one.vercel.app" style="display:inline-block;padding:7px 20px;background:#fff;color:#1a3a6a;border-radius:7px;font-weight:800;font-size:11px;text-decoration:none">🌀 life-wheel-one.vercel.app</a>
+  <a href="https://life-wheel-lime.vercel.app" style="display:inline-block;padding:7px 20px;background:#fff;color:#1a3a6a;border-radius:7px;font-weight:800;font-size:11px;text-decoration:none">🌀 life-wheel-lime.vercel.app</a>
 </div>
 <div class="no-print" style="margin-top:18px;text-align:center;padding:12px;border-top:1px solid #dde8f8">
   <button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:10px 30px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>
@@ -2375,7 +2368,8 @@ function getCalendarDate(daysFromNow){
 }
 
 function shareResult(avgScore){
-  const text=`🌀 Я пройшов тест Колеса Життя — мій середній бал ${avgScore}/10. Перевір свій баланс: ${location.href}`;
+  const siteUrl='https://life-wheel-lime.vercel.app';
+  const text=`🌀 Я пройшов тест Колеса Життя — мій середній бал ${avgScore}/10. Перевір свій баланс: ${siteUrl}`;
   const shareTextClean=text.replace(/\u0060/g,'');
   const url=encodeURIComponent(location.href);
   const msg=encodeURIComponent(text);
@@ -2535,7 +2529,7 @@ function saveToGoogleDrive(avgScore){
   }
   printDoc+='<div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:7px;color:#fff;text-align:center">';
   printDoc+='<b style="display:block;font-size:12px;margin-bottom:4px">Повернись через 30 днів і виміряй прогрес!</b>';
-  printDoc+='<a href="https://life-wheel-one.vercel.app" style="color:#fff;font-size:11px">life-wheel-one.vercel.app</a></div>';
+  printDoc+='<a href="https://life-wheel-lime.vercel.app" style="color:#fff;font-size:11px">life-wheel-lime.vercel.app</a></div>';
   printDoc+='<div style="margin-top:16px;text-align:center;padding:10px;border-top:1px solid #dde8f8">';
   printDoc+='<button onclick="window.print()" style="background:#16478a;color:#fff;border:none;padding:9px 28px;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer">Зберегти як PDF</button>';
   printDoc+='<p style="margin-top:5px;font-size:9px;color:#8aabcc">Оберіть принтер «Зберегти як PDF» → OK → завантаж у Google Drive</p></div>';
