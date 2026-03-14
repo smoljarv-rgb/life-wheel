@@ -1978,21 +1978,52 @@ function renderAdvice(parsed){
 /* ══════════════════════════════════════════════
    PDF EXPORT
 ══════════════════════════════════════════════ */
+function _pdfProgress(pct, label){
+  let bar=document.getElementById('pdfProgressBar');
+  if(!bar){
+    const overlay=document.createElement('div');
+    overlay.id='pdfOverlay';
+    overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(10,20,40,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Nunito,sans-serif';
+    overlay.innerHTML=`
+      <div style="background:rgba(18,35,70,.98);border:1.5px solid rgba(100,160,240,.3);border-radius:18px;padding:28px 36px;min-width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+        <div style="font-size:2rem;margin-bottom:10px">📄</div>
+        <div style="font-size:1rem;font-weight:800;color:#e8ddd0;margin-bottom:6px">Формуємо PDF-звіт</div>
+        <div id="pdfProgressLabel" style="font-size:.75rem;color:#8aabcc;margin-bottom:14px;min-height:18px"></div>
+        <div style="background:rgba(255,255,255,.1);border-radius:20px;height:10px;overflow:hidden;margin-bottom:10px">
+          <div id="pdfProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2878c8,#5090e0);border-radius:20px;transition:width .4s ease"></div>
+        </div>
+        <div id="pdfProgressPct" style="font-size:1.4rem;font-weight:800;color:#c4a882">0%</div>
+        <div style="font-size:.65rem;color:#5a7090;margin-top:8px">Не закривайте вкладку</div>
+      </div>`;
+    document.body.appendChild(overlay);
+    bar=document.getElementById('pdfProgressBar');
+  }
+  bar.style.width=pct+'%';
+  document.getElementById('pdfProgressPct').textContent=pct+'%';
+  document.getElementById('pdfProgressLabel').textContent=label;
+}
+function _pdfDone(){
+  const o=document.getElementById('pdfOverlay');
+  if(o){
+    document.getElementById('pdfProgressLabel').textContent='Відкриваємо діалог збереження…';
+    document.getElementById('pdfProgressBar').style.width='100%';
+    document.getElementById('pdfProgressPct').textContent='100%';
+    setTimeout(()=>o.remove(),1200);
+  }
+}
+
 function exportPDF(){
-  // Show loading toast
-  const toast=document.createElement('div');
-  toast.id='pdfToast';
-  toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(22,71,138,.97);color:#fff;padding:12px 24px;border-radius:12px;font-size:.8rem;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px;font-family:Nunito,sans-serif';
-  toast.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Формуємо PDF… зачекайте';
-  document.body.appendChild(toast);
-  setTimeout(()=>{ const t=document.getElementById('pdfToast'); if(t) t.remove(); }, 4000);
+  _pdfProgress(5,'Підготовка даних…');
 
   const now=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
   const avg_score=globalAvg().toFixed(1);
 
+  setTimeout(()=>{
+  _pdfProgress(15,'Малюємо колесо…');
   const tmpC=document.createElement('canvas');tmpC.width=500;tmpC.height=500;
   drawWheelOnCtx(tmpC,250,250,200,22,(Math.PI*2)/12,active.id);
   const wheelImg=tmpC.toDataURL('image/png');
+  _pdfProgress(30,'Формуємо таблицю балансу…');
 
   const prioLabel=sc=>sc<4?'КРИТИЧНО':sc<6?'ВАЖЛИВО':sc<8?'РЕКОМЕНДОВАНО':'ПІДТРИМКА';
   const prioColor=sc=>sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';
@@ -2017,6 +2048,7 @@ function exportPDF(){
     </tr>`;
   }).join('');
 
+  _pdfProgress(50,'Будуємо чек-листи…');
   // ── Зведений трекер всіх звичок ──
   const combinedTrackerHTML=(lastParsed&&lastParsed.advice&&lastParsed.advice.length>0)?`
   <div style="page-break-before:always">
@@ -2073,6 +2105,7 @@ function exportPDF(){
     </div>
   </div>`:'';
 
+  _pdfProgress(65,'Формуємо 7-денні плани…');
   const algoHTML=lastParsed&&lastParsed.advice?lastParsed.advice.map((a,ai)=>{
     const sc=parseFloat(a.score)||5;
     const gap=(10-sc).toFixed(0);
@@ -2313,6 +2346,7 @@ const roadmap=lastParsed&&lastParsed.balance_roadmap
     </div>`;
   })() : '';
 
+  _pdfProgress(80,'Збираємо документ…');
   const printDoc=`<!DOCTYPE html><html lang="uk"><head>
 <meta charset="UTF-8"><title>Колесо Життя — ${now}</title>
 <style>
@@ -2363,26 +2397,34 @@ ${affiliateHTML}
 </div>
 </body></html>`;
 
-  // Open in new tab — works everywhere
-  const w=window.open('about:blank','_blank');
-  if(w){
-    w.document.open();
-    w.document.write(printDoc);
-    w.document.close();
-    w.document.close(); setTimeout(()=>{ try{ w.print(); }catch(e){} },150);
-  } else {
-    // Fallback: inject into hidden iframe and print
-    const old=document.getElementById('_printFrame');
-    if(old) old.remove();
-    const iframe=document.createElement('iframe');
-    iframe.id='_printFrame';
-    iframe.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;background:white';
-    document.body.appendChild(iframe);
-    iframe.contentDocument.open();
-    iframe.contentDocument.write(printDoc);
-    iframe.contentDocument.close();
-    setTimeout(()=>{ try{ iframe.contentWindow.print(); }catch(e){} setTimeout(()=>iframe.remove(),1500); },150);
-  }
+  _pdfProgress(90,'Відкриваємо вікно…');
+  },0); // end setTimeout
+  setTimeout(()=>{
+  setTimeout(()=>{
+    _pdfProgress(95,'Записуємо HTML…');
+    setTimeout(()=>{
+      const w=window.open('about:blank','_blank');
+      if(w){
+        w.document.open();
+        w.document.write(printDoc);
+        w.document.close();
+        _pdfDone();
+        setTimeout(()=>{ try{ w.print(); }catch(e){} },300);
+      } else {
+        const old=document.getElementById('_printFrame');
+        if(old) old.remove();
+        const iframe=document.createElement('iframe');
+        iframe.id='_printFrame';
+        iframe.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;background:white';
+        document.body.appendChild(iframe);
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(printDoc);
+        iframe.contentDocument.close();
+        _pdfDone();
+        setTimeout(()=>{ try{ iframe.contentWindow.print(); }catch(e){} setTimeout(()=>iframe.remove(),2000); },300);
+      }
+    },80);
+  },80);
 }
 
 /* ── RETURN & SHARE ── */
@@ -2502,9 +2544,12 @@ function saveToGoogleDrive(avgScore){
   const date=new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'});
   const fileName='Koleso-Zhyttia-'+date.replace(/ /g,'-')+'.pdf';
 
+  setTimeout(()=>{
+  _pdfProgress(15,'Малюємо колесо…');
   const tmpC=document.createElement('canvas');tmpC.width=500;tmpC.height=500;
   drawWheelOnCtx(tmpC,250,250,200,22,(Math.PI*2)/12,active.id);
   const wheelImg=tmpC.toDataURL('image/png');
+  _pdfProgress(30,'Формуємо таблицю балансу…');
 
   const prioColor=function(sc){return sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';};
   const scoreColor=function(sc){return sc<4?'#c02020':sc<6?'#a06010':sc<8?'#207040':'#1060b0';};
