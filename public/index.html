@@ -1367,7 +1367,7 @@ let _groqKey='';
 async function callAI(prompt, attempt=1){
   try{
     const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),58000); // 58s timeout
+    const tid=setTimeout(()=>controller.abort(),12000); // 12s — just under Vercel limit
     const res=await fetch('/api/analyze',{
       method:'POST',
       signal:controller.signal,
@@ -1393,7 +1393,7 @@ async function callAI(prompt, attempt=1){
             method:'POST',signal:ctrl2.signal,
             headers:{'Content-Type':'application/json','Authorization':'Bearer '+_groqKey},
             body:JSON.stringify({
-              model:'llama-3.1-8b-instant',
+              model:'llama-3.3-70b-versatile',
               messages:[
                 {role:'system',content:'JSON API. Return ONLY valid JSON. No markdown.'},
                 {role:'user',content:prompt}
@@ -1532,13 +1532,20 @@ async function runAnalysis(){
       return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
     }).join('\n');
 
-    const batchPrompt = `ICF coach. Respond ONLY with valid JSON, no markdown.
-Context: ${context}
-Analyze these ${chosen.length} sphere(s):
+    const batchPrompt = `Ти експерт-коуч ICF рівня MCC та психолог. Відповідай ТІЛЬКИ валідним JSON, без markdown, без пояснень.
+Контекст балансу користувача: ${context}
+Проаналізуй ${chosen.length} сферу(и):
 ${spheresList}
 
-Return JSON object with array:
-{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]}`;
+ВАЖЛИВО для кожного дня тижня:
+- "task": конкретна дія (до 10 слів)
+- "how_to": детальна інструкція виконання (4-6 речень). Поясни КРОК ЗА КРОКОМ що робити, коли, скільки разів, на що звертати увагу. Будь конкретним і практичним.
+- "technique": назва психологічної або коучингової техніки + детальний опис як її застосувати саме в цій ситуації (3-4 речення). Наприклад: "Техніка 5-4-3-2-1: Назви 5 речей які бачиш, 4 які чуєш, 3 яких торкаєшся..."
+- "resource": конкретна книга або курс з поясненням чому саме вона допоможе
+- "duration": реалістичний час виконання
+
+Повертай JSON:
+{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"3-4 речення чому ця сфера критична і як вона впливає на інші сфери життя","days":[{"day":"День 1","title":"назва фокусу дня","task":"конкретна дія","how_to":"детальна покрокова інструкція 4-6 речень як виконувати завдання","technique":"Назва техніки: детальний опис як застосувати цю техніку 3-4 речення","resource":"Назва книги — Автор: чому ця книга допоможе","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"покрокова інструкція","technique":"техніка з описом","resource":"книга з поясненням","duration":"хв"},{"day":"День 7","title":"Підсумок тижня","task":"рефлексія та планування","how_to":"Відведи 20 хвилин у тихому місці. Запиши відповіді на 3 питання: 1) Що змінилось за тиждень? 2) Який момент був найважчим і чому? 3) Що буду робити інакше наступного тижня? Оціни сферу повторно від 1 до 10.","technique":"Weekly Review (Девід Аллен): Переглянь всі нотатки тижня, відзнач виконані завдання, визнач незавершене і перенеси на наступний тиждень. Це знижує тривогу і дає відчуття контролю.","resource":"Getting Things Done — Девід Аллен: система продуктивності що звільняє розум від тривоги","duration":"20 хв"}],"week2_habit":"конкретна мікрозвичка на 2-4 тиждень (2-3 речення з часом і місцем виконання)","month_goal":"SMART-ціль на 30 днів: Specific, Measurable, Achievable, Relevant, Time-bound","to_10":"3 конкретні кроки що піднімуть сферу до 10/10 протягом 90 днів","goal":"ключова трансформація до 12 слів","quick_win":"одна мікродія яку можна зробити сьогодні за 5-10 хвилин"}]}`;
 
     // Update progress to show "processing"
     const progInterval = setInterval(()=>{
@@ -2736,4 +2743,3 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
 </div>
 </body>
 </html>
- 
