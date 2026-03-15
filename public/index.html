@@ -1138,11 +1138,66 @@ function showPaywall(){
         <button onclick="applyPromo()" style="padding:8px 14px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700">Застосувати</button>
       </div>
       <div id="promoMsg" style="font-size:.7rem;margin-bottom:8px;display:none"></div>
-      <button class="pay-btn" id="payBtn" onclick="processPayment()">💳 Отримати план — $<span id="payPrice">2</span></button>
-      <button class="pay-btn-free" onclick="closePaywall()">Пізніше</button>
+      <div id="paywallActionBlock">
+        <!-- Динамічно замінюється через updatePaywallAction() -->
+        <button class="pay-btn" id="payBtn" onclick="processPayment()">💳 Отримати план — $<span id="payPrice">2</span></button>
+        <button class="pay-btn-free" onclick="closePaywall()">Пізніше</button>
+      </div>
     </div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener('click',e=>{ if(e.target===overlay) closePaywall(); });
+  // Показати waitlist або кнопку оплати залежно від налаштувань
+  updatePaywallAction();
+}
+
+function updatePaywallAction(){
+  const block = document.getElementById('paywallActionBlock');
+  if(!block) return;
+  const isWaitlist = siteConfig.waitlist_enabled !== false && !siteConfig.liqpay_enabled;
+  if(isWaitlist){
+    block.innerHTML = `
+      <div style="margin-top:4px;padding:14px 16px;background:rgba(255,255,255,.1);border-radius:12px;border:1.5px solid rgba(255,255,255,.25)">
+        <div style="font-size:.8rem;font-weight:800;margin-bottom:5px">⏳ Оплата буде доступна найближчим часом</div>
+        <div style="font-size:.7rem;opacity:.85;margin-bottom:10px">Залиш email — повідомимо одразу як відкриється доступ</div>
+        <div style="display:flex;gap:6px">
+          <input type="email" id="paywallEmailMain" placeholder="твій@email.com"
+            style="flex:1;padding:9px 12px;border-radius:8px;border:none;font-size:.75rem;font-family:'Nunito',sans-serif;outline:none"
+            onkeydown="if(event.key==='Enter')submitPaywallEmailMain()">
+          <button onclick="submitPaywallEmailMain()"
+            style="padding:9px 16px;background:#fff;color:#1a3a6a;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap">
+            Сповістити
+          </button>
+        </div>
+        <div id="paywallEmailMainMsg" style="font-size:.65rem;margin-top:6px;opacity:.85"></div>
+      </div>
+      <button class="pay-btn-free" onclick="closePaywall()" style="margin-top:10px">Закрити</button>
+    `;
+  }
+}
+
+function submitPaywallEmailMain(){
+  const input = document.getElementById('paywallEmailMain');
+  const msg = document.getElementById('paywallEmailMainMsg');
+  if(!input) return;
+  const email = (input.value || '').trim();
+  if(!email || !email.includes('@')){
+    msg.style.color='#ffaaaa';
+    msg.textContent='Введи коректний email';
+    return;
+  }
+  fetch('/api/subscribe',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email, source:'paywall_waitlist_main'})
+  }).then(()=>{
+    msg.style.color='#aaffaa';
+    msg.textContent='✓ Збережено! Повідомимо як відкриється доступ';
+    input.value='';
+    trackEvent('paywall_waitlist_email','monetization','paywall');
+  }).catch(()=>{
+    msg.style.color='#aaffaa';
+    msg.textContent='✓ Збережено!';
+  });
 }
 
 function closePaywall(){
