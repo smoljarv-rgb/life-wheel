@@ -165,10 +165,59 @@ tr:hover td{background:#1e2d48}
           <label>Ціна аналізу ($)</label>
           <input type="number" id="priceInput" min="0" step="0.5" value="2">
         </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
           <label class="toggle"><input type="checkbox" id="paywallToggle"><span class="toggle-slider"></span></label>
-          <span style="font-size:.8rem">Paywall увімкнено</span>
+          <div>
+            <div style="font-size:.8rem">Paywall увімкнено</div>
+            <div style="font-size:.65rem;color:#4a6a8a">Блокує після 1 безкоштовного аналізу</div>
+          </div>
         </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <label class="toggle"><input type="checkbox" id="waitlistToggle"><span class="toggle-slider"></span></label>
+          <div>
+            <div style="font-size:.8rem">Paywall Waitlist (збір email)</div>
+            <div style="font-size:.65rem;color:#4a6a8a">"Оплата буде доступна — залиш email"</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <label class="toggle"><input type="checkbox" id="counterToggle"><span class="toggle-slider"></span></label>
+          <div>
+            <div style="font-size:.8rem">Лічильник користувачів</div>
+            <div style="font-size:.65rem;color:#4a6a8a">"X людей вже оцінили колесо" на головній</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <label class="toggle"><input type="checkbox" id="scaleToggle"><span class="toggle-slider"></span></label>
+          <div>
+            <div style="font-size:.8rem">Шкала оцінювання у вступному вікні</div>
+            <div style="font-size:.65rem;color:#4a6a8a">Показувати / сховати шкалу</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <label class="toggle"><input type="checkbox" id="socialProofToggle"><span class="toggle-slider"></span></label>
+          <div>
+            <div style="font-size:.8rem">Social proof (відгуки)</div>
+            <div style="font-size:.65rem;color:#4a6a8a">Показувати блок відгуків на головній</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <label class="toggle"><input type="checkbox" id="liqpayToggle"><span class="toggle-slider"></span></label>
+          <div>
+            <div style="font-size:.8rem">LiqPay оплата активна</div>
+            <div style="font-size:.65rem;color:#4a6a8a">Вмикати після підключення ФОП + LiqPay</div>
+          </div>
+        </div>
+
+        <div style="padding:10px 14px;background:#0f2a1a;border-radius:8px;border:1px solid #1a4a2a;margin-bottom:16px">
+          <div style="font-size:.7rem;color:#4ade80;font-weight:700;margin-bottom:4px">📊 Статус функцій</div>
+          <div id="featureStatusText" style="font-size:.65rem;color:#4a8a6a;line-height:1.8"></div>
+        </div>
+
         <button class="btn" onclick="saveSettings()">💾 Зберегти налаштування</button>
       </div>
       <div class="card">
@@ -424,14 +473,45 @@ function renderSettings(s){
   if(!s) return;
   document.getElementById('priceInput').value = s.price || 2;
   document.getElementById('paywallToggle').checked = s.paywall_enabled !== false;
+  document.getElementById('waitlistToggle').checked = s.waitlist_enabled !== false;
+  document.getElementById('counterToggle').checked = s.counter_enabled !== false;
+  document.getElementById('scaleToggle').checked = s.scale_visible !== false;
+  document.getElementById('socialProofToggle').checked = s.social_proof_enabled === true;
+  document.getElementById('liqpayToggle').checked = s.liqpay_enabled === true;
+  updateFeatureStatus(s);
+}
+
+function updateFeatureStatus(s){
+  const el = document.getElementById('featureStatusText');
+  if(!el) return;
+  const items = [
+    { label: 'Paywall', on: s.paywall_enabled !== false },
+    { label: 'Waitlist email', on: s.waitlist_enabled !== false },
+    { label: 'Лічильник', on: s.counter_enabled !== false },
+    { label: 'Шкала оцінювання', on: s.scale_visible !== false },
+    { label: 'Social proof', on: s.social_proof_enabled === true },
+    { label: 'LiqPay оплата', on: s.liqpay_enabled === true },
+  ];
+  el.innerHTML = items.map(i =>
+    `<span style="margin-right:12px">${i.on ? '🟢' : '🔴'} ${i.label}</span>`
+  ).join('');
 }
 
 function saveSettings(){
   const price = parseFloat(document.getElementById('priceInput').value);
   const paywall_enabled = document.getElementById('paywallToggle').checked;
-  api('/api/admin/settings', 'POST', { price, paywall_enabled }).then(() => {
+  const waitlist_enabled = document.getElementById('waitlistToggle').checked;
+  const counter_enabled = document.getElementById('counterToggle').checked;
+  const scale_visible = document.getElementById('scaleToggle').checked;
+  const social_proof_enabled = document.getElementById('socialProofToggle').checked;
+  const liqpay_enabled = document.getElementById('liqpayToggle').checked;
+
+  const settings = { price, paywall_enabled, waitlist_enabled, counter_enabled,
+                     scale_visible, social_proof_enabled, liqpay_enabled };
+
+  api('/api/admin/settings', 'POST', settings).then(() => {
     showToast('✅ Налаштування збережено');
-    if(statsData) { statsData.settings.price = price; statsData.settings.paywall_enabled = paywall_enabled; }
+    if(statsData) { Object.assign(statsData.settings, settings); updateFeatureStatus(statsData.settings); }
   });
 }
 

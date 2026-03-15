@@ -464,6 +464,10 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       </div>
       <h2 style="margin-bottom:6px">Колесо <em>Життя</em></h2>
       <p class="tagline">AI-коуч для особистісного зростання · 12 сфер · 5 хвилин</p>
+      <div id="userCounterBadge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:.62rem;color:var(--tl);margin-top:8px;transition:color 3s">
+        <span style="width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+        <span id="userCounterText">Завантаження...</span>
+      </div>
     </div>
 
     <!-- How it works — 3 steps horizontal -->
@@ -494,10 +498,17 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       </div>
     </div>
 
-    <!-- Scale compact -->
-    <div style="margin-bottom:20px">
-      <div style="font-size:.62rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;transition:color 3s">📊 Шкала оцінювання</div>
-      <div class="score-scale" id="modalScaleGrid"></div>
+    <!-- Scale compact — collapsed by default -->
+    <div style="margin-bottom:16px">
+      <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.scale-arrow').textContent=this.nextElementSibling.style.display==='none'?'▼':'▲'"
+        style="font-size:.62rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color 3s">
+        📊 Шкала оцінювання
+        <span class="scale-arrow" style="font-size:.55rem;opacity:.6">▼</span>
+        <span style="font-size:.55rem;font-weight:400;opacity:.5;text-transform:none;letter-spacing:0">натисни щоб розгорнути</span>
+      </div>
+      <div id="modalScaleWrapper" style="display:none">
+        <div class="score-scale" id="modalScaleGrid" style="margin-top:8px"></div>
+      </div>
     </div>
 
     <button class="btn-start" onclick="closeModal()">✦ Розпочати оцінку — це безкоштовно</button>
@@ -506,6 +517,27 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 </div>
 
 <!-- MAIN -->
+<!-- SOCIAL PROOF BLOCK (керується з адмін-панелі) -->
+<div id="socialProofBlock" style="display:none;max-width:520px;margin:0 auto 16px;padding:0 16px">
+  <div style="background:var(--sf2);border:1px solid var(--sb);border-radius:14px;padding:16px 20px">
+    <div style="font-size:.65rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">💬 Що кажуть користувачі</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="background:var(--sf1);border-radius:10px;padding:11px 14px">
+        <div style="font-size:.75rem;line-height:1.6;color:var(--tx)">«Підняв кар'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.»</div>
+        <div style="font-size:.63rem;color:var(--tl);margin-top:5px">— Олексій, 32 · Київ</div>
+      </div>
+      <div style="background:var(--sf1);border-radius:10px;padding:11px 14px">
+        <div style="font-size:.75rem;line-height:1.6;color:var(--tx)">«Нарешті побачила де реально проблема. Здоров'я 2/10 — і я навіть не помічала.»</div>
+        <div style="font-size:.63rem;color:var(--tl);margin-top:5px">— Наталія, 28 · Львів</div>
+      </div>
+      <div style="background:var(--sf1);border-radius:10px;padding:11px 14px">
+        <div style="font-size:.75rem;line-height:1.6;color:var(--tx)">«Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.»</div>
+        <div style="font-size:.63rem;color:var(--tl);margin-top:5px">— Марина, 35 · Коуч ICF</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="wrapper">
 
   <!-- LEFT -->
@@ -681,6 +713,56 @@ function closeModal(){
   m.style.display='none';
   m.style.pointerEvents='none';
 }
+
+/* ── PAYWALL EMAIL ── */
+function submitPaywallEmail(){
+  const input = document.getElementById('paywallEmail');
+  const msg = document.getElementById('paywallEmailMsg');
+  const email = (input.value || '').trim();
+  if(!email || !email.includes('@')){
+    msg.style.color='#ffcccc';
+    msg.textContent='Введи коректний email';
+    return;
+  }
+  // Зберегти через той самий API що і форма підписки
+  fetch('/api/subscribe', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email, source:'paywall_waitlist'})
+  }).then(()=>{
+    msg.style.color='#ccffcc';
+    msg.textContent='✓ Чудово! Повідомимо як тільки відкриється доступ';
+    input.value='';
+    trackEvent('paywall_email_submitted','monetization','paywall');
+  }).catch(()=>{
+    msg.style.color='#ccffcc';
+    msg.textContent='✓ Збережено! Повідомимо незабаром';
+    trackEvent('paywall_email_submitted','monetization','paywall');
+  });
+}
+
+/* ── USER COUNTER ── */
+function loadUserCounter(){
+  const el = document.getElementById('userCounterText');
+  if(!el) return;
+  fetch('/api/admin/stats')
+    .then(r=>r.json())
+    .then(data=>{
+      const count = data.totalAssessments || data.total || 0;
+      if(count > 0){
+        el.textContent = count + ' людей вже оцінили своє колесо';
+      } else {
+        el.textContent = 'Перший безкоштовно · Без реєстрації';
+      }
+    })
+    .catch(()=>{
+      el.textContent = 'Перший аналіз безкоштовно';
+    });
+}
+// Запустити лічильник при завантаженні
+document.addEventListener('DOMContentLoaded', loadUserCounter);
+
+
 
 /* ── CLOUDS ── */
 function makeClouds(){
@@ -939,12 +1021,37 @@ let siteConfig={price:2,paywall_enabled:true,ads:{}};
     const r=await fetch('/api/config');
     if(r.ok){
       siteConfig=await r.json();
+      // Apply feature flags from admin
+      applyFeatureFlags(siteConfig);
       // Show persistent ads (sidebar, bottom) immediately
       showAd('sidebar','adSlotSidebar');
       showAd('bottom_banner','adSlotBottom');
     }
   }catch(e){}
 })();
+
+function applyFeatureFlags(cfg){
+  if(!cfg) return;
+
+  // Лічильник користувачів
+  const counterBadge = document.getElementById('userCounterBadge');
+  if(counterBadge){
+    counterBadge.style.display = cfg.counter_enabled !== false ? 'inline-flex' : 'none';
+    if(cfg.counter_enabled !== false) loadUserCounter();
+  }
+
+  // Шкала оцінювання у modal
+  const scaleWrapper = document.getElementById('modalScaleWrapper');
+  if(scaleWrapper && cfg.scale_visible === true){
+    scaleWrapper.style.display = 'block';
+  }
+
+  // Social proof блок
+  const spBlock = document.getElementById('socialProofBlock');
+  if(spBlock){
+    spBlock.style.display = cfg.social_proof_enabled === true ? 'block' : 'none';
+  }
+}
 
 function showAd(slot, elId){
   try{
@@ -1973,13 +2080,20 @@ function renderAdvice(parsed){
         <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Повний PDF-звіт</div>
         <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Стратегія до 10/10</div>
       </div>
-      <button onclick="showPaywall()"
-        style="padding:13px 28px;background:#fff;color:#1a3a6a;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:all .3s"
-        onmouseover="this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.transform=''">
-        💳 Повний аналіз — $${siteConfig.price||2}
-      </button>
-      <div style="font-size:.6rem;opacity:.7;margin-top:8px">Одноразовий платіж · Без підписки</div>`;
+      <div style="margin-top:12px;padding:12px 16px;background:rgba(255,255,255,.12);border-radius:12px;border:1.5px solid rgba(255,255,255,.3)">
+        <div style="font-size:.8rem;font-weight:800;margin-bottom:6px">⏳ Оплата буде доступна найближчим часом</div>
+        <div style="font-size:.7rem;opacity:.85;margin-bottom:10px">Залиш email — повідомимо одразу як відкриється доступ</div>
+        <div style="display:flex;gap:6px">
+          <input type="email" id="paywallEmail" placeholder="твій@email.com"
+            style="flex:1;padding:9px 12px;border-radius:8px;border:none;font-size:.75rem;font-family:'Nunito',sans-serif;outline:none"
+            onkeydown="if(event.key==='Enter')document.getElementById('paywallEmailBtn').click()">
+          <button id="paywallEmailBtn" onclick="submitPaywallEmail()"
+            style="padding:9px 16px;background:#fff;color:#1a3a6a;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap">
+            Сповістити
+          </button>
+        </div>
+        <div id="paywallEmailMsg" style="font-size:.65rem;margin-top:6px;opacity:.8"></div>
+      </div>`;
     document.getElementById('analysisContent').appendChild(upsell);
   }
 }

@@ -29,6 +29,11 @@ function loadDB() {
     settings: {
       price: 2,
       paywall_enabled: true,
+      waitlist_enabled: true,
+      counter_enabled: true,
+      scale_visible: false,
+      social_proof_enabled: false,
+      liqpay_enabled: false,
       promo_codes: [],
     },
     ads: {
@@ -125,7 +130,17 @@ app.post('/api/promo/use', (req, res) => {
 
 app.get('/api/config', (req, res) => {
   const db = loadDB();
-  res.json({ price: db.settings.price, paywall_enabled: db.settings.paywall_enabled, ads: db.ads });
+  const s = db.settings;
+  res.json({
+    price: s.price,
+    paywall_enabled: s.paywall_enabled !== false,
+    waitlist_enabled: s.waitlist_enabled !== false,
+    counter_enabled: s.counter_enabled !== false,
+    scale_visible: s.scale_visible === true,
+    social_proof_enabled: s.social_proof_enabled === true,
+    liqpay_enabled: s.liqpay_enabled === true,
+    ads: db.ads,
+  });
 });
 
 // ══════════════════════════════════════════
@@ -223,12 +238,14 @@ app.get('/api/admin/stats', adminAuth, function(req, res) {
     });
   }
 
+  const totalAssessments = countEvents('analysis_completed', 0);
   res.json({
     visitors: { today: uniqueIPs(now-day), week: uniqueIPs(now-7*day), total: uniqueIPs(0) },
-    analyses: { today: countEvents('analysis_completed', now-day), total: countEvents('analysis_completed', 0) },
+    analyses: { today: countEvents('analysis_completed', now-day), total: totalAssessments },
     payments: { today: db.payments.filter(function(p){ return p.ts>=now-day; }).length, total: db.payments.length },
     revenue:  { today: revenueToday, month: revenueMonth, total: revenueTotal },
     emails: db.emails.length,
+    totalAssessments,
     chart,
     settings: db.settings,
     ads: db.ads,
@@ -242,9 +259,15 @@ app.get('/api/admin/emails', adminAuth, function(req, res) {
 
 app.post('/api/admin/settings', adminAuth, function(req, res) {
   const db = loadDB();
-  const { price, paywall_enabled, promo_codes } = req.body;
+  const { price, paywall_enabled, waitlist_enabled, counter_enabled,
+          scale_visible, social_proof_enabled, liqpay_enabled, promo_codes } = req.body;
   if (price !== undefined) db.settings.price = parseFloat(price);
   if (paywall_enabled !== undefined) db.settings.paywall_enabled = !!paywall_enabled;
+  if (waitlist_enabled !== undefined) db.settings.waitlist_enabled = !!waitlist_enabled;
+  if (counter_enabled !== undefined) db.settings.counter_enabled = !!counter_enabled;
+  if (scale_visible !== undefined) db.settings.scale_visible = !!scale_visible;
+  if (social_proof_enabled !== undefined) db.settings.social_proof_enabled = !!social_proof_enabled;
+  if (liqpay_enabled !== undefined) db.settings.liqpay_enabled = !!liqpay_enabled;
   if (promo_codes !== undefined) db.settings.promo_codes = promo_codes;
   saveDB(db);
   res.json({ ok: true });
