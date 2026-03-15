@@ -36,6 +36,11 @@ function loadDB() {
       liqpay_enabled: false,
       promo_codes: [],
     },
+    reviews: [
+      { text: "Підняв кар'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.", author: "Олексій, 32", location: "Київ", active: true },
+      { text: "Нарешті побачила де реально проблема. Здоров'я 2/10 — і я навіть не помічала.", author: "Наталія, 28", location: "Львів", active: true },
+      { text: "Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.", author: "Марина, 35", location: "Коуч ICF", active: true },
+    ],
     ads: {
       after_analysis: { enabled: false, type: 'banner', title: '', text: '', url: '', image: '', adsense_code: '' },
       sidebar:        { enabled: false, type: 'banner', title: '', text: '', url: '', image: '', adsense_code: '' },
@@ -139,8 +144,18 @@ app.get('/api/config', (req, res) => {
     scale_visible: s.scale_visible === true,
     social_proof_enabled: s.social_proof_enabled === true,
     liqpay_enabled: s.liqpay_enabled === true,
+    reviews: (db.reviews || []).filter(function(r){ return r.active !== false; }),
     ads: db.ads,
   });
+});
+
+// ══════════════════════════════════════════
+//  SOCIAL PROOF (public)
+// ══════════════════════════════════════════
+app.get('/api/reviews', function(req, res) {
+  const db = loadDB();
+  const reviews = (db.reviews || []).filter(function(r){ return r.active !== false; });
+  res.json({ reviews });
 });
 
 // ══════════════════════════════════════════
@@ -269,6 +284,27 @@ app.post('/api/admin/settings', adminAuth, function(req, res) {
   if (social_proof_enabled !== undefined) db.settings.social_proof_enabled = !!social_proof_enabled;
   if (liqpay_enabled !== undefined) db.settings.liqpay_enabled = !!liqpay_enabled;
   if (promo_codes !== undefined) db.settings.promo_codes = promo_codes;
+  saveDB(db);
+  res.json({ ok: true });
+});
+
+app.get('/api/admin/social-proof', adminAuth, function(req, res) {
+  const db = loadDB();
+  res.json({ reviews: db.reviews || [] });
+});
+
+app.post('/api/admin/social-proof', adminAuth, function(req, res) {
+  const db = loadDB();
+  const { reviews } = req.body;
+  if (!Array.isArray(reviews)) return res.status(400).json({ error: 'Invalid reviews' });
+  db.reviews = reviews.map(function(r){
+    return {
+      text: String(r.text || '').slice(0, 500),
+      author: String(r.author || '').slice(0, 100),
+      location: String(r.location || '').slice(0, 100),
+      active: r.active !== false,
+    };
+  });
   saveDB(db);
   res.json({ ok: true });
 });

@@ -103,6 +103,7 @@ tr:hover td{background:#1e2d48}
     <div class="nav-item" onclick="showPage('emails',this)"><span class="icon">📧</span> Email-база</div>
     <div class="nav-item" onclick="showPage('settings',this)"><span class="icon">⚙️</span> Налаштування</div>
     <div class="nav-item" onclick="showPage('promos',this)"><span class="icon">🎁</span> Промокоди</div>
+    <div class="nav-item" onclick="showPage('socialproof',this)"><span class="icon">💬</span> Social proof</div>
     <div class="nav-item" style="margin-top:auto" onclick="window.open('/')"><span class="icon">🌐</span> Відкрити сайт</div>
     <div class="nav-item" onclick="doLogout()"><span class="icon">🚪</span> Вийти</div>
   </nav>
@@ -229,6 +230,32 @@ tr:hover td{background:#1e2d48}
       </div>
     </div>
 
+
+    <!-- SOCIAL PROOF -->
+    <div class="page" id="page-socialproof">
+      <div class="page-title">💬 Social Proof — відгуки</div>
+
+      <div class="card">
+        <h3>📋 Як це працює</h3>
+        <p style="font-size:.72rem;color:#4a6a8a;line-height:1.7;margin-bottom:0">
+          Відгуки показуються на сайті перед колесом балансу коли увімкнено перемикач <strong>Social proof</strong> у Налаштуваннях.
+          Отримай відгук від користувача → введи тут → збережи → вмикай/вимикай одним кліком.
+        </p>
+      </div>
+
+      <div class="card" id="socialProofCard">
+        <h3>✏️ Редагування відгуків</h3>
+        <div id="reviewsList"></div>
+        <button class="btn" style="margin-top:12px;background:#1a3a6a" onclick="addReview()">+ Додати відгук</button>
+        <button class="btn" style="margin-top:8px" onclick="saveSocialProof()">💾 Зберегти всі відгуки</button>
+      </div>
+
+      <div class="card">
+        <h3>👁️ Попередній перегляд</h3>
+        <div id="socialProofPreview" style="background:#0a1628;border-radius:12px;padding:16px"></div>
+      </div>
+    </div>
+
     <!-- PROMOS -->
     <div class="page" id="page-promos">
       <div class="page-title">🎁 Промокоди</div>
@@ -315,6 +342,7 @@ function showPage(id, el){
   if(el) el.classList.add('active');
   if(id === 'emails') loadEmails();
   if(id === 'ads' && statsData) renderAds(statsData.ads);
+  if(id === 'socialproof') loadSocialProof();
   if(id === 'settings' && statsData) renderSettings(statsData.settings);
   if(id === 'promos' && statsData) renderPromos(statsData.settings);
 }
@@ -566,6 +594,111 @@ function deletePromo(i){
 
 // Enter key on login
 document.getElementById('pwdInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+
+// ══ SOCIAL PROOF ══
+let reviewsData = [];
+
+function loadSocialProof(){
+  api('/api/admin/social-proof').then(data => {
+    reviewsData = data.reviews || defaultReviews();
+    renderReviews();
+    renderPreview();
+  }).catch(() => {
+    reviewsData = defaultReviews();
+    renderReviews();
+    renderPreview();
+  });
+}
+
+function defaultReviews(){
+  return [
+    { text: "Підняв кар'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.", author: "Олексій, 32", location: "Київ", active: true },
+    { text: "Нарешті побачила де реально проблема. Здоров'я 2/10 — і я навіть не помічала.", author: "Наталія, 28", location: "Львів", active: true },
+    { text: "Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.", author: "Марина, 35", location: "Коуч ICF", active: true },
+  ];
+}
+
+function renderReviews(){
+  const container = document.getElementById('reviewsList');
+  if(!container) return;
+  container.innerHTML = reviewsData.map((r, i) => `
+    <div style="border:1px solid #1a2e4a;border-radius:10px;padding:14px;margin-bottom:12px;background:${r.active?'#0a1f35':'#0a1220'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:.7rem;color:#4a6a8a">Відгук #${i+1}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="toggle" style="transform:scale(0.8)">
+            <input type="checkbox" ${r.active?'checked':''} onchange="toggleReview(${i},this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:.65rem;color:${r.active?'#4ade80':'#6a4a4a'}">${r.active?'Показується':'Приховано'}</span>
+          <button onclick="deleteReview(${i})" style="background:#2a1020;border:1px solid #4a2030;color:#f87171;padding:3px 10px;border-radius:6px;font-size:.65rem;cursor:pointer">✕</button>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-size:.65rem;color:#4a6a8a;display:block;margin-bottom:4px">Текст відгуку</label>
+        <textarea rows="3" style="width:100%;background:#0e1a2e;border:1px solid #1a3a5a;border-radius:8px;color:#c8d8e8;padding:8px;font-size:.75rem;font-family:inherit;resize:vertical;box-sizing:border-box"
+          onchange="reviewsData[${i}].text=this.value;renderPreview()">${r.text}</textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <label style="font-size:.65rem;color:#4a6a8a;display:block;margin-bottom:4px">Ім'я, вік</label>
+          <input type="text" value="${r.author}" style="width:100%;background:#0e1a2e;border:1px solid #1a3a5a;border-radius:8px;color:#c8d8e8;padding:7px 10px;font-size:.75rem;box-sizing:border-box"
+            onchange="reviewsData[${i}].author=this.value;renderPreview()">
+        </div>
+        <div>
+          <label style="font-size:.65rem;color:#4a6a8a;display:block;margin-bottom:4px">Місто / Роль</label>
+          <input type="text" value="${r.location}" style="width:100%;background:#0e1a2e;border:1px solid #1a3a5a;border-radius:8px;color:#c8d8e8;padding:7px 10px;font-size:.75rem;box-sizing:border-box"
+            onchange="reviewsData[${i}].location=this.value;renderPreview()">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPreview(){
+  const container = document.getElementById('socialProofPreview');
+  if(!container) return;
+  const active = reviewsData.filter(r => r.active);
+  if(!active.length){
+    container.innerHTML = '<p style="color:#4a6a8a;font-size:.72rem;text-align:center">Немає активних відгуків</p>';
+    return;
+  }
+  container.innerHTML = `
+    <div style="font-size:.65rem;font-weight:700;color:#4a8a9a;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">💬 Що кажуть користувачі</div>
+    ${active.map(r => `
+      <div style="background:#0e1a2e;border-radius:10px;padding:11px 14px;margin-bottom:8px">
+        <div style="font-size:.75rem;line-height:1.6;color:#c8d8e8">«${r.text}»</div>
+        <div style="font-size:.63rem;color:#4a6a8a;margin-top:5px">— ${r.author} · ${r.location}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function addReview(){
+  reviewsData.push({ text: 'Новий відгук...', author: "Ім'я, вік", location: 'Місто', active: false });
+  renderReviews();
+  renderPreview();
+}
+
+function deleteReview(i){
+  if(!confirm('Видалити відгук?')) return;
+  reviewsData.splice(i, 1);
+  renderReviews();
+  renderPreview();
+}
+
+function toggleReview(i, val){
+  reviewsData[i].active = val;
+  renderPreview();
+}
+
+function saveSocialProof(){
+  api('/api/admin/social-proof', 'POST', { reviews: reviewsData }).then(() => {
+    showToast('✅ Відгуки збережено');
+  });
+}
+
 </script>
 </body>
 </html>
