@@ -1,4 +1,9 @@
-const express = require('express');
+const express = require('express');const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 const path = require('path');
 const fs = require('fs');
 
@@ -91,15 +96,30 @@ app.post('/api/track', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/subscribe', (req, res) => {
+app.post('/api/subscribe', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
   const { email } = req.body;
-  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
+  if (!email || !email.includes('@'))
+    return res.status(400).json({ error: 'Invalid email' });
+
+  // Зберігаємо в Supabase
+  const { error } = await supabase
+    .from('subscribers')
+    .insert([{ email }]);
+
+  // код 23505 = email вже існує (UNIQUE constraint) — це не помилка
+  if (error && error.code !== '23505') {
+    console.error('Supabase error:', error);
+    return res.status(500).json({ error: 'DB error' });
+  }
+
+  // Зберігаємо також локально для статистики адмін-панелі
   const db = loadDB();
-  if (!db.emails.find(function(e){ return e.email === email; })) {
+  if (!db.emails.find(e => e.email === email)) {
     db.emails.push({ ts: Date.now(), email, ip });
     saveDB(db);
   }
+
   res.json({ ok: true });
 });
 
