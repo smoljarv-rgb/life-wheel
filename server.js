@@ -115,34 +115,50 @@ app.post('/api/subscribe', async (req, res) => {
 
   // Відправляємо підтвердження на email
   try {
-    await resend.emails.send({
-      from: 'Колесо Життя <noreply@koleso.live>',
-      to: email,
-      subject: '🌀 Ти в списку очікування Колеса Життя!',
-      html: `
-        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#0a0a0f;color:#f0f0f8;border-radius:16px">
-          <h1 style="font-size:24px;margin-bottom:8px">🌀 Колесо Життя</h1>
-          <p style="color:#8888a8;margin-bottom:24px">AI-коуч для особистісного зростання</p>
-          <h2 style="font-size:18px;margin-bottom:12px">Ти в списку! 🎉</h2>
-          <p style="line-height:1.7;color:#c8c8e8">
-            Дякуємо що зацікавився Колесом Життя.<br>
-            Ми повідомимо тебе першим коли відкриється повний доступ.
-          </p>
-          <div style="margin:28px 0;padding:20px;background:#16161f;border-radius:12px;border-left:3px solid #22d3a0">
-            <p style="margin:0;color:#22d3a0;font-weight:600">Що тебе чекає у Pro:</p>
-            <ul style="color:#8888a8;margin:10px 0 0;padding-left:20px;line-height:2">
-              <li>Трекінг прогресу по 12 сферах</li>
-              <li>AI план на місяць</li>
-              <li>Персональні нагадування</li>
-              <li>Приватний щоденник</li>
-            </ul>
-          </div>
-          <p style="color:#555570;font-size:13px;margin-top:32px">
-            Колесо Життя · <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a>
-          </p>
-        </div>
-      `
-    });
+   await resend.emails.send({
+  from: 'Володимир з Колеса Життя <noreply@koleso.live>',
+  to: email,
+  subject: 'Ти в списку очікування Колеса Життя',
+  html: `
+<!DOCTYPE html>
+<html lang="uk">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td>
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden">
+  <tr><td style="padding:40px 40px 24px">
+    <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#333;line-height:1.7">
+      Мене звати Володимир, я розробляю Колесо Життя — інструмент для оцінки балансу 12 сфер з AI-аналізом.
+    </p>
+    <p style="margin:0 0 16px;font-size:15px;color:#333;line-height:1.7">
+      Ти залишив email і тепер у списку очікування. Я особисто напишу тобі коли відкриється повний доступ.
+    </p>
+    <p style="margin:0 0 32px;font-size:15px;color:#333;line-height:1.7">
+      Поки що можеш безкоштовно оцінити своє колесо на сайті — просто натисни кнопку:
+    </p>
+    <table cellpadding="0" cellspacing="0" style="margin:0 0 32px">
+      <tr><td style="background:#22d3a0;border-radius:8px;padding:14px 28px">
+        <a href="https://koleso.live" style="color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none">Відкрити Колесо Життя</a>
+      </td></tr>
+    </table>
+    <p style="margin:0 0 8px;font-size:15px;color:#333;line-height:1.7">З повагою,</p>
+    <p style="margin:0 0 32px;font-size:15px;color:#333;font-weight:bold;line-height:1.7">Володимир</p>
+    <hr style="border:none;border-top:1px solid #eeeeee;margin:0 0 20px">
+    <p style="margin:0;font-size:12px;color:#999;line-height:1.6">
+      Ти отримав цей лист тому що залишив email на <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a>.<br>
+      Якщо це була помилка — просто ігноруй цей лист.<br>
+      <a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a>
+    </p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+  `
+});
   } catch(emailErr) {
     console.error('Resend error:', emailErr);
     // Не повертаємо помилку користувачу — email не критичний
