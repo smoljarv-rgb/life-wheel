@@ -493,7 +493,7 @@ function saveAd(slot, enabled){
 }
 
 // ── EMAILS ──
-function loadEmails(){function sendBroadcast(){
+function sendBroadcast(){
   const subject = document.getElementById('broadcastSubject').value.trim();
   const html = document.getElementById('broadcastHtml').value.trim();
   if(!subject || !html) return showToast('⚠️ Заповни тему і текст листа');
@@ -509,7 +509,7 @@ function loadEmails(){function sendBroadcast(){
       }
     })
     .catch(() => result.textContent = '❌ Помилка з\'єднання');
-}}
+}
   // Завантажуємо з Supabase напряму
   fetch('https://dzvvxysjovczgepxueby.supabase.co/rest/v1/subscribers?select=*&order=created_at.desc', {
     headers: {
