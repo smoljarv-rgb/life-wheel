@@ -321,7 +321,39 @@ app.get('/api/admin/stats', adminAuth, function(req, res) {
     ads: db.ads,
   });
 });
+app.post('/api/admin/broadcast', adminAuth, async function(req, res) {
+  const { subject, html } = req.body;
+  if (!subject || !html) return res.status(400).json({ error: 'Missing subject or html' });
 
+  const { data: subscribers, error } = await supabase
+    .from('subscribers')
+    .select('email');
+
+  if (error) return res.status(500).json({ error: 'DB error' });
+  if (!subscribers.length) return res.json({ ok: true, sent: 0 });
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const sub of subscribers) {
+    try {
+      await resend.emails.send({
+        from: 'Колесо Життя <noreply@koleso.live>',
+        to: sub.email,
+        subject,
+        html
+      });
+      sent++;
+      // Затримка щоб не перевищити ліміт Resend
+      await new Promise(r => setTimeout(r, 100));
+    } catch(e) {
+      failed++;
+      console.error('Broadcast error for', sub.email, e);
+    }
+  }
+
+  res.json({ ok: true, sent, failed });
+});
 app.get('/api/admin/emails', adminAuth, function(req, res) {
   const db = loadDB();
   res.json(db.emails.sort(function(a,b){ return b.ts-a.ts; }));

@@ -156,7 +156,21 @@ tr:hover td{background:#1e2d48}
         <tbody id="emailsTbl"></tbody></table>
       </div>
     </div>
-
+		<div class="card" style="margin-top:16px">
+  <h3>📢 Розсилка всім підписникам</h3>
+  <div class="form-row">
+    <label>Тема листа</label>
+    <input type="text" id="broadcastSubject" placeholder="🌀 Важлива новина від Колеса Життя">
+  </div>
+  <div class="form-row">
+    <label>Текст листа (HTML)</label>
+    <textarea id="broadcastHtml" style="min-height:120px" placeholder="<p>Привіт! У нас є новини...</p>"></textarea>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+    <button class="btn" onclick="sendBroadcast()">📧 Розіслати всім</button>
+    <span id="broadcastResult" style="font-size:.75rem;color:#4a6a8a"></span>
+  </div>
+</div>
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="page-title">⚙️ Налаштування</div>
@@ -479,7 +493,23 @@ function saveAd(slot, enabled){
 }
 
 // ── EMAILS ──
-function loadEmails(){
+function loadEmails(){function sendBroadcast(){
+  const subject = document.getElementById('broadcastSubject').value.trim();
+  const html = document.getElementById('broadcastHtml').value.trim();
+  if(!subject || !html) return showToast('⚠️ Заповни тему і текст листа');
+  const result = document.getElementById('broadcastResult');
+  result.textContent = '⏳ Надсилаємо...';
+  api('/api/admin/broadcast', 'POST', { subject, html })
+    .then(data => {
+      if(data.ok) {
+        result.textContent = `✅ Надіслано: ${data.sent} · Помилок: ${data.failed}`;
+        showToast(`✅ Розсилка завершена! ${data.sent} листів`);
+      } else {
+        result.textContent = '❌ Помилка розсилки';
+      }
+    })
+    .catch(() => result.textContent = '❌ Помилка з\'єднання');
+}}
   // Завантажуємо з Supabase напряму
   fetch('https://dzvvxysjovczgepxueby.supabase.co/rest/v1/subscribers?select=*&order=created_at.desc', {
     headers: {
