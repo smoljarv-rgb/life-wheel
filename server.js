@@ -4,6 +4,8 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 const path = require('path');
 const fs = require('fs');
 
@@ -102,18 +104,51 @@ app.post('/api/subscribe', async (req, res) => {
   if (!email || !email.includes('@'))
     return res.status(400).json({ error: 'Invalid email' });
 
-  // Зберігаємо в Supabase
   const { error } = await supabase
     .from('subscribers')
     .insert([{ email }]);
 
-  // код 23505 = email вже існує (UNIQUE constraint) — це не помилка
   if (error && error.code !== '23505') {
     console.error('Supabase error:', error);
     return res.status(500).json({ error: 'DB error' });
   }
 
-  // Зберігаємо також локально для статистики адмін-панелі
+  // Відправляємо підтвердження на email
+  try {
+    await resend.emails.send({
+      from: 'Колесо Життя <noreply@koleso.live>',
+      to: email,
+      subject: '🌀 Ти в списку очікування Колеса Життя!',
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#0a0a0f;color:#f0f0f8;border-radius:16px">
+          <h1 style="font-size:24px;margin-bottom:8px">🌀 Колесо Життя</h1>
+          <p style="color:#8888a8;margin-bottom:24px">AI-коуч для особистісного зростання</p>
+          <h2 style="font-size:18px;margin-bottom:12px">Ти в списку! 🎉</h2>
+          <p style="line-height:1.7;color:#c8c8e8">
+            Дякуємо що зацікавився Колесом Життя.<br>
+            Ми повідомимо тебе першим коли відкриється повний доступ.
+          </p>
+          <div style="margin:28px 0;padding:20px;background:#16161f;border-radius:12px;border-left:3px solid #22d3a0">
+            <p style="margin:0;color:#22d3a0;font-weight:600">Що тебе чекає у Pro:</p>
+            <ul style="color:#8888a8;margin:10px 0 0;padding-left:20px;line-height:2">
+              <li>Трекінг прогресу по 12 сферах</li>
+              <li>AI план на місяць</li>
+              <li>Персональні нагадування</li>
+              <li>Приватний щоденник</li>
+            </ul>
+          </div>
+          <p style="color:#555570;font-size:13px;margin-top:32px">
+            Колесо Життя · <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a>
+          </p>
+        </div>
+      `
+    });
+  } catch(emailErr) {
+    console.error('Resend error:', emailErr);
+    // Не повертаємо помилку користувачу — email не критичний
+  }
+
+  // Зберігаємо локально для статистики
   const db = loadDB();
   if (!db.emails.find(e => e.email === email)) {
     db.emails.push({ ts: Date.now(), email, ip });
