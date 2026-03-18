@@ -98,6 +98,43 @@ app.post('/api/track', (req, res) => {
   res.json({ ok: true });
 });
 
+// ══════════════════════════════════════════
+// RESULTS
+// ══════════════════════════════════════════
+app.post('/api/results/save', async (req, res) => {
+  const { scores, analysis } = req.body;
+  if (!scores) return res.status(400).json({ error: 'Missing scores' });
+
+  // Генеруємо унікальний slug (6 символів)
+  const slug = Math.random().toString(36).substring(2, 8);
+
+  const { error } = await supabase
+    .from('results')
+    .insert([{ slug, scores, analysis }]);
+
+  if (error) {
+    console.error('Supabase error:', error);
+    return res.status(500).json({ error: 'DB error' });
+  }
+
+  res.json({ ok: true, slug, url: `https://koleso.live/result/${slug}` });
+});
+
+app.get('/api/results/:slug', async (req, res) => {
+  const { slug } = req.params;
+
+  const { data, error } = await supabase
+    .from('results')
+    .select('*')
+    .eq('slug', slug)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (error || !data) return res.status(404).json({ error: 'Not found' });
+
+  res.json(data);
+});
+
 app.post('/api/subscribe', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
   const { email } = req.body;
@@ -423,6 +460,42 @@ app.post('/api/admin/ads', adminAuth, function(req, res) {
 
 app.get('/admin', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.post('/api/results/email', async (req, res) => {
+  const { email, slug, url } = req.body;
+  if (!email || !slug) return res.status(400).json({ error: 'Missing data' });
+
+  try {
+    await resend.emails.send({
+      from: 'Володимир з Колеса Життя <noreply@koleso.live>',
+      to: email,
+      subject: 'Твій результат Колеса Життя',
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#0a0a0f;color:#f0f0f8;border-radius:16px">
+          <h2 style="font-size:20px;margin-bottom:16px">🌀 Твій результат збережено!</h2>
+          <p style="color:#8888a8;line-height:1.7;margin-bottom:24px">
+            Ось твоє персональне посилання на результат Колеса Життя. Зберігається 30 днів.
+          </p>
+          <div style="margin:24px 0;padding:16px;background:#16161f;border-radius:12px;border-left:3px solid #22d3a0">
+            <a href="${url}" style="color:#22d3a0;font-size:14px;word-break:break-all">${url}</a>
+          </div>
+          <a href="${url}" style="display:inline-block;padding:14px 28px;background:#22d3a0;color:#080810;font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">Переглянути результат</a>
+          <p style="color:#555570;font-size:12px;margin-top:32px">
+            Колесо Життя · <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a>
+          </p>
+        </div>
+      `
+    });
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('Email error:', e);
+    res.status(500).json({ error: 'Email error' });
+  }
+});
+
+app.get('/result/:slug', function(req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'result.html'));
 });
 
 app.get('*', function(req, res) {
