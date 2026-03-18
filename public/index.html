@@ -2103,34 +2103,34 @@ function renderAdvice(parsed){
     parsed.advice.forEach(a=>{ sphereSnapshot[a.sphere]=parseFloat(a.score)||5; });
     localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
 	// Зберігаємо результат в Supabase
-fetch('/api/results/save', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    scores: sphereSnapshot,
-    analysis: {
-      weekPlan: [],
-      spheres: {}
-    }
-  })
-}).then(r => r.json()).then(saved => {
-  if (saved.slug) {
-    localStorage.setItem('lw_last_result', saved.slug);
-    localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
-      scores: sphereSnapshot
-    }));
-    // Додаємо кнопку "Переглянути результат"
-    const btn = document.createElement('div');
-    btn.style.cssText = 'text-align:center;margin:16px 0';
-    btn.innerHTML = `<a href="/result/${saved.slug}" target="_blank"
-      style="display:inline-block;padding:12px 28px;background:#22d3a0;color:#080810;
-      font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">
-      🔗 Переглянути повний результат
-    </a>`;
-    const ac = document.getElementById('analysisContent');
-    if (ac) ac.appendChild(btn);
-  }
-}).catch(e => console.error('Save error:', e));
+	fetch('/api/results/save', {
+	  method: 'POST',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify({
+			scores: sphereSnapshot,
+			analysis: {
+			  weekPlan: [],
+			  spheres: {}
+			}
+		  })
+		}).then(r => r.json()).then(saved => {
+		  if (saved.slug) {
+			localStorage.setItem('lw_last_result', saved.slug);
+			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
+			  scores: sphereSnapshot
+			}));
+			// Додаємо кнопку "Переглянути результат"
+			const btn = document.createElement('div');
+			btn.style.cssText = 'text-align:center;margin:16px 0';
+			btn.innerHTML = `<a href="/result/${saved.slug}" target="_blank"
+			  style="display:inline-block;padding:12px 28px;background:#22d3a0;color:#080810;
+			  font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">
+			  🔗 Переглянути повний результат
+			</a>`;
+			const ac = document.getElementById('analysisContent');
+			if (ac) ac.appendChild(btn);
+		  }
+		}).catch(e => console.error('Save error:', e));
   }catch(e){}
 
   // ── Write overview + summary to RIGHT COL (adviceArea) ──
@@ -2144,25 +2144,6 @@ fetch('/api/results/save', {
     analysisContent.innerHTML=algoHTML;
     analysisRow.style.display='block';
     setTimeout(()=>analysisRow.scrollIntoView({behavior:'smooth',block:'nearest'}),300);
-	// Зберігаємо результат в Supabase і localStorage
-	fetch('/api/results/save', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ scores: sphereSnapshot })
-}).then(r => r.json()).then(saved => {
-  if (saved.slug) {
-    localStorage.setItem('lw_last_result', saved.slug);
-    localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({ scores: sphereSnapshot }));
-    const btn = document.createElement('div');
-    btn.style.cssText = 'text-align:center;margin:16px 0';
-    btn.innerHTML = `<a href="/result/${saved.slug}" target="_blank"
-      style="display:inline-block;padding:12px 28px;background:#22d3a0;color:#080810;
-      font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">
-      🔗 Переглянути повний результат</a>`;
-    const ac = document.getElementById('analysisContent');
-    if (ac) ac.appendChild(btn);
-  }
-}).catch(e => console.error('Save error:', e));
   }
 
   // ── Show ads ──
