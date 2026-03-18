@@ -2145,36 +2145,6 @@ fetch('/api/results/save', {
     analysisRow.style.display='block';
     setTimeout(()=>analysisRow.scrollIntoView({behavior:'smooth',block:'nearest'}),300);
 	// Зберігаємо результат в Supabase і localStorage
-try {
-  const saveRes = await fetch('/api/results/save', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      scores: currentScores,
-      analysis: currentAnalysis
-    })
-  });
-  if (saveRes.ok) {
-    const saved = await saveRes.json();
-    if (saved.slug) {
-      localStorage.setItem('lw_last_result', saved.slug);
-      localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
-        scores: currentScores,
-        analysis: currentAnalysis
-      }));
-      // Показуємо кнопку "Переглянути результат"
-      const resultBtn = document.createElement('div');
-      resultBtn.style.cssText = 'margin-top:12px;text-align:center';
-      resultBtn.innerHTML = `<a href="${saved.url}" target="_blank"
-        style="display:inline-block;padding:10px 24px;background:#22d3a0;color:#080810;
-        font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">
-        🔗 Переглянути повний результат
-      </a>`;
-      document.getElementById('analysisContent').appendChild(resultBtn);
-    }
-  }
-} catch(e) { console.error('Save result error:', e); }
-
   }
 
   // ── Show ads ──
