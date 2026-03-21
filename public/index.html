@@ -577,10 +577,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       <div class="panel-title">План зростання</div>
       <div class="btn-row no-print">
         <button class="btn-advice" id="btnAdv" onclick="showPicker()">✦ Отримати план до балансу</button>
-        <button class="btn-print" onclick="exportPDF()" title="Друк / Зберегти PDF">
-          <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          PDF
-        </button>
+
       </div>
       <div id="spherePicker" style="display:none"></div>
 
@@ -2119,16 +2116,9 @@ function renderAdvice(parsed){
 			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
 			  scores: sphereSnapshot
 			}));
-			// Додаємо кнопку "Переглянути результат"
-			const btn = document.createElement('div');
-			btn.style.cssText = 'text-align:center;margin:16px 0';
-			btn.innerHTML = `<a href="/result/${saved.slug}" target="_blank"
-			  style="display:inline-block;padding:12px 28px;background:#22d3a0;color:#080810;
-			  font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">
-			  🔗 Переглянути повний результат
-			</a>`;
-			const ac = document.getElementById('analysisContent');
-			if (ac) ac.appendChild(btn);
+			// Зберігаємо slug глобально
+			window._lastResultSlug = saved.slug;
+			window._lastResultUrl = '/result/' + saved.slug;
 		  }
 		}).catch(e => console.error('Save error:', e));
   }catch(e){}
@@ -2151,6 +2141,34 @@ function renderAdvice(parsed){
   showAd('native_reco','adSlotNativeReco');
   showAd('sidebar','adSlotSidebar');
   showAd('bottom_banner','adSlotBottom');
+
+  // ── Великий блок "Переглянути повний результат" ──
+  if(window._lastResultUrl) {
+    const resultBlock = document.createElement('div');
+    resultBlock.style.cssText = 'margin-top:20px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#071a12,#0d2e1f);border:1px solid rgba(32,212,160,.25)';
+    resultBlock.innerHTML = `
+      <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:.7rem;font-weight:700;color:#20d4a0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">✦ Повний звіт готовий</div>
+          <div style="font-size:1rem;font-weight:800;color:#eeeef8;margin-bottom:4px">Переглянути детальний результат</div>
+          <div style="font-size:.72rem;color:#5a8a70;line-height:1.5">Heatmap · Шкали · Топ-3 зони · 30-денний план · Порівняння</div>
+        </div>
+        <a href="${window._lastResultUrl}" target="_blank"
+          style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;
+          background:#20d4a0;color:#071a12;font-weight:800;border-radius:10px;
+          text-decoration:none;font-size:.82rem;white-space:nowrap;flex-shrink:0">
+          Відкрити звіт →
+        </a>
+      </div>
+      <div style="padding:10px 24px 14px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid rgba(32,212,160,.1)">
+        <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">📊 Heatmap сфер</div>
+        <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">🎯 Топ-3 пріоритети</div>
+        <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">📅 Roadmap 30 днів</div>
+        <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">🔗 Поділитись</div>
+        <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">📧 На email</div>
+      </div>`;
+    document.getElementById('analysisContent').appendChild(resultBlock);
+  }
 
   // ── Upsell after free analysis ──
   if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){

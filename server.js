@@ -493,7 +493,13 @@ app.post('/api/results/email', async (req, res) => {
     res.status(500).json({ error: 'Email error' });
   }
 });
-
+app.get('/api/results/stats', async (req, res) => {
+  const { data, error } = await supabase
+    .from('results')
+    .select('scores');
+  if (error) return res.status(500).json({ error: 'DB error' });
+  res.json({ total: data.length });
+});
 app.get('/result/:slug', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'result.html'));
 });
