@@ -120,6 +120,15 @@ app.post('/api/results/save', async (req, res) => {
   res.json({ ok: true, slug, url: `https://koleso.live/result/${slug}` });
 });
 
+// Stats маршрут МАЄ бути перед :slug щоб Express не плутав 'stats' як slug
+app.get('/api/results/stats', async (req, res) => {
+  const { data, error } = await supabase
+    .from('results')
+    .select('scores');
+  if (error) return res.status(500).json({ error: 'DB error' });
+  res.json({ total: data.length });
+});
+
 app.get('/api/results/:slug', async (req, res) => {
   const { slug } = req.params;
 
@@ -492,13 +501,6 @@ app.post('/api/results/email', async (req, res) => {
     console.error('Email error:', e);
     res.status(500).json({ error: 'Email error' });
   }
-});
-app.get('/api/results/stats', async (req, res) => {
-  const { data, error } = await supabase
-    .from('results')
-    .select('scores');
-  if (error) return res.status(500).json({ error: 'DB error' });
-  res.json({ total: data.length });
 });
 app.get('/result/:slug', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'result.html'));
