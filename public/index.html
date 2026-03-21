@@ -2096,8 +2096,18 @@ function renderAdvice(parsed){
     }
     localStorage.setItem('prev_result',JSON.stringify({avg:avgNow,date:new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'})}));
     // Save per-sphere scores for next comparison
+    // Маппінг українських назв до англійських ключів result.html
+    const sphereKeyMap = {
+      'Любов': 'love', "Сім'я": 'family', 'Друзі': 'friends',
+      "Кар'єра": 'career', 'Фінанси': 'finance', 'Саморозвиток': 'selfdev',
+      'Духовність': 'spirit', 'Відпочинок': 'rest', 'Середовище': 'env',
+      'Комунікація': 'comm', "Здоров'я": 'health', 'Зовнішність': 'appear'
+    };
     const sphereSnapshot={};
-    parsed.advice.forEach(a=>{ sphereSnapshot[a.sphere]=parseFloat(a.score)||5; });
+    parsed.advice.forEach(a=>{
+      const key = sphereKeyMap[a.sphere] || a.sphere;
+      sphereSnapshot[key] = parseFloat(a.score)||5;
+    });
     localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
 	// Зберігаємо результат в Supabase
 	fetch('/api/results/save', {
