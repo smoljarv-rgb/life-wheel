@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Твій звіт — Колесо Життя</title>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#fdf6e3;
@@ -24,7 +24,7 @@
 html{scroll-behavior:smooth}
 
 body{
-  font-family:'Kalam',cursive;
+  font-family:'Patrick Hand',cursive;
   background:var(--paper);
   color:var(--ink);
   min-height:100vh;
@@ -56,7 +56,7 @@ body::after{
 .loader{position:fixed;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999;transition:opacity .5s}
 .loader.hide{opacity:0;pointer-events:none}
 .loader-pencil{font-size:40px;animation:sketch 1s ease-in-out infinite alternate}
-.loader-txt{font-family:'Caveat',cursive;font-size:20px;color:var(--ink2)}
+.loader-txt{font-family:'Patrick Hand',cursive;font-size:20px;color:var(--ink2)}
 @keyframes sketch{0%{transform:rotate(-15deg) scale(.9)}100%{transform:rotate(15deg) scale(1.1)}}
 
 /* ERROR */
@@ -115,7 +115,7 @@ body::after{
 
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .chip{
-  font-family:'Caveat',cursive;
+  font-family:'Patrick Hand',cursive;
   font-size:14px;font-weight:600;
   padding:3px 14px;
   border-radius:100px;
@@ -245,8 +245,8 @@ body::after{
   font-family:'Caveat Brush',cursive;
   font-size:28px;line-height:1;margin-bottom:4px;
 }
-.snap-lbl{font-family:'Caveat',cursive;font-size:13px;color:var(--ink3)}
-.snap-sub{font-family:'Caveat',cursive;font-size:15px;color:var(--ink2);margin-top:3px}
+.snap-lbl{font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink3)}
+.snap-sub{font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink2);margin-top:3px}
 
 /* RADAR */
 .radar-wrap{display:flex;justify-content:center;padding:8px 0 20px}
@@ -260,9 +260,9 @@ body::after{
   margin-bottom:10px;
   box-shadow:2px 3px 0 rgba(0,0,0,.07);
 }
-.cmp-name{font-family:'Caveat',cursive;font-size:17px;font-weight:600;color:var(--ink);margin-bottom:10px}
+.cmp-name{font-family:'Patrick Hand',cursive;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:10px}
 .cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.cmp-lbl{font-family:'Caveat',cursive;font-size:13px;color:var(--ink3);width:60px;flex-shrink:0}
+.cmp-lbl{font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink3);width:64px;flex-shrink:0}
 .cmp-track{
   flex:1;height:14px;
   background:var(--paper3);
@@ -277,7 +277,7 @@ body::after{
 }
 .cmp-val{font-family:'Caveat Brush',cursive;font-size:16px;width:28px;text-align:right;flex-shrink:0}
 .cmp-diff{
-  font-family:'Caveat',cursive;font-size:14px;font-weight:600;
+  font-family:'Patrick Hand',cursive;font-size:14px;font-weight:600;
   padding:2px 10px;border:1.5px solid currentColor;border-radius:100px;
   align-self:center;
 }
@@ -296,7 +296,7 @@ body::after{
 }
 .prog-scores{display:flex;align-items:center;gap:16px;margin-bottom:16px}
 .prog-num{font-family:'Caveat Brush',cursive;font-size:52px;line-height:1;text-align:center}
-.prog-num-lbl{font-family:'Caveat',cursive;font-size:14px;color:var(--ink3);text-align:center;margin-top:4px}
+.prog-num-lbl{font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink3);text-align:center;margin-top:4px}
 .prog-arrow{font-size:28px;flex:1;text-align:center;color:var(--ink3)}
 .prog-delta{
   font-family:'Caveat Brush',cursive;
@@ -313,7 +313,7 @@ body::after{
 .prog-delta.neu{color:var(--ink3)}
 .prog-sph{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .prog-sph-ico{font-size:14px}
-.prog-sph-name{font-family:'Caveat',cursive;font-size:15px;width:90px;color:var(--ink2);flex-shrink:0}
+.prog-sph-name{font-family:'Patrick Hand',cursive;font-size:16px;width:96px;color:var(--ink2);flex-shrink:0}
 .prog-track{
   flex:1;height:10px;
   background:var(--paper3);
@@ -329,7 +329,7 @@ body::after{
   border:2px dashed var(--ink3);
   border-radius:4px;padding:20px;
   text-align:center;
-  font-family:'Caveat',cursive;font-size:17px;color:var(--ink3);
+  font-family:'Patrick Hand',cursive;font-size:17px;color:var(--ink3);
   background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(0,0,0,.02) 8px,rgba(0,0,0,.02) 9px);
 }
 
@@ -359,7 +359,7 @@ body::after{
   font-size:18px;flex-shrink:0;
 }
 .sph-name{font-family:'Caveat Brush',cursive;font-size:20px;color:var(--ink)}
-.sph-status{font-family:'Caveat',cursive;font-size:13px;color:var(--ink3);margin-top:1px}
+.sph-status{font-family:'Patrick Hand',cursive;font-size:13px;color:var(--ink3);margin-top:1px}
 .sph-score{font-family:'Caveat Brush',cursive;font-size:36px;line-height:1}
 .sph-bar{
   height:12px;
@@ -386,7 +386,7 @@ body::after{
   text-transform:uppercase;letter-spacing:.08em;
   margin-bottom:6px;
 }
-.sph-item{display:flex;gap:6px;font-family:'Caveat',cursive;font-size:15px;color:var(--ink2);margin-bottom:5px;line-height:1.4}
+.sph-item{display:flex;gap:6px;font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2);margin-bottom:5px;line-height:1.4}
 .sph-mk{flex-shrink:0}
 .sph-why{
   background:var(--paper);
@@ -394,7 +394,7 @@ body::after{
   border-radius:0 4px 4px 0;
   padding:10px 14px;
   margin-bottom:10px;
-  font-family:'Caveat',cursive;
+  font-family:'Patrick Hand',cursive;
   font-size:15px;color:var(--ink2);line-height:1.6;
 }
 .sph-action{
@@ -414,18 +414,18 @@ body::after{
   font-size:12px;color:var(--ink3);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;
 }
-.sph-action-txt{font-family:'Caveat',cursive;font-size:16px;color:var(--ink);line-height:1.5;font-weight:600}
+.sph-action-txt{font-family:'Patrick Hand',cursive;font-size:17px;color:var(--ink);line-height:1.5;font-weight:600}
 .sph-how{
   background:var(--paper);
   border:1.5px dashed var(--ink3);
   border-radius:4px;
   padding:12px;margin-top:10px;
-  font-family:'Caveat',cursive;font-size:14px;color:var(--ink2);line-height:1.7;
+  font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink2);line-height:1.7;
 }
 .sph-steps{margin-top:10px}
 .sph-step{
   display:flex;gap:8px;align-items:flex-start;
-  font-family:'Caveat',cursive;font-size:15px;
+  font-family:'Patrick Hand',cursive;font-size:15px;
   color:var(--ink2);margin-bottom:7px;line-height:1.4;
 }
 .sph-step-n{
@@ -466,9 +466,9 @@ body::after{
   border:2px solid rgba(255,255,255,.08);
   border-radius:50%;
 }
-.ph-date{font-family:'Caveat',cursive;font-size:15px;color:rgba(255,255,255,.5);margin-bottom:4px}
+.ph-date{font-family:'Patrick Hand',cursive;font-size:15px;color:rgba(255,255,255,.5);margin-bottom:4px}
 .ph-title{font-family:'Caveat Brush',cursive;font-size:28px;color:#fff;margin-bottom:4px}
-.ph-sub{font-family:'Caveat',cursive;font-size:16px;color:rgba(255,255,255,.6);line-height:1.5}
+.ph-sub{font-family:'Patrick Hand',cursive;font-size:16px;color:rgba(255,255,255,.6);line-height:1.5}
 
 /* MICRO */
 .micro-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
@@ -493,16 +493,16 @@ body::after{
   transition:all .2s;
 }
 .micro.done .micro-circle{background:var(--green);border-color:var(--green);color:#fff}
-.micro-txt{font-family:'Caveat',cursive;font-size:16px;color:var(--ink);font-weight:600;margin-bottom:4px;line-height:1.4}
+.micro-txt{font-family:'Patrick Hand',cursive;font-size:17px;color:var(--ink);font-weight:600;margin-bottom:4px;line-height:1.4}
 .micro-meta{display:flex;gap:8px;flex-wrap:wrap}
 .micro-tag{
-  font-family:'Caveat',cursive;font-size:13px;
+  font-family:'Patrick Hand',cursive;font-size:13px;
   background:var(--paper3);
   border:1px solid var(--ink3);
   border-radius:100px;
   padding:1px 8px;color:var(--ink2);
 }
-.micro-time{font-family:'Caveat',cursive;font-size:13px;color:var(--ink3)}
+.micro-time{font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink3)}
 
 /* WEEK */
 .week-day{margin-bottom:10px}
@@ -525,13 +525,13 @@ body::after{
 .wday-lbl{font-family:'Caveat Brush',cursive;font-size:16px;color:var(--ink3);width:28px}
 .wday-name{font-family:'Caveat Brush',cursive;font-size:20px;color:var(--ink)}
 .wday-today{
-  font-family:'Caveat',cursive;font-size:13px;
+  font-family:'Patrick Hand',cursive;font-size:13px;
   color:var(--red);
   border:1.5px solid var(--red);
   padding:1px 8px;border-radius:100px;
   transform:rotate(-1deg);display:inline-block;
 }
-.wday-cnt{font-family:'Caveat',cursive;font-size:14px;color:var(--ink3)}
+.wday-cnt{font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink3)}
 .wday-arrow{font-size:14px;color:var(--ink3);transition:transform .2s}
 .week-tasks{padding:8px 16px 12px;display:none;flex-direction:column;gap:6px}
 .week-task{
@@ -554,8 +554,8 @@ body::after{
   transition:all .2s;
 }
 .week-task.done .wcb{background:var(--green);border-color:var(--green)}
-.week-task-txt{font-family:'Caveat',cursive;font-size:15px;color:var(--ink);line-height:1.4}
-.week-task-sph{font-family:'Caveat',cursive;font-size:12px;color:var(--ink3);margin-top:2px}
+.week-task-txt{font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink);line-height:1.4}
+.week-task-sph{font-family:'Patrick Hand',cursive;font-size:12px;color:var(--ink3);margin-top:2px}
 
 /* GOALS */
 .goal{
@@ -568,10 +568,10 @@ body::after{
   box-shadow:2px 3px 0 rgba(0,0,0,.07);
 }
 .goal-n{font-family:'Caveat Brush',cursive;font-size:36px;color:var(--paper3);line-height:1;width:32px;flex-shrink:0}
-.goal-txt{font-family:'Caveat',cursive;font-size:17px;color:var(--ink);font-weight:600;margin-bottom:4px}
+.goal-txt{font-family:'Patrick Hand',cursive;font-size:18px;color:var(--ink);font-weight:600;margin-bottom:4px}
 .goal-meta{display:flex;gap:12px;flex-wrap:wrap}
-.goal-dead{font-family:'Caveat',cursive;font-size:13px;color:var(--ink3)}
-.goal-sph{font-family:'Caveat',cursive;font-size:13px;color:var(--blue);font-weight:600}
+.goal-dead{font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink3)}
+.goal-sph{font-family:'Patrick Hand',cursive;font-size:13px;color:var(--blue);font-weight:600}
 
 /* ROADMAP */
 .roadmap{padding-left:28px;position:relative;margin-bottom:28px}
@@ -590,9 +590,9 @@ body::after{
 }
 .rl-week{font-family:'Caveat Brush',cursive;font-size:13px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
 .rl-title{font-family:'Caveat Brush',cursive;font-size:20px;color:var(--ink);margin-bottom:4px}
-.rl-text{font-family:'Caveat',cursive;font-size:15px;color:var(--ink2);line-height:1.6}
+.rl-text{font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink2);line-height:1.6}
 .rl-tag{
-  font-family:'Caveat',cursive;font-size:13px;font-weight:600;
+  font-family:'Patrick Hand',cursive;font-size:13px;font-weight:600;
   padding:2px 10px;
   border:1.5px solid currentColor;
   border-radius:100px;
@@ -603,8 +603,8 @@ body::after{
 /* BTN ROW */
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
 .btn{
-  font-family:'Caveat',cursive;
-  font-size:16px;font-weight:600;
+  font-family:'Patrick Hand',cursive;
+  font-size:17px;font-weight:600;
   padding:10px 20px;
   background:var(--paper2);
   border:2px solid var(--ink3);
@@ -641,13 +641,13 @@ body::after{
   animation:fadeIn .25s ease;
 }
 .modal h3{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin-bottom:6px}
-.modal p{font-family:'Caveat',cursive;font-size:16px;color:var(--ink2);line-height:1.6;margin-bottom:18px}
+.modal p{font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink2);line-height:1.6;margin-bottom:18px}
 .modal input{
   width:100%;padding:10px 14px;
   background:var(--paper2);
   border:2px solid var(--ink3);
   border-radius:2px 6px 4px 3px;
-  color:var(--ink);font-family:'Caveat',cursive;font-size:16px;
+  color:var(--ink);font-family:'Patrick Hand',cursive;font-size:16px;
   outline:none;margin-bottom:12px;transition:border-color .2s;
 }
 .modal input:focus{border-color:var(--ink)}
@@ -658,7 +658,7 @@ body::after{
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
   background:var(--ink);color:var(--paper);
-  font-family:'Caveat',cursive;font-size:16px;font-weight:600;
+  font-family:'Patrick Hand',cursive;font-size:17px;font-weight:600;
   border-radius:3px 8px 6px 4px;
   padding:10px 24px;z-index:900;
   white-space:nowrap;display:none;
@@ -977,7 +977,7 @@ function renderResult(data){
     if(!showFull){return `<div class="sph" style="opacity:.7">
       <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">Недоступно у безкоштовній версії</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
       <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}40"></div></div>
-      <div class="sph-locked"><div style="font-family:'Caveat',cursive;font-size:15px;color:var(--ink2);margin-bottom:6px">Детальний аналіз і план — у повній версії</div><a href="https://koleso.live" style="font-family:'Caveat',cursive;font-size:16px;color:var(--blue);font-weight:600">Отримати повний аналіз →</a></div>
+      <div class="sph-locked"><div style="font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2);margin-bottom:6px">Детальний аналіз і план — у повній версії</div><a href="https://koleso.live" style="font-family:'Patrick Hand',cursive;font-size:16px;color:var(--blue);font-weight:600">Отримати повний аналіз →</a></div>
     </div>`;}
     return `<div class="sph">
       <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">${status}</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
