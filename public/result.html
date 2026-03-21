@@ -730,17 +730,17 @@ function renderResult(data){
     const bg=s.score>=7?'var(--green-l)':s.score>=4?'var(--yellow-l)':'var(--red-l)';
     const status=s.score>=7?'Сильна зона ✦':s.score>=4?'Є потенціал для росту':'⚠ Критична — фокус тут';
     // Для free — неаналізовані сфери показуємо спрощено
-    if(!showFull){ return \`<div class="sph" style="opacity:.7">
+    if(!showFull){ return `<div class="sph" style="opacity:.7">
       <div class="sph-hdr">
-        <div class="sph-left"><div class="sph-ico" style="background:\${bg}">\${s.icon}</div><div><div class="sph-name">\${s.name}</div><div class="sph-status" style="color:var(--t3)">Недоступно у безкоштовній версії</div></div></div>
-        <div class="sph-score" style="color:\${clr}">\${s.score}</div>
+        <div class="sph-left"><div class="sph-ico" style="background:${bg}">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status" style="color:var(--t3)">Недоступно у безкоштовній версії</div></div></div>
+        <div class="sph-score" style="color:${clr}">${s.score}</div>
       </div>
-      <div class="sph-bar"><div class="sph-fill" style="width:\${s.score*10}%;background:\${clr}"></div></div>
+      <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
       <div style="background:var(--s2);border-radius:10px;padding:12px 14px;text-align:center">
         <div style="font-size:12px;color:var(--t2);margin-bottom:8px">Детальний аналіз, план дій і покрокові інструкції доступні у повній версії</div>
         <a href="https://koleso.live" style="font-size:12px;font-weight:700;color:var(--acc);text-decoration:none">Отримати повний аналіз →</a>
       </div>
-    </div>\`; }
+    </div>`; }
     return `<div class="sph">
       <div class="sph-hdr">
         <div class="sph-left"><div class="sph-ico" style="background:${bg}">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">${status}</div></div></div>
