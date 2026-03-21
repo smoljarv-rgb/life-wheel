@@ -2140,7 +2140,9 @@ function renderAdvice(parsed){
     localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
     // Чи безкоштовний аналіз (1 сфера)
     const isFreeResult = _isFreeThisAnalysis; // чи цей аналіз безкоштовний
-	// Зберігаємо результат в Supabase
+  }catch(e){ console.error('Snapshot error:', e); }
+
+  // Зберігаємо результат в Supabase
 	fetch('/api/results/save', {
 	  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },
@@ -2171,11 +2173,29 @@ function renderAdvice(parsed){
 			}
 		  }
 		}).catch(e => console.error('Save error:', e));
-  }catch(e){}
+
+  // ── Завжди показуємо блок звіту якщо є slug ──
+  if(window._lastResultUrl){
+    const rb = document.getElementById('fullResultBlock');
+    if(rb && rb.innerHTML.trim()===''){
+      rb.style.display='block';
+      const slug=window._lastResultSlug||'';
+      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--sf2);border:1.5px solid var(--ac);border-radius:14px;text-decoration:none;box-shadow:0 4px 18px var(--sh);transition:all .2s;" onmouseover="this.style.background='var(--sf)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='var(--sf2)';this.style.transform=''"><div><div style="font-size:.62rem;font-weight:700;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">✦ Повний звіт готовий</div><div style="font-size:.85rem;font-weight:700;color:var(--td)">Переглянути детальний результат</div><div style="font-size:.65rem;color:var(--tl);margin-top:3px">Сфери · Heatmap · План · Порівняння</div></div><div style="padding:9px 16px;background:var(--ac);color:#fff;font-weight:800;border-radius:9px;font-size:.75rem;white-space:nowrap;flex-shrink:0;font-family:'Nunito',sans-serif">Відкрити →</div></a>`;
+    }
+  }
 
   // ── Write overview + summary to RIGHT COL (adviceArea) ──
   document.getElementById('adviceArea').innerHTML=summaryHTML;
   setTimeout(_restoreChecklists,100);
+
+  // ── Резервний показ блоку звіту (якщо fetch ще не завершився) ──
+  setTimeout(()=>{
+    const rb = document.getElementById('fullResultBlock');
+    if(rb && window._lastResultUrl && rb.innerHTML.trim()===''){
+      rb.style.display='block';
+      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--sf2);border:1.5px solid var(--ac);border-radius:14px;text-decoration:none;box-shadow:0 4px 18px var(--sh);transition:all .2s;" onmouseover="this.style.background='var(--sf)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='var(--sf2)';this.style.transform=''"><div><div style="font-size:.62rem;font-weight:700;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">✦ Повний звіт готовий</div><div style="font-size:.85rem;font-weight:700;color:var(--td)">Переглянути детальний результат</div><div style="font-size:.65rem;color:var(--tl);margin-top:3px">Сфери · Heatmap · План · Порівняння</div></div><div style="padding:9px 16px;background:var(--ac);color:#fff;font-weight:800;border-radius:9px;font-size:.75rem;white-space:nowrap;flex-shrink:0;font-family:'Nunito',sans-serif">Відкрити →</div></a>`;
+    }
+  }, 3000);
 
   // ── Ховаємо analysis-row (алгоритм прибрано) ──
   const analysisRow=document.getElementById('analysisRow');
