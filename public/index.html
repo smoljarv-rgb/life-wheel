@@ -2073,24 +2073,6 @@ function renderAdvice(parsed){
   });
   algoHTML+=`</div>`;
 
-  // ── Big Save Button ──
-  algoHTML+=`<div style="margin-top:20px;text-align:center">
-    <button onclick="exportPDF()"
-      style="display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:14px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 8px 28px rgba(40,120,200,.5);transition:all .3s"
-      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 36px rgba(40,120,200,.6)'"
-      onmouseout="this.style.transform='';this.style.boxShadow='0 8px 28px rgba(40,120,200,.5)'">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 6 2 18 2 18 9"/>
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-        <rect x="6" y="14" width="12" height="8"/>
-      </svg>
-      💾 Зберегти результат як PDF
-    </button>
-    <div style="margin-top:8px;font-size:.68rem;color:var(--tl);transition:color 3s">
-      Роздрукуй або завантаж у Google Drive
-    </div>
-  </div>`;
-
   // Return CTA
   const returnDate=new Date();
   returnDate.setDate(returnDate.getDate()+30);
@@ -2161,33 +2143,48 @@ function renderAdvice(parsed){
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
 			window._lastResultUrl = '/result/' + saved.slug;
-			// Додаємо великий блок результату
+			// Додаємо блок результату ПІД КОЛЕСОМ
+			const existing = document.getElementById('fullResultBlock');
+			if(existing) existing.remove();
 			const resultBlock = document.createElement('div');
 			resultBlock.id = 'fullResultBlock';
-			resultBlock.style.cssText = 'margin-top:20px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#071a12,#0d2e1f);border:1px solid rgba(32,212,160,.25)';
+			resultBlock.style.cssText = 'width:100%;max-width:500px;margin-top:8px';
 			resultBlock.innerHTML = `
-			  <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+			  <a href="/result/${saved.slug}" target="_blank" style="
+			    display:flex;align-items:center;justify-content:space-between;gap:12px;
+			    padding:14px 18px;
+			    background:var(--sf2);
+			    border:1.5px solid var(--ac);
+			    border-radius:14px;
+			    text-decoration:none;
+			    box-shadow:0 4px 18px var(--sh);
+			    transition:all .2s;
+			    color:inherit;
+			  "
+			  onmouseover="this.style.background='var(--sf)';this.style.transform='translateY(-1px)'"
+			  onmouseout="this.style.background='var(--sf2)';this.style.transform=''">
 			    <div>
-			      <div style="font-size:.7rem;font-weight:700;color:#20d4a0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">✦ Повний звіт готовий</div>
-			      <div style="font-size:1rem;font-weight:800;color:#eeeef8;margin-bottom:4px">Переглянути детальний результат</div>
-			      <div style="font-size:.72rem;color:#5a8a70;line-height:1.5">Heatmap · Шкали · Топ-3 зони · 30-денний план</div>
+			      <div style="font-size:.62rem;font-weight:700;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">✦ Повний звіт готовий</div>
+			      <div style="font-size:.85rem;font-weight:700;color:var(--td)">Переглянути детальний результат</div>
+			      <div style="font-size:.65rem;color:var(--tl);margin-top:3px">Сфери · Heatmap · План · Порівняння</div>
 			    </div>
-			    <a href="/result/${saved.slug}" target="_blank"
-			      style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;
-			      background:#20d4a0;color:#071a12;font-weight:800;border-radius:10px;
-			      text-decoration:none;font-size:.82rem;white-space:nowrap;flex-shrink:0">
-			      Відкрити звіт →
-			    </a>
-			  </div>
-			  <div style="padding:10px 24px 14px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid rgba(32,212,160,.1)">
-			    <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">📊 Heatmap сфер</div>
-			    <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">🎯 Топ-3 пріоритети</div>
-			    <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">📅 Roadmap 30 днів</div>
-			    <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">🔗 Поділитись</div>
-			    <div style="font-size:.65rem;color:#3a7a5a;background:rgba(32,212,160,.08);padding:4px 10px;border-radius:100px">📧 На email</div>
-			  </div>`;
-			const acEl = document.getElementById('analysisContent');
-			if (acEl) acEl.appendChild(resultBlock);
+			    <div style="
+			      padding:9px 16px;
+			      background:var(--ac);
+			      color:#fff;
+			      font-weight:800;
+			      border-radius:9px;
+			      font-size:.75rem;
+			      white-space:nowrap;
+			      flex-shrink:0;
+			      font-family:'Nunito',sans-serif;
+			    ">Відкрити →</div>
+			  </a>`;
+			// Вставляємо після wheel-card в center-col
+			const wheelCard = document.querySelector('.wheel-card');
+			if(wheelCard && wheelCard.parentNode){
+			  wheelCard.parentNode.insertBefore(resultBlock, wheelCard.nextSibling);
+			}
 		  }
 		}).catch(e => console.error('Save error:', e));
   }catch(e){}
@@ -2196,14 +2193,9 @@ function renderAdvice(parsed){
   document.getElementById('adviceArea').innerHTML=summaryHTML;
   setTimeout(_restoreChecklists,100);
 
-  // ── Write algorithm + roadmap to FULL-WIDTH ROW ──
+  // ── Ховаємо analysis-row (алгоритм прибрано) ──
   const analysisRow=document.getElementById('analysisRow');
-  const analysisContent=document.getElementById('analysisContent');
-  if(analysisRow && analysisContent){
-    analysisContent.innerHTML=algoHTML;
-    analysisRow.style.display='block';
-    setTimeout(()=>analysisRow.scrollIntoView({behavior:'smooth',block:'nearest'}),300);
-  }
+  if(analysisRow) analysisRow.style.display='none';
 
   // ── Show ads ──
   showAd('after_analysis','adSlotAfterAnalysis');
