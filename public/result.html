@@ -591,7 +591,10 @@ function renderResult(data){
   const scores=data.scores||{};
   const analysis=data.analysis||{};
   const isFree=analysis.isFree||false;
-  const analysedKeys=analysis.analysedKeys||Object.keys(scores); // проаналізовані сфери
+  // analysedKeys — тільки проаналізовані сфери (якщо є), інакше всі
+  const analysedKeys=(analysis.analysedKeys && analysis.analysedKeys.length>0)
+    ? analysis.analysedKeys
+    : Object.keys(scores);
   try{checkedTasks=JSON.parse(localStorage.getItem('lw_checks_'+currentSlug)||'{}');}catch(e){}
 
   // Попередній результат з localStorage

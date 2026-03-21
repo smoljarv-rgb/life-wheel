@@ -1535,6 +1535,7 @@ function _startFromModal(){
   }
 
   // First analysis FREE (max 1 sphere)
+  const _isFreeThisAnalysis = !freeAnalysisUsed && !isPremiumUnlocked && siteConfig.paywall_enabled !== false;
   if(!freeAnalysisUsed && !isPremiumUnlocked){
     freeAnalysisUsed=true;
     try{ sessionStorage.setItem('free_used','1'); }catch(e){}
@@ -2138,7 +2139,7 @@ function renderAdvice(parsed){
     });
     localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
     // Чи безкоштовний аналіз (1 сфера)
-    const isFreeResult = freeAnalysisUsed && siteConfig.paywall_enabled !== false;
+    const isFreeResult = _isFreeThisAnalysis; // чи цей аналіз безкоштовний
 	// Зберігаємо результат в Supabase
 	fetch('/api/results/save', {
 	  method: 'POST',
