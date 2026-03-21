@@ -1536,6 +1536,7 @@ function _startFromModal(){
 
   // First analysis FREE (max 1 sphere)
   const _isFreeThisAnalysis = !freeAnalysisUsed && !isPremiumUnlocked && siteConfig.paywall_enabled !== false;
+  window._isFreeThisAnalysis = _isFreeThisAnalysis;
   if(!freeAnalysisUsed && !isPremiumUnlocked){
     freeAnalysisUsed=true;
     try{ sessionStorage.setItem('free_used','1'); }catch(e){}
@@ -2099,6 +2100,24 @@ function renderAdvice(parsed){
     <div id="reminderConfirm" style="display:none;margin-top:10px;font-size:.68rem;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;line-height:1.6"></div>
   </div>`;
 
+  // Змінні поза try — доступні для fetch нижче
+  const sphereKeyMap = {
+    'Любов': 'love', "Сім'я": 'family', 'Друзі': 'friends',
+    "Кар'єра": 'career', 'Фінанси': 'finance', 'Саморозвиток': 'selfdev',
+    'Духовність': 'spirit', 'Відпочинок': 'rest', 'Середовище': 'env',
+    'Комунікація': 'comm', "Здоров'я": 'health', 'Зовнішність': 'appear'
+  };
+  const sphereSnapshot={};
+  const analysedKeys=[];
+  const isFreeResult = window._isFreeThisAnalysis || false;
+
+  // Заповнюємо allScoresSnapshot ДО try — гарантовано доступне для fetch
+  const allScoresSnapshot={};
+  SPHERES.forEach(s=>{
+    const key = s.id==='money'?'finance':s.id==='self'?'selfdev':s.id==='look'?'appear':s.id;
+    allScoresSnapshot[key] = parseFloat(avg(s.id).toFixed(1));
+  });
+
   try{
     const prev=JSON.parse(localStorage.getItem('prev_result')||'null');
     if(prev){
@@ -2112,34 +2131,12 @@ function renderAdvice(parsed){
       </div>`;
     }
     localStorage.setItem('prev_result',JSON.stringify({avg:avgNow,date:new Date().toLocaleDateString('uk-UA',{day:'2-digit',month:'long',year:'numeric'})}));
-    // Save per-sphere scores for next comparison
-    // Маппінг українських назв до англійських ключів result.html
-    const sphereKeyMap = {
-      'Любов': 'love', "Сім'я": 'family', 'Друзі': 'friends',
-      "Кар'єра": 'career', 'Фінанси': 'finance', 'Саморозвиток': 'selfdev',
-      'Духовність': 'spirit', 'Відпочинок': 'rest', 'Середовище': 'env',
-      'Комунікація': 'comm', "Здоров'я": 'health', 'Зовнішність': 'appear'
-    };
-    const sphereSnapshot={};
-    const analysedKeys=[]; // тільки ті що аналізував AI
     parsed.advice.forEach(a=>{
       const key = sphereKeyMap[a.sphere] || a.sphere;
       sphereSnapshot[key] = parseFloat(a.score)||5;
       analysedKeys.push(key);
     });
-    // Додаємо всі 12 сфер з поточними балами (для повного колеса у звіті)
-    const allSpheresKeyMap = {
-      'love':'love','family':'family','friends':'friends','career':'career',
-      'finance':'finance','health':'health','selfdev':'selfdev','spirit':'spirit',
-      'rest':'rest','env':'env','comm':'comm','appear':'appear'
-    };
-    const allScoresSnapshot={};
-    SPHERES.forEach(s=>{
-      allScoresSnapshot[s.id==='money'?'finance':s.id==='self'?'selfdev':s.id==='look'?'appear':s.id] = parseFloat(avg(s.id).toFixed(1));
-    });
     localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
-    // Чи безкоштовний аналіз (1 сфера)
-    const isFreeResult = _isFreeThisAnalysis; // чи цей аналіз безкоштовний
   }catch(e){ console.error('Snapshot error:', e); }
 
   // Зберігаємо результат в Supabase
