@@ -580,6 +580,8 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       <div style="text-align:center;margin-top:6px"><div class="wheel-hint">👆 Клікни на сферу · Пересув повзунок для оцінки</div></div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
+    <!-- Блок повного звіту — з'являється після аналізу -->
+    <div id="fullResultBlock" style="display:none;width:100%;max-width:500px"></div>
   </div>
 
   <!-- RIGHT -->
@@ -2143,47 +2145,11 @@ function renderAdvice(parsed){
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
 			window._lastResultUrl = '/result/' + saved.slug;
-			// Додаємо блок результату ПІД КОЛЕСОМ
-			const existing = document.getElementById('fullResultBlock');
-			if(existing) existing.remove();
-			const resultBlock = document.createElement('div');
-			resultBlock.id = 'fullResultBlock';
-			resultBlock.style.cssText = 'width:100%;max-width:500px;margin-top:8px';
-			resultBlock.innerHTML = `
-			  <a href="/result/${saved.slug}" target="_blank" style="
-			    display:flex;align-items:center;justify-content:space-between;gap:12px;
-			    padding:14px 18px;
-			    background:var(--sf2);
-			    border:1.5px solid var(--ac);
-			    border-radius:14px;
-			    text-decoration:none;
-			    box-shadow:0 4px 18px var(--sh);
-			    transition:all .2s;
-			    color:inherit;
-			  "
-			  onmouseover="this.style.background='var(--sf)';this.style.transform='translateY(-1px)'"
-			  onmouseout="this.style.background='var(--sf2)';this.style.transform=''">
-			    <div>
-			      <div style="font-size:.62rem;font-weight:700;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">✦ Повний звіт готовий</div>
-			      <div style="font-size:.85rem;font-weight:700;color:var(--td)">Переглянути детальний результат</div>
-			      <div style="font-size:.65rem;color:var(--tl);margin-top:3px">Сфери · Heatmap · План · Порівняння</div>
-			    </div>
-			    <div style="
-			      padding:9px 16px;
-			      background:var(--ac);
-			      color:#fff;
-			      font-weight:800;
-			      border-radius:9px;
-			      font-size:.75rem;
-			      white-space:nowrap;
-			      flex-shrink:0;
-			      font-family:'Nunito',sans-serif;
-			    ">Відкрити →</div>
-			  </a>`;
-			// Вставляємо після wheel-card в center-col
-			const wheelCard = document.querySelector('.wheel-card');
-			if(wheelCard && wheelCard.parentNode){
-			  wheelCard.parentNode.insertBefore(resultBlock, wheelCard.nextSibling);
+			// Показуємо готовий блок під колесом
+			const resultBlock = document.getElementById('fullResultBlock');
+			if(resultBlock){
+			  resultBlock.style.display = 'block';
+			  resultBlock.innerHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--sf2);border:1.5px solid var(--ac);border-radius:14px;text-decoration:none;box-shadow:0 4px 18px var(--sh);transition:all .2s;" onmouseover="this.style.background='var(--sf)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='var(--sf2)';this.style.transform=''"><div><div style="font-size:.62rem;font-weight:700;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">✦ Повний звіт готовий</div><div style="font-size:.85rem;font-weight:700;color:var(--td)">Переглянути детальний результат</div><div style="font-size:.65rem;color:var(--tl);margin-top:3px">Сфери · Heatmap · План · Порівняння</div></div><div style="padding:9px 16px;background:var(--ac);color:#fff;font-weight:800;border-radius:9px;font-size:.75rem;white-space:nowrap;flex-shrink:0;font-family:'Nunito',sans-serif">Відкрити →</div></a>`;
 			}
 		  }
 		}).catch(e => console.error('Save error:', e));
