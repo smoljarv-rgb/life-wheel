@@ -135,40 +135,49 @@ body::after{
 
 /* TABS = handwritten nav */
 .tabs{
-  display:flex;gap:4px;
+  display:flex;gap:6px;
   margin-bottom:32px;
-  border-bottom:2px solid var(--paper3);
   overflow-x:auto;scrollbar-width:none;
-  position:relative;
-}
-.tabs::after{
-  content:'';
-  position:absolute;bottom:-3px;left:0;right:0;height:1px;
-  background:var(--ink3);opacity:.2;
+  align-items:flex-end;
+  padding-bottom:0;
 }
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-  font-family:'Caveat',cursive;
-  font-size:18px;font-weight:600;
+  font-family:'Caveat Brush',cursive;
+  font-size:17px;font-weight:400;
   color:var(--ink3);
-  padding:8px 18px 10px;
-  border:none;background:none;cursor:pointer;
-  border-bottom:3px solid transparent;
-  margin-bottom:-2px;
+  padding:9px 20px 11px;
+  border:2px solid var(--paper3);
+  border-bottom:none;
+  background:var(--paper3);
+  cursor:pointer;
+  border-radius:6px 8px 0 0 / 4px 6px 0 0;
   transition:all .2s;
   white-space:nowrap;
+  position:relative;
+  top:2px;
+  box-shadow:1px -2px 0 rgba(0,0,0,.04);
 }
-.tab:hover{color:var(--ink2)}
+.tab:hover{
+  color:var(--ink2);
+  background:var(--paper2);
+  border-color:var(--paper3);
+  top:0;
+}
 .tab.on{
   color:var(--ink);
-  border-bottom-color:var(--ink);
-  position:relative;
+  background:var(--paper2);
+  border:2px solid var(--ink3);
+  border-bottom:2px solid var(--paper2);
+  top:0;
+  z-index:2;
+  box-shadow:2px -3px 0 rgba(0,0,0,.07);
 }
-.tab.on::before{
-  content:'';
-  position:absolute;bottom:-3px;left:0;right:0;height:3px;
-  background:var(--ink);
-  transform:rotate(-.5deg);
+.tabs-border{
+  border-bottom:2px solid var(--ink3);
+  margin-bottom:28px;
+  margin-top:-2px;
+  position:relative;z-index:1;
 }
 
 /* PAGES */
@@ -714,6 +723,7 @@ body::after{
     <button class="tab" onclick="goScreen('spheres')">🔍 Сфери</button>
     <button class="tab" onclick="goScreen('plan')">✏️ План дій</button>
   </nav>
+  <div class="tabs-border"></div>
 
   <!-- ══ ЕКРАН 1 ══ -->
   <div class="pg on" id="sc-snap">
@@ -1003,7 +1013,8 @@ function renderResult(data){
   }).join('');
 
   const wDays=[{k:'Пн',l:'Понеділок'},{k:'Вт',l:'Вівторок'},{k:'Ср',l:'Середа'},{k:'Чт',l:'Четвер'},{k:'Пт',l:"П'ятниця"},{k:'Сб',l:'Субота'},{k:'Нд',l:'Неділя'}];
-  const analysedSpheres=isFree?sorted.filter(s=>analysedKeys.includes(s.key)):sorted;
+  // Тільки проаналізовані сфери для плану — завжди фільтруємо
+  const analysedSpheres=sorted.filter(s=>analysedKeys.includes(s.key));
   document.getElementById('weekGrid').innerHTML=wDays.map((day,di)=>{
     const dayTasks=analysedSpheres.map(s=>{
       const acts=DAILY[s.key]||WEEK_ACTIONS[s.key]||[];
