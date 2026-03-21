@@ -2120,18 +2120,34 @@ function renderAdvice(parsed){
       'Комунікація': 'comm', "Здоров'я": 'health', 'Зовнішність': 'appear'
     };
     const sphereSnapshot={};
+    const analysedKeys=[]; // тільки ті що аналізував AI
     parsed.advice.forEach(a=>{
       const key = sphereKeyMap[a.sphere] || a.sphere;
       sphereSnapshot[key] = parseFloat(a.score)||5;
+      analysedKeys.push(key);
+    });
+    // Додаємо всі 12 сфер з поточними балами (для повного колеса у звіті)
+    const allSpheresKeyMap = {
+      'love':'love','family':'family','friends':'friends','career':'career',
+      'finance':'finance','health':'health','selfdev':'selfdev','spirit':'spirit',
+      'rest':'rest','env':'env','comm':'comm','appear':'appear'
+    };
+    const allScoresSnapshot={};
+    SPHERES.forEach(s=>{
+      allScoresSnapshot[s.id==='money'?'finance':s.id==='self'?'selfdev':s.id==='look'?'appear':s.id] = parseFloat(avg(s.id).toFixed(1));
     });
     localStorage.setItem('prev_spheres',JSON.stringify(sphereSnapshot));
+    // Чи безкоштовний аналіз (1 сфера)
+    const isFreeResult = freeAnalysisUsed && siteConfig.paywall_enabled !== false;
 	// Зберігаємо результат в Supabase
 	fetch('/api/results/save', {
 	  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },
 		  body: JSON.stringify({
-			scores: sphereSnapshot,
+			scores: allScoresSnapshot,
 			analysis: {
+			  analysedKeys: analysedKeys,
+			  isFree: isFreeResult,
 			  weekPlan: [],
 			  spheres: {}
 			}
@@ -2140,7 +2156,8 @@ function renderAdvice(parsed){
 		  if (saved.slug) {
 			localStorage.setItem('lw_last_result', saved.slug);
 			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
-			  scores: sphereSnapshot
+			  scores: allScoresSnapshot,
+			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult }
 			}));
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;

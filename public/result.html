@@ -589,6 +589,9 @@ function showErr(){
 function renderResult(data){
   resultData=data;
   const scores=data.scores||{};
+  const analysis=data.analysis||{};
+  const isFree=analysis.isFree||false;
+  const analysedKeys=analysis.analysedKeys||Object.keys(scores); // проаналізовані сфери
   try{checkedTasks=JSON.parse(localStorage.getItem('lw_checks_'+currentSlug)||'{}');}catch(e){}
 
   // Попередній результат з localStorage
@@ -718,12 +721,26 @@ function renderResult(data){
       </div>`;
   }
 
-  // SPHERES page
+  // SPHERES page — для free показуємо повну картку тільки для проаналізованих сфер
   document.getElementById('sphList').innerHTML=sorted.map(s=>{
+    const isAnalysed = analysedKeys.includes(s.key);
+    const showFull = !isFree || isAnalysed; // pro бачить все, free — тільки свою сферу
     const act=ACTIONS[s.key]||{problem:'Потребує уваги',strength:'Є потенціал',why:'Ця сфера впливає на загальний баланс.',action:'Приділи увагу цій сфері сьогодні',how:'Почни з маленького кроку щодня.',steps:['Визнач проблему','Зроби перший крок']};
     const clr=s.score>=7?'var(--green)':s.score>=4?'var(--yellow)':'var(--red)';
     const bg=s.score>=7?'var(--green-l)':s.score>=4?'var(--yellow-l)':'var(--red-l)';
     const status=s.score>=7?'Сильна зона ✦':s.score>=4?'Є потенціал для росту':'⚠ Критична — фокус тут';
+    // Для free — неаналізовані сфери показуємо спрощено
+    if(!showFull){ return \`<div class="sph" style="opacity:.7">
+      <div class="sph-hdr">
+        <div class="sph-left"><div class="sph-ico" style="background:\${bg}">\${s.icon}</div><div><div class="sph-name">\${s.name}</div><div class="sph-status" style="color:var(--t3)">Недоступно у безкоштовній версії</div></div></div>
+        <div class="sph-score" style="color:\${clr}">\${s.score}</div>
+      </div>
+      <div class="sph-bar"><div class="sph-fill" style="width:\${s.score*10}%;background:\${clr}"></div></div>
+      <div style="background:var(--s2);border-radius:10px;padding:12px 14px;text-align:center">
+        <div style="font-size:12px;color:var(--t2);margin-bottom:8px">Детальний аналіз, план дій і покрокові інструкції доступні у повній версії</div>
+        <a href="https://koleso.live" style="font-size:12px;font-weight:700;color:var(--acc);text-decoration:none">Отримати повний аналіз →</a>
+      </div>
+    </div>\`; }
     return `<div class="sph">
       <div class="sph-hdr">
         <div class="sph-left"><div class="sph-ico" style="background:${bg}">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">${status}</div></div></div>
@@ -909,12 +926,13 @@ function renderResult(data){
     ]
   };
 
-  // Беремо сфери які аналізувались (всі що є в scores), сортуємо від найслабших
-  const analysedSpheres = sorted; // всі 12 сфер або скільки є
+  // Тільки проаналізовані сфери для тижневого плану
+  const analysedSpheres = isFree
+    ? sorted.filter(s=>analysedKeys.includes(s.key))
+    : sorted;
 
-  // На кожен день — одна задача з кожної аналізованої сфери
+  // На кожен день — accordion з задачами по проаналізованих сферах
   document.getElementById('weekGrid').innerHTML=wDays.map((day, di)=>{
-    // Для кожного дня беремо задачі з УСІХ сфер — по одній на сферу
     const dayTasks = analysedSpheres.map(s=>{
       const dayActions = DAILY[s.key] || WEEK_ACTIONS[s.key] || [];
       const txt = dayActions[di] || dayActions[di % dayActions.length] || 'Приділи увагу цій сфері';
@@ -926,18 +944,24 @@ function renderResult(data){
 
     const doneCnt = dayTasks.filter(t=>t.done).length;
     const total = dayTasks.length;
+    const isToday = di === (new Date().getDay()+6)%7; // Пн=0
+    const accId = `acc_day_${di}`;
 
-    return `<div class="week-day" style="background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:16px;margin-bottom:10px;box-shadow:var(--shadow)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;width:28px">${day.key}</div>
+    return `<div style="background:var(--s1);border:1px solid ${isToday?'var(--acc)':'var(--b1)'};border-radius:16px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)">
+      <div onclick="toggleDay('${accId}')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:11px;font-weight:700;color:${isToday?'var(--acc)':'var(--t3)'};letter-spacing:.08em;text-transform:uppercase;width:28px">${day.key}</div>
           <div style="font-size:14px;font-weight:600;color:var(--t1)">${day.label}</div>
+          ${isToday?`<span style="font-size:10px;font-weight:700;color:var(--acc);background:var(--acc-l);padding:2px 8px;border-radius:100px">Сьогодні</span>`:''}
         </div>
-        <div style="font-size:11px;color:${doneCnt===total?'var(--green)':'var(--t3)'};font-weight:600">${doneCnt}/${total}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:11px;color:${doneCnt===total&&total>0?'var(--green)':'var(--t3)'};font-weight:600">${doneCnt}/${total}</div>
+          <div id="${accId}_arrow" style="font-size:12px;color:var(--t3);transition:transform .2s">${isToday?'▼':'▶'}</div>
+        </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px">
+      <div id="${accId}" style="display:${isToday?'block':'none'};padding:0 16px 14px;display:${isToday?'flex':'none'};flex-direction:column;gap:6px">
         ${dayTasks.map(t=>`
-          <div class="week-task ${t.done?'done':''}" id="${t.id}" onclick="toggleCheck('${t.id}')"
+          <div class="week-task ${t.done?'done':''}" id="${t.id}" onclick="event.stopPropagation();toggleCheck('${t.id}')"
             style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;cursor:pointer;transition:all .2s">
             <div class="wcb" style="width:18px;height:18px;border-radius:5px;border:1.5px solid ${t.done?'var(--acc)':'var(--b2)'};background:${t.done?'var(--acc)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:10px;color:#fff;transition:all .2s">${t.done?'✓':''}</div>
             <div style="flex:1">
@@ -1071,6 +1095,16 @@ function toggleCheck(id){
 
 function saveChecks(){
   try{localStorage.setItem('lw_checks_'+currentSlug,JSON.stringify(checkedTasks));showToast('✅ Прогрес збережено');}catch(e){}
+}
+
+function toggleDay(id){
+  const el=document.getElementById(id);
+  const arrow=document.getElementById(id+'_arrow');
+  if(!el)return;
+  const isOpen=el.style.display==='flex'||el.style.display==='block';
+  el.style.display=isOpen?'none':'flex';
+  el.style.flexDirection='column';
+  if(arrow)arrow.textContent=isOpen?'▶':'▼';
 }
 
 function copyLink(){
