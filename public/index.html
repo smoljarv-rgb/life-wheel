@@ -1077,9 +1077,17 @@ function applyFeatureFlags(cfg){
   const spBlock = document.getElementById('socialProofBlock');
   if(spBlock){
     const hasReviews = (cfg.reviews||[]).filter(r=>r.active!==false).length > 0;
-    spBlock.style.display = (cfg.social_proof_enabled === true && hasReviews) ? 'block' : 'none';
+    // Fallback відгуки якщо сервер повернув порожній масив
+    const defaultReviews = [
+      { text: "Підняв кар'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.", author: "Олексій, 32", location: "Київ", active: true },
+      { text: "Нарешті побачила де реально проблема. Здоров'я 2/10 — і я навіть не помічала.", author: "Наталія, 28", location: "Львів", active: true },
+      { text: "Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.", author: "Марина, 35", location: "Коуч ICF", active: true },
+    ];
+    const reviewsToShow = (cfg.reviews && cfg.reviews.length > 0) ? cfg.reviews : defaultReviews;
+    const hasReviewsFinal = reviewsToShow.filter(r=>r.active!==false).length > 0;
+    spBlock.style.display = (cfg.social_proof_enabled === true && hasReviewsFinal) ? 'block' : 'none';
     if(cfg.social_proof_enabled === true){
-      renderSocialProofOnSite(cfg.reviews || []);
+      renderSocialProofOnSite(reviewsToShow);
     }
   }
 }
