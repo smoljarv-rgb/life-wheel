@@ -1035,16 +1035,8 @@ let lastParsed=null;
 let selectedSpheres=new Set();
 let isPremiumUnlocked=false; // true after payment or promo
 let freeAnalysisUsed=false; // 1 free sphere analysis per session
-try{ freeAnalysisUsed=sessionStorage.getItem('free_used')==='1'; }catch(e){}
-// Якщо повернулись з result.html — зберігаємо free_used щоб не давати нову безкоштовну спробу
-try{
-  if(new URLSearchParams(window.location.search).get('returning')==='1'){
-    freeAnalysisUsed=true;
-    sessionStorage.setItem('free_used','1');
-    // Прибираємо параметр з URL без перезавантаження
-    history.replaceState({},'',window.location.pathname);
-  }
-}catch(e){}
+try{ freeAnalysisUsed=localStorage.getItem('lw_free_used')==='1'; }catch(e){}
+
 let siteConfig={price:2,paywall_enabled:true,ads:{}};
 (async function loadConfig(){
   try{
@@ -1551,7 +1543,7 @@ function _startFromModal(){
   window._isFreeThisAnalysis = _isFreeThisAnalysis;
   if(!freeAnalysisUsed && !isPremiumUnlocked){
     freeAnalysisUsed=true;
-    try{ sessionStorage.setItem('free_used','1'); }catch(e){}
+    try{ localStorage.setItem('lw_free_used','1'); }catch(e){}
     // Cut to 1 worst sphere RIGHT NOW before anything else runs
     const allScores=SPHERES.map(s=>({id:s.id,score:parseFloat(avg(s.id).toFixed(1))}));
     const selected=[...selectedSpheres];
