@@ -544,14 +544,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   </div>
 </div>
 
-<!-- MAIN -->
-<!-- SOCIAL PROOF BLOCK (керується з адмін-панелі) -->
-<div id="socialProofBlock" style="display:none;max-width:520px;margin:0 auto 16px;padding:0 16px">
-  <div style="background:var(--sf2);border:1px solid var(--sb);border-radius:14px;padding:16px 20px">
-    <div style="font-size:.65rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">💬 Що кажуть користувачі</div>
-    <div id="socialProofReviews" style="display:flex;flex-direction:column;gap:10px"></div>
-  </div>
-</div>
+<!-- SOCIAL PROOF MOVED TO CENTER-COL -->
 
 <div class="wrapper">
 
@@ -588,6 +581,13 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     <div class="detail-box glass" id="detailBox"></div>
     <!-- Блок повного звіту — з'являється після аналізу -->
     <div id="fullResultBlock" style="display:none;width:100%;max-width:500px"></div>
+    <!-- SOCIAL PROOF BLOCK -->
+    <div id="socialProofBlock" style="display:none;width:100%;max-width:500px">
+      <div style="background:var(--sf2);border:1px solid var(--sb);border-radius:14px;padding:16px 20px;transition:all 3s">
+        <div style="font-size:.65rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center;transition:color 3s">💬 Що кажуть користувачі</div>
+        <div id="socialProofReviews" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
   </div>
 
   <!-- RIGHT -->
