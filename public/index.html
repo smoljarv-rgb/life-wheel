@@ -467,6 +467,11 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <span class="mm" id="moodName">Мінливо</span>
 </div>
 
+<!-- Кнопка тарифів -->
+<a href="/pricing" target="_blank" id="pricingBtn" style="position:fixed;top:14px;right:14px;z-index:200;display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(20px);border-radius:30px;font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:700;color:var(--ac);text-decoration:none;box-shadow:0 4px 14px var(--sh);transition:all .2s;white-space:nowrap" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='var(--sf)'">
+  💎 PRO
+</a>
+
 <!-- ONBOARDING -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -2215,34 +2220,42 @@ function renderAdvice(parsed){
   showAd('sidebar','adSlotSidebar');
   showAd('bottom_banner','adSlotBottom');
 
-  // ── Upsell after free analysis ──
+  // ── Upsell після безкоштовного аналізу ──
   if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){
     const upsell=document.createElement('div');
-    upsell.style.cssText='margin-top:16px;padding:18px 20px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border-radius:14px;color:#fff;text-align:center';
+    upsell.id='upsellBlock';
+    upsell.style.cssText='margin-top:16px';
     upsell.innerHTML=`
-      <div style="font-size:1rem;font-weight:800;margin-bottom:6px">🎯 Сподобався результат?</div>
-      <div style="font-size:.75rem;opacity:.9;line-height:1.6;margin-bottom:14px">
-        Це лише <strong>1 із 12 сфер</strong> твого Колеса Життя.<br>
-        Отримай повний аналіз усіх критичних сфер і 7-денний план для кожної.
-      </div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
-        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Аналіз 3–12 сфер</div>
-        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Повний PDF-звіт</div>
-        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.68rem">✓ Стратегія до 10/10</div>
-      </div>
-      <div style="margin-top:12px;padding:12px 16px;background:rgba(255,255,255,.12);border-radius:12px;border:1.5px solid rgba(255,255,255,.3)">
-        <div style="font-size:.8rem;font-weight:800;margin-bottom:6px">⏳ Оплата буде доступна найближчим часом</div>
-        <div style="font-size:.7rem;opacity:.85;margin-bottom:10px">Залиш email — повідомимо одразу як відкриється доступ</div>
-        <div style="display:flex;gap:6px">
-          <input type="email" id="paywallEmail" placeholder="твій@email.com"
-            style="flex:1;padding:9px 12px;border-radius:8px;border:none;font-size:.75rem;font-family:'Nunito',sans-serif;outline:none"
-            onkeydown="if(event.key==='Enter')document.getElementById('paywallEmailBtn').click()">
-          <button id="paywallEmailBtn" onclick="submitPaywallEmail()"
-            style="padding:9px 16px;background:#fff;color:#1a3a6a;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap">
-            Сповістити
-          </button>
+      <div style="background:var(--sf2);border:1.5px solid var(--sb);border-radius:16px;padding:20px;box-shadow:0 4px 20px var(--sh)">
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:.62rem;font-weight:800;color:var(--ac);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">✦ Це лише 1 із 12 сфер</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--td);margin-bottom:4px">Розблокуй повний аналіз</div>
+          <div style="font-size:.72rem;color:var(--tm);line-height:1.5">Отримай детальний план по всіх 12 сферах, heatmap, порівняння і roadmap на 30 днів</div>
         </div>
-        <div id="paywallEmailMsg" style="font-size:.65rem;margin-top:6px;opacity:.8"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--sf);border:1.5px solid var(--sb);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s" onclick="triggerPayment('report','uah')"
+            onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)'">
+            <div style="font-size:.6rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Одноразовий звіт</div>
+            <div style="font-size:1.4rem;font-weight:800;color:var(--td)">99 ₴</div>
+            <div style="font-size:.6rem;color:var(--tl);margin-top:2px">Повний звіт зараз</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#1a3a6a,#2878c8);border:1.5px solid rgba(40,120,200,.4);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s" onclick="triggerPayment('monthly','uah')"
+            onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:.6rem;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">⭐ Місячний PRO</div>
+            <div style="font-size:1.4rem;font-weight:800;color:#fff">249 ₴</div>
+            <div style="font-size:.6rem;color:rgba(255,255,255,.6);margin-top:2px">Необмежені аналізи</div>
+          </div>
+        </div>
+
+        <button onclick="triggerPayment('monthly','uah')" style="width:100%;padding:13px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .2s;margin-bottom:8px"
+          onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 10px 28px rgba(40,120,200,.5)'"
+          onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(40,120,200,.4)'">
+          🚀 Активувати PRO — 249 ₴/міс
+        </button>
+        <div style="text-align:center">
+          <a href="/pricing" style="font-size:.68rem;color:var(--ac);text-decoration:none" target="_blank">Переглянути всі тарифи →</a>
+        </div>
       </div>`;
     document.getElementById('analysisContent').appendChild(upsell);
   }
@@ -2844,6 +2857,41 @@ function onMobileSphereChange(id){
 
 // Слухаємо зміну розміру — перемикаємо між дропдауном і кнопками
 window.addEventListener('resize', buildMobileDropdown);
+
+// ── Оплата LiqPay ──
+function triggerPayment(plan, currency) {
+  var btn = event && event.target ? event.target : document.body;
+  var origText = btn.textContent || '';
+  if(btn.tagName === 'BUTTON') { btn.textContent = '⏳...'; btn.disabled = true; }
+
+  fetch('/api/liqpay/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan: plan, currency: currency || 'uah', email: '' })
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(result){
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = result.action;
+    form.target = '_blank';
+    [['data', result.data], ['signature', result.signature]].forEach(function(pair){
+      var inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = pair[0]; inp.value = pair[1];
+      form.appendChild(inp);
+    });
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  })
+  .catch(function(e){
+    console.error('Payment error:', e);
+    alert('Помилка оплати. Спробуй через /pricing або напиши support@koleso.live');
+  })
+  .finally(function(){
+    if(btn.tagName === 'BUTTON'){ btn.textContent = origText; btn.disabled = false; }
+  });
+}
 
 buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
 
