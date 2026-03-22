@@ -67,8 +67,8 @@ function loadDB() {
       waitlist_enabled: true,
       counter_enabled: true,
       scale_visible: false,
-      social_proof_enabled: false,
-      liqpay_enabled: false,
+      social_proof_enabled: true,
+      liqpay_enabled: true,
       promo_codes: [],
     },
     reviews: [
