@@ -3038,5 +3038,50 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
     <button class="btn-start" onclick="document.getElementById('privacyModal').style.display='none'">Зрозуміло ✓</button>
   </div>
 </div>
+
+<!-- ══ ПІДВАЛ САЙТУ ══ -->
+<footer id="siteFooter" style="margin-top:40px;background:var(--sf2);border-top:1.5px solid var(--sb);padding:32px 24px 20px;transition:background 3s,border-color 3s;">
+  <div style="max-width:960px;margin:0 auto">
+
+    <div style="display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;margin-bottom:28px">
+
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--td);margin-bottom:6px;transition:color 3s">
+          Колесо <em style="font-style:italic;color:var(--ac)">Життя</em>
+        </div>
+        <div style="font-size:.68rem;color:var(--tl);line-height:1.6;max-width:280px;transition:color 3s">
+          AI-коуч для оцінки балансу 12 сфер життя.<br>
+          Безкоштовний перший аналіз — без реєстрації.
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <a href="mailto:support@koleso.live" style="display:inline-flex;align-items:center;gap:5px;font-size:.65rem;color:var(--ac);text-decoration:none;background:var(--sf);border:1px solid var(--sb);border-radius:100px;padding:4px 12px;transition:all .2s">📧 support@koleso.live</a>
+          <a href="tel:+380678366608" style="display:inline-flex;align-items:center;gap:5px;font-size:.65rem;color:var(--tm);text-decoration:none;background:var(--sf);border:1px solid var(--sb);border-radius:100px;padding:4px 12px;transition:all .2s">📞 +38 067 836 66 08</a>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 28px">
+        <a href="/pricing" style="font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:6px">💎 Тарифи PRO</a>
+        <a href="/terms" style="font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:6px">📄 Публічна оферта</a>
+        <a href="mailto:support@koleso.live" style="font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:6px">✉️ Контакти</a>
+        <a href="javascript:void(0)" onclick="document.getElementById('privacyModal').style.display='flex'" style="font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:6px;cursor:pointer">🔒 Конфіденційність</a>
+        <a href="javascript:void(0)" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:6px;cursor:pointer">↑ Нагору</a>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--sb);margin-bottom:16px;transition:background 3s"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="font-size:.62rem;color:var(--tl);line-height:1.5;transition:color 3s">
+        © 2026 ФОП Смоляр В.А. · ІПН 3114013676 · Київська обл., м. Ржищів<br>
+        Оплата через <strong style="color:var(--tm)">LiqPay</strong> · Гарантія повернення 14 днів
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="font-size:.6rem;color:var(--tl);transition:color 3s">Безпечна оплата</div>
+        <div style="background:var(--sf);border:1px solid var(--sb);border-radius:6px;padding:3px 8px;font-size:.6rem;font-weight:700;color:var(--tm);transition:all 3s">🔒 LiqPay</div>
+      </div>
+    </div>
+
+  </div>
+</footer>
 </body>
 </html>
