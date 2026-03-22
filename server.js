@@ -8,6 +8,23 @@ const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+
+// ── LiqPay ──
+const LIQPAY_PUBLIC  = process.env.LIQPAY_PUBLIC_KEY  || 'sandbox_i49225421155';
+const LIQPAY_PRIVATE = process.env.LIQPAY_PRIVATE_KEY || 'sandbox_cPnao1O7fZrKyRPxEplDjdFTOWD2uO6hr43y7ECZ';
+
+function liqpaySign(data){
+  return crypto.createHash('sha1')
+    .update(LIQPAY_PRIVATE + data + LIQPAY_PRIVATE)
+    .digest('base64');
+}
+function liqpayEncode(obj){
+  return Buffer.from(JSON.stringify(obj)).toString('base64');
+}
+function liqpayDecode(str){
+  try{ return JSON.parse(Buffer.from(str,'base64').toString('utf8')); }catch(e){ return null; }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -502,6 +519,115 @@ app.post('/api/results/email', async (req, res) => {
     res.status(500).json({ error: 'Email error' });
   }
 });
+// ── LiqPay: генерація форми оплати ──
+const PLANS = {
+  report:  { name: 'Одноразовий звіт Koleso.live', amount_uah: 99,   amount_usd: 2.49  },
+  monthly: { name: 'PRO Місячний Koleso.live',      amount_uah: 249,  amount_usd: 5.99  },
+  yearly:  { name: 'PRO Річний Koleso.live',         amount_uah: 1990, amount_usd: 49.99 },
+};
+
+app.post('/api/liqpay/checkout', (req, res) => {
+  const { plan, currency, email } = req.body;
+  const planData = PLANS[plan];
+  if(!planData) return res.status(400).json({ error: 'Invalid plan' });
+
+  const cur = (currency === 'usd') ? 'USD' : 'UAH';
+  const amount = (currency === 'usd') ? planData.amount_usd : planData.amount_uah;
+  const orderId = `kl_${plan}_${Date.now()}`;
+
+  const params = {
+    version:     '3',
+    public_key:  LIQPAY_PUBLIC,
+    action:      'pay',
+    amount:      amount,
+    currency:    cur,
+    description: planData.name,
+    order_id:    orderId,
+    server_url:  'https://koleso.live/api/liqpay/callback',
+    result_url:  'https://koleso.live/thank-you',
+    language:    'uk',
+  };
+  if(email) params.customer = email;
+
+  const data      = liqpayEncode(params);
+  const signature = liqpaySign(data);
+
+  res.json({ data, signature, action: 'https://www.liqpay.ua/api/3/checkout' });
+});
+
+// ── LiqPay: webhook після оплати ──
+app.post('/api/liqpay/callback', express.urlencoded({ extended: true }), async (req, res) => {
+  try {
+    const { data, signature } = req.body;
+    if(!data || !signature) return res.sendStatus(400);
+
+    // Перевірка підпису
+    const expectedSig = liqpaySign(data);
+    if(expectedSig !== signature){
+      console.error('LiqPay: invalid signature');
+      return res.sendStatus(403);
+    }
+
+    const payment = liqpayDecode(data);
+    if(!payment) return res.sendStatus(400);
+
+    console.log('LiqPay payment:', payment.status, payment.order_id, payment.amount, payment.currency);
+
+    // Тільки успішні платежі
+    if(payment.status !== 'success' && payment.status !== 'sandbox') {
+      return res.sendStatus(200);
+    }
+
+    // Зберігаємо в db
+    const planKey = payment.order_id.split('_')[1] || 'unknown';
+    db.payments.push({
+      ts:        Date.now(),
+      order_id:  payment.order_id,
+      plan:      planKey,
+      amount:    payment.amount,
+      currency:  payment.currency,
+      email:     payment.sender_phone || payment.customer || '',
+      status:    payment.status,
+    });
+    saveDb();
+
+    // Надсилаємо лист з підтвердженням
+    const email = payment.customer || payment.sender_phone;
+    if(email && email.includes('@')){
+      const planName = (PLANS[planKey] || {}).name || 'PRO доступ';
+      try {
+        await resend.emails.send({
+          from: 'Колесо Життя <noreply@koleso.live>',
+          to: email,
+          subject: '✅ Оплата підтверджена — Koleso.live',
+          html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#0a0a0f;color:#f0f0f8;border-radius:16px">
+            <h2 style="font-size:20px;margin-bottom:12px">✅ Оплату підтверджено!</h2>
+            <p style="color:#8888a8;line-height:1.7;margin-bottom:16px">Дякуємо за покупку <strong style="color:#22d3a0">\${planName}</strong>.</p>
+            <p style="color:#8888a8;line-height:1.7;margin-bottom:24px">Твій доступ активовано. Поверніться на сайт та пройди повний аналіз!</p>
+            <a href="https://koleso.live" style="display:inline-block;padding:14px 28px;background:#22d3a0;color:#080810;font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">Відкрити Колесо Життя →</a>
+            <p style="color:#555570;font-size:12px;margin-top:32px">Koleso.live · <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a></p>
+          </div>`
+        });
+      } catch(e){ console.error('Email after payment error:', e); }
+    }
+
+    res.sendStatus(200);
+  } catch(e){
+    console.error('LiqPay callback error:', e);
+    res.sendStatus(500);
+  }
+});
+
+// ── /pricing сторінка ──
+app.get('/pricing', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pricing.html'));
+});
+
+// ── /thank-you сторінка ──
+app.get('/thank-you', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'thank-you.html'));
+});
+
 app.get('/result/:slug', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'result.html'));
 });

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дякуємо! — Koleso.live</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#09090f;color:#f0f0f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(32,216,160,.07) 0%,transparent 70%);pointer-events:none}
+.card{max-width:480px;width:100%;text-align:center;position:relative;z-index:1;animation:fadeUp .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.icon{font-size:72px;margin-bottom:24px;animation:bounce .6s .3s ease both}
+@keyframes bounce{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+h1{font-family:'Fraunces',serif;font-size:clamp(32px,6vw,52px);font-weight:600;line-height:1.1;margin-bottom:14px}
+h1 em{font-style:italic;color:#20d8a0}
+p{font-size:16px;color:#8888a8;line-height:1.7;margin-bottom:32px}
+.actions{display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto 40px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,#20d8a0,#18b088);color:#071a12;box-shadow:0 8px 24px rgba(32,216,160,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(32,216,160,.35)}
+.btn-secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8888a8}
+.btn-secondary:hover{color:#f0f0f8;border-color:rgba(255,255,255,.2)}
+.note{font-size:13px;color:#44445a;line-height:1.6}
+.note a{color:#20d8a0;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🎉</div>
+  <h1>Оплату<br><em>підтверджено!</em></h1>
+  <p>Твій PRO доступ активовано. Лист з підтвердженням надісланий на email. Починай свій повний аналіз прямо зараз!</p>
+  <div class="actions">
+    <a href="https://koleso.live" class="btn btn-primary">🌀 Відкрити Колесо Життя →</a>
+    <a href="https://koleso.live/pricing" class="btn btn-secondary">← Повернутись до тарифів</a>
+  </div>
+  <div class="note">Питання? Напиши нам: <a href="mailto:support@koleso.live">support@koleso.live</a></div>
+</div>
+</body>
+</html>
