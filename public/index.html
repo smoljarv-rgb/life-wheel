@@ -1078,30 +1078,39 @@ function applyFeatureFlags(cfg){
     scaleWrapper.style.display = 'block';
   }
 
-  // Social proof блок
-  setTimeout(function(){
-    var spBlock = document.getElementById('socialProofBlock');
-    var spReviews = document.getElementById('socialProofReviews');
-    if(!spBlock || !spReviews) return;
-    var defaultReviews = [
-      { text: "Підняв кар\'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.", author: "Олексій, 32", location: "Київ", active: true },
-      { text: "Нарешті побачила де реально проблема. Здоров\'я 2/10 — і я навіть не помічала.", author: "Наталія, 28", location: "Львів", active: true },
-      { text: "Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.", author: "Марина, 35", location: "Коуч ICF", active: true }
-    ];
-    var reviews = (cfg.reviews && cfg.reviews.length > 0) ? cfg.reviews : defaultReviews;
-    var active = reviews.filter(function(r){ return r.active !== false; });
-    if(cfg.social_proof_enabled === true && active.length > 0){
-      spReviews.innerHTML = active.map(function(r){
-        return '<div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:all 3s">' +
-          '<div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«' + r.text + '»</div>' +
-          '<div style="font-size:.63rem;color:var(--tl);margin-top:5px;font-weight:600;transition:color 3s">— ' + r.author + ' · ' + r.location + '</div>' +
-          '</div>';
-      }).join('');
-      spBlock.style.display = 'block';
-    } else {
-      spBlock.style.display = 'none';
-    }
-  }, 200);
+  // Social proof блок — зберігаємо cfg для відкладеного рендеру
+  window._pendingSocialCfg = cfg;
+  renderSocialProofFromCfg();
+}
+
+function renderSocialProofFromCfg(){
+  var cfg = window._pendingSocialCfg;
+  if(!cfg) return;
+  var spBlock = document.getElementById('socialProofBlock');
+  var spReviews = document.getElementById('socialProofReviews');
+  if(!spBlock || !spReviews){
+    // DOM ще не готовий — спробуємо ще раз
+    setTimeout(renderSocialProofFromCfg, 300);
+    return;
+  }
+  var defaultReviews = [
+    { text: "Підняв кар'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.", author: "Олексій, 32", location: "Київ", active: true },
+    { text: "Нарешті побачила де реально проблема. Здоров'я 2/10 — і я навіть не помічала.", author: "Наталія, 28", location: "Львів", active: true },
+    { text: "Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.", author: "Марина, 35", location: "Коуч ICF", active: true }
+  ];
+  var reviews = (cfg.reviews && cfg.reviews.length > 0) ? cfg.reviews : defaultReviews;
+  var active = reviews.filter(function(r){ return r.active !== false; });
+  if(cfg.social_proof_enabled === true && active.length > 0){
+    spReviews.innerHTML = active.map(function(r){
+      return '<div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:all 3s">' +
+        '<div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«' + r.text + '»</div>' +
+        '<div style="font-size:.63rem;color:var(--tl);margin-top:5px;font-weight:600;transition:color 3s">— ' + r.author + ' · ' + r.location + '</div>' +
+        '</div>';
+    }).join('');
+    spBlock.style.display = 'block';
+  } else {
+    spBlock.style.display = 'none';
+  }
 }
 
 function renderSocialProofOnSite(reviews){
