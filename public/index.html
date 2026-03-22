@@ -1162,25 +1162,60 @@ function showPaywall(){
   overlay.className='paywall-overlay';
   overlay.id='paywallOverlay';
   overlay.innerHTML=`
-    <div class="paywall-box">
+    <div class="paywall-box" style="max-width:440px;overflow-y:auto;max-height:90vh">
       <div class="promo-banner">🎯 AI-аналіз твого Колеса Життя</div>
-      <h2>Персональний план зростання</h2>
-      <p>Отримай детальний 7-денний план для кожної сфери, щоденний алгоритм дій та стратегію досягнення 10/10</p>
-      <ul class="paywall-features">
-        <li>Аналіз 3 критичних сфер від AI-коуча</li>
-        <li>7-денний покроковий план дій</li>
-        <li>Щоденні завдання з часом виконання</li>
-        <li>Ціль на 30 днів + шлях до 10/10</li>
-        <li>PDF-звіт для друку</li>
-      </ul>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <input type="text" id="promoInput" placeholder="Промокод (якщо є)" style="flex:1;padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:.75rem;outline:none;font-family:'Nunito',sans-serif">
-        <button onclick="applyPromo()" style="padding:8px 14px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700">Застосувати</button>
-      </div>
-      <div id="promoMsg" style="font-size:.7rem;margin-bottom:8px;display:none"></div>
+      <h2>Обери свій тариф</h2>
+      <p>Отримай повний AI-аналіз усіх 12 сфер, покроковий план і порівняння з іншими</p>
       <div id="paywallActionBlock">
-        <!-- Динамічно замінюється через updatePaywallAction() -->
-        <button class="pay-btn" id="payBtn" onclick="processPayment()">💳 Отримати план — $<span id="payPrice">2</span></button>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+
+          <!-- Одноразовий звіт -->
+          <div onclick="paywallPay('report')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f0f8ff;border:1.5px solid #b0d4f0;border-radius:12px;cursor:pointer;transition:all .2s"
+            onmouseover="this.style.borderColor='#2878c8';this.style.background='#e4f2ff'"
+            onmouseout="this.style.borderColor='#b0d4f0';this.style.background='#f0f8ff'">
+            <div>
+              <div style="font-size:.78rem;font-weight:800;color:#1a2e48">📄 Одноразовий звіт</div>
+              <div style="font-size:.65rem;color:#5a7090;margin-top:2px">Повний аналіз 12 сфер + PDF</div>
+            </div>
+            <div style="font-size:1.1rem;font-weight:800;color:#2878c8;white-space:nowrap">99 ₴</div>
+          </div>
+
+          <!-- Місячний PRO — виділений -->
+          <div onclick="paywallPay('monthly')" style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;cursor:pointer;position:relative;transition:all .2s"
+            onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 8px 24px rgba(40,120,200,.4)'"
+            onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="position:absolute;top:-9px;left:14px;background:#f5a623;color:#111;font-size:.58rem;font-weight:800;padding:2px 9px;border-radius:100px;letter-spacing:.04em">⭐ НАЙПОПУЛЯРНІШИЙ</div>
+            <div>
+              <div style="font-size:.78rem;font-weight:800;color:#fff">🔥 Місячний PRO</div>
+              <div style="font-size:.65rem;color:rgba(255,255,255,.7);margin-top:2px">Необмежені аналізи + трекінг</div>
+            </div>
+            <div style="font-size:1.1rem;font-weight:800;color:#fff;white-space:nowrap">249 ₴/міс</div>
+          </div>
+
+          <!-- Річний PRO -->
+          <div onclick="paywallPay('yearly')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8f0ff;border:1.5px solid #c8a8e8;border-radius:12px;cursor:pointer;transition:all .2s"
+            onmouseover="this.style.borderColor='#8040c0';this.style.background='#f0e4ff'"
+            onmouseout="this.style.borderColor='#c8a8e8';this.style.background='#f8f0ff'">
+            <div>
+              <div style="font-size:.78rem;font-weight:800;color:#1a2e48">💎 Річний PRO</div>
+              <div style="font-size:.65rem;color:#5a7090;margin-top:2px">Все включено · економія 33%</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:1.1rem;font-weight:800;color:#6020a0;white-space:nowrap">1 990 ₴/рік</div>
+              <div style="font-size:.58rem;color:#8040c0">~166 ₴/міс</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="text" id="promoInput" placeholder="Промокод (якщо є)" style="flex:1;padding:8px 12px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:8px;color:#1a2e48;font-size:.72rem;outline:none;font-family:'Nunito',sans-serif">
+          <button onclick="applyPromo()" style="padding:8px 14px;background:#e8f0f8;color:#2878c8;border:1px solid #c0d8f0;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700">Застосувати</button>
+        </div>
+        <div id="promoMsg" style="font-size:.68rem;margin-bottom:8px;display:none"></div>
+
+        <div style="text-align:center;margin-bottom:8px">
+          <span style="font-size:.6rem;color:#8aabcc">🔒 Безпечна оплата · LiqPay · 14 днів гарантія</span>
+        </div>
         <button class="pay-btn-free" onclick="closePaywall()">Пізніше</button>
       </div>
     </div>`;
@@ -1193,7 +1228,7 @@ function showPaywall(){
 function updatePaywallAction(){
   const block = document.getElementById('paywallActionBlock');
   if(!block) return;
-  const isWaitlist = siteConfig.waitlist_enabled !== false && !siteConfig.liqpay_enabled;
+  const isWaitlist = false; // LiqPay підключено — завжди показуємо оплату
   if(isWaitlist){
     block.innerHTML = `
       <div style="margin-top:4px;padding:14px 16px;background:rgba(255,255,255,.1);border-radius:12px;border:1.5px solid rgba(255,255,255,.25)">
@@ -1277,20 +1312,43 @@ function applyPromo(){
     }).catch(function(){});
 }
 
+function paywallPay(plan){
+  trackEvent('payment_initiated','monetization',plan);
+  var btn = event && event.currentTarget ? event.currentTarget : null;
+  if(btn){ btn.style.opacity='.6'; }
+
+  fetch('/api/liqpay/checkout',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({plan:plan, currency:'uah', email:''})
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(result){
+    if(!result.data || !result.signature) throw new Error('no data');
+    // Формуємо URL для переходу (без popup — обходимо блокування)
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = result.action;
+    form.style.display = 'none';
+    [['data', result.data],['signature', result.signature]].forEach(function(p){
+      var i = document.createElement('input');
+      i.type='hidden'; i.name=p[0]; i.value=p[1];
+      form.appendChild(i);
+    });
+    document.body.appendChild(form);
+    closePaywall();
+    form.submit(); // В тій же вкладці — не блокується браузером
+    document.body.removeChild(form);
+  })
+  .catch(function(e){
+    console.error('Payment error:',e);
+    if(btn){ btn.style.opacity='1'; }
+    alert('Помилка підключення. Спробуйте через /pricing або напишіть support@koleso.live');
+  });
+}
+
 function processPayment(){
-  trackEvent('payment_initiated','monetization','$2_plan');
-  // TODO: замінити на свій Stripe Payment Link
-  // Отримати на: dashboard.stripe.com → Payment Links → Create
-  const stripeUrl='https://buy.stripe.com/ЗАМІНИТИ_НА_СВІЙ_ПОСИЛАННЯ';
-  
-  // Для тестування — тимчасово розблоковуємо без оплати
-  // Видали цей блок після підключення Stripe:
-  isPremiumUnlocked=true;
-  try{ sessionStorage.setItem('premium_unlocked','1'); }catch(e){}
-  fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).catch(function(){});
-  closePaywall();
-  runAnalysis();
-  // window.open(stripeUrl,'_blank'); // розкоментуй після налаштування Stripe
+  paywallPay('monthly');
 }
 
 // ── Email capture ──
