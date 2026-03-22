@@ -196,13 +196,13 @@ footer{border-top:1px solid var(--b1);padding:24px 5vw;display:flex;justify-cont
 <footer>
   <div class="footer-copy">© 2026 Koleso.live</div>
   <div class="footer-links">
-    <a href="#">Умови</a>
-    <a href="#">Конфіденційність</a>
-    <a href="mailto:support@koleso.live">Підтримка</a>
+    <a href="/terms">Умови</a>
+    <a href="/#privacy">Конфіденційність</a>
+    <a href="/cdn-cgi/l/email-protection#3e4d4b4e4e514c4a7e5551525b4d51105257485b">Підтримка</a>
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var PRICES = {
   uah: {
     report:  { amount: 99,   period: '₴ · разова оплата',      savings: '' },
@@ -269,13 +269,4 @@ function startPayment(plan, btn) {
   })
   .catch(function(e) {
     console.error('Payment error:', e);
-    alert('Помилка підключення до платіжної системи. Спробуй ще раз або напиши нам на support@koleso.live');
-  })
-  .finally(function() {
-    btn.textContent = origText;
-    btn.disabled = false;
-  });
-}
-</script>
-</body>
-</html>
+    alert('Помилка підключення до платіжної системи. Спробуй ще раз або напиши нам

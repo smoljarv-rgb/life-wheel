@@ -619,6 +619,10 @@ app.post('/api/liqpay/callback', express.urlencoded({ extended: true }), async (
 });
 
 // ── /pricing сторінка ──
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
+
 app.get('/pricing', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pricing.html'));
 });
