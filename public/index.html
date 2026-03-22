@@ -351,6 +351,10 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   .mood-pill{top:8px;right:8px;font-size:.62rem;padding:4px 10px}
   .wrapper{padding-top:44px;display:flex;flex-direction:column}
 
+  /* Footer мобільний */
+  #siteFooter>div>div:first-child{grid-template-columns:1fr 1fr!important;gap:16px!important}
+  #siteFooter>div>div:first-child>div:first-child{grid-column:1/-1!important}
+
   /* Ховаємо стандартний лівий список сфер — замінюємо дропдауном */
   .left-col{display:none!important}
 
@@ -581,13 +585,6 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     <div class="detail-box glass" id="detailBox"></div>
     <!-- Блок повного звіту — з'являється після аналізу -->
     <div id="fullResultBlock" style="display:none;width:100%;max-width:500px"></div>
-    <!-- SOCIAL PROOF BLOCK -->
-    <div id="socialProofBlock" style="display:none;width:100%;max-width:500px">
-      <div style="background:var(--sf2);border:1px solid var(--sb);border-radius:14px;padding:16px 20px;transition:all 3s">
-        <div style="font-size:.65rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center;transition:color 3s">💬 Що кажуть користувачі</div>
-        <div id="socialProofReviews" style="display:flex;flex-direction:column;gap:10px"></div>
-      </div>
-    </div>
   </div>
 
   <!-- RIGHT -->
@@ -608,6 +605,14 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       <p id="printDate"></p>
     </div>
     <div id="printWheelWrap"><canvas id="printWheel" width="340" height="340"></canvas></div>
+
+    <!-- Social proof у правій колонці (видно на всіх пристроях) -->
+    <div id="socialProofBlock" style="display:none">
+      <div class="glass" style="padding:14px 16px">
+        <div style="font-size:.65rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;transition:color 3s">💬 Що кажуть користувачі</div>
+        <div id="socialProofReviews" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
 
     <!-- advice -->
     <div class="glass" style="padding:14px 16px;flex:1">
