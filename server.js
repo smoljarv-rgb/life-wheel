@@ -278,29 +278,58 @@ app.post('/api/promo/use', (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/api/config', (req, res) => {
-  const db = loadDB();
-  const s = db.settings;
-  res.json({
-    price: s.price,
-    paywall_enabled: s.paywall_enabled !== false,
-    waitlist_enabled: s.waitlist_enabled !== false,
-    counter_enabled: s.counter_enabled !== false,
-    scale_visible: s.scale_visible === true,
-    social_proof_enabled: s.social_proof_enabled === true,
-    liqpay_enabled: s.liqpay_enabled === true,
-    reviews: (db.reviews || []).filter(function(r){ return r.active !== false; }),
-    ads: db.ads,
-  });
+app.get('/api/config', async (req, res) => {
+  try {
+    // Читаємо налаштування з Supabase
+    const [cfgRes, revRes] = await Promise.all([
+      supabase.from('settings').select('value').eq('key','site_config').single(),
+      supabase.from('reviews').select('*').eq('active', true)
+    ]);
+    const s = (cfgRes.data && cfgRes.data.value) || {};
+    const reviews = (revRes.data || []).map(r => ({
+      text: r.text, author: r.author, location: r.location, active: r.active
+    }));
+    res.json({
+      price: s.price || 2,
+      paywall_enabled: s.paywall_enabled !== false,
+      waitlist_enabled: s.waitlist_enabled !== false,
+      counter_enabled: s.counter_enabled !== false,
+      scale_visible: s.scale_visible === true,
+      social_proof_enabled: s.social_proof_enabled !== false,
+      liqpay_enabled: s.liqpay_enabled !== false,
+      reviews: reviews,
+      ads: s.ads || {},
+    });
+  } catch(e) {
+    console.error('Config error:', e);
+    // Fallback до /tmp якщо Supabase недоступний
+    const db = loadDB();
+    const s = db.settings;
+    res.json({
+      price: s.price,
+      paywall_enabled: s.paywall_enabled !== false,
+      waitlist_enabled: s.waitlist_enabled !== false,
+      counter_enabled: s.counter_enabled !== false,
+      scale_visible: s.scale_visible === true,
+      social_proof_enabled: s.social_proof_enabled !== false,
+      liqpay_enabled: s.liqpay_enabled !== false,
+      reviews: (db.reviews || []).filter(r => r.active !== false),
+      ads: db.ads || {},
+    });
+  }
 });
 
 // ══════════════════════════════════════════
 //  SOCIAL PROOF (public)
 // ══════════════════════════════════════════
-app.get('/api/reviews', function(req, res) {
-  const db = loadDB();
-  const reviews = (db.reviews || []).filter(function(r){ return r.active !== false; });
-  res.json({ reviews });
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const { data } = await supabase.from('reviews').select('*').eq('active', true);
+    res.json({ reviews: (data||[]).map(r => ({ text:r.text, author:r.author, location:r.location })) });
+  } catch(e) {
+    const db = loadDB();
+    res.json({ reviews: (db.reviews||[]).filter(r => r.active !== false) });
+  }
 });
 
 // ══════════════════════════════════════════
@@ -449,32 +478,45 @@ app.get('/api/admin/emails', adminAuth, function(req, res) {
   res.json(db.emails.sort(function(a,b){ return b.ts-a.ts; }));
 });
 
-app.post('/api/admin/settings', adminAuth, function(req, res) {
-  const db = loadDB();
+app.post('/api/admin/settings', adminAuth, async function(req, res) {
   const { price, paywall_enabled, waitlist_enabled, counter_enabled,
           scale_visible, social_proof_enabled, liqpay_enabled, promo_codes } = req.body;
-  if (price !== undefined) db.settings.price = parseFloat(price);
-  if (paywall_enabled !== undefined) db.settings.paywall_enabled = !!paywall_enabled;
-  if (waitlist_enabled !== undefined) db.settings.waitlist_enabled = !!waitlist_enabled;
-  if (counter_enabled !== undefined) db.settings.counter_enabled = !!counter_enabled;
-  if (scale_visible !== undefined) db.settings.scale_visible = !!scale_visible;
-  if (social_proof_enabled !== undefined) db.settings.social_proof_enabled = !!social_proof_enabled;
-  if (liqpay_enabled !== undefined) db.settings.liqpay_enabled = !!liqpay_enabled;
-  if (promo_codes !== undefined) db.settings.promo_codes = promo_codes;
+  // Читаємо поточні налаштування
+  const { data } = await supabase.from('settings').select('value').eq('key','site_config').single();
+  const current = (data && data.value) || {};
+  const updated = Object.assign({}, current);
+  if (price !== undefined) updated.price = parseFloat(price);
+  if (paywall_enabled !== undefined) updated.paywall_enabled = !!paywall_enabled;
+  if (waitlist_enabled !== undefined) updated.waitlist_enabled = !!waitlist_enabled;
+  if (counter_enabled !== undefined) updated.counter_enabled = !!counter_enabled;
+  if (scale_visible !== undefined) updated.scale_visible = !!scale_visible;
+  if (social_proof_enabled !== undefined) updated.social_proof_enabled = !!social_proof_enabled;
+  if (liqpay_enabled !== undefined) updated.liqpay_enabled = !!liqpay_enabled;
+  if (promo_codes !== undefined) updated.promo_codes = promo_codes;
+  await supabase.from('settings').upsert({ key: 'site_config', value: updated, updated_at: new Date().toISOString() });
+  // Також зберігаємо в /tmp як backup
+  const db = loadDB();
+  Object.assign(db.settings, updated);
   saveDB(db);
   res.json({ ok: true });
 });
 
-app.get('/api/admin/social-proof', adminAuth, function(req, res) {
-  const db = loadDB();
-  res.json({ reviews: db.reviews || [] });
+app.get('/api/admin/social-proof', adminAuth, async function(req, res) {
+  try {
+    const { data } = await supabase.from('reviews').select('*').order('id');
+    res.json({ reviews: data || [] });
+  } catch(e) {
+    const db = loadDB();
+    res.json({ reviews: db.reviews || [] });
+  }
 });
 
-app.post('/api/admin/social-proof', adminAuth, function(req, res) {
-  const db = loadDB();
+app.post('/api/admin/social-proof', adminAuth, async function(req, res) {
   const { reviews } = req.body;
   if (!Array.isArray(reviews)) return res.status(400).json({ error: 'Invalid reviews' });
-  db.reviews = reviews.map(function(r){
+  // Видаляємо всі і вставляємо нові
+  await supabase.from('reviews').delete().neq('id', 0);
+  const toInsert = reviews.map(function(r){
     return {
       text: String(r.text || '').slice(0, 500),
       author: String(r.author || '').slice(0, 100),
@@ -482,6 +524,10 @@ app.post('/api/admin/social-proof', adminAuth, function(req, res) {
       active: r.active !== false,
     };
   });
+  if (toInsert.length > 0) await supabase.from('reviews').insert(toInsert);
+  // Backup в /tmp
+  const db = loadDB();
+  db.reviews = toInsert;
   saveDB(db);
   res.json({ ok: true });
 });
