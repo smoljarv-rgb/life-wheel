@@ -616,6 +616,8 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       <div id="adviceArea">
         <p class="placeholder-txt">Оціни сфери та натисни «Отримати план» — AI-коуч визначить 3 найкритичніші або ти обереш самостійно. Отримаєш таблицю балансу та покроковий алгоритм до 10/10.</p>
       </div>
+      <!-- Блок повного звіту після плану зростання -->
+      <div id="fullResultBlock2" style="display:none;margin-top:10px"></div>
       <!-- Email capture — показується після аналізу -->
       <div id="emailCapture" style="display:none" class="email-capture">
         <h3>📩 Отримати план на email</h3>
@@ -1034,6 +1036,15 @@ let selectedSpheres=new Set();
 let isPremiumUnlocked=false; // true after payment or promo
 let freeAnalysisUsed=false; // 1 free sphere analysis per session
 try{ freeAnalysisUsed=sessionStorage.getItem('free_used')==='1'; }catch(e){}
+// Якщо повернулись з result.html — зберігаємо free_used щоб не давати нову безкоштовну спробу
+try{
+  if(new URLSearchParams(window.location.search).get('returning')==='1'){
+    freeAnalysisUsed=true;
+    sessionStorage.setItem('free_used','1');
+    // Прибираємо параметр з URL без перезавантаження
+    history.replaceState({},'',window.location.pathname);
+  }
+}catch(e){}
 let siteConfig={price:2,paywall_enabled:true,ads:{}};
 (async function loadConfig(){
   try{
@@ -2163,12 +2174,19 @@ function renderAdvice(parsed){
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
 			window._lastResultUrl = '/result/' + saved.slug;
-			// Показуємо готовий блок під колесом
+			// Показуємо блок під колесом і після плану зростання
+			const _blockHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Nunito,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
 			const resultBlock = document.getElementById('fullResultBlock');
 			if(resultBlock){
 			  resultBlock.style.display = 'block';
-			  resultBlock.innerHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Nunito,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+			  resultBlock.innerHTML = _blockHTML;
 			}
+			const resultBlock2 = document.getElementById('fullResultBlock2');
+			if(resultBlock2){
+			  resultBlock2.style.display = 'block';
+			  resultBlock2.innerHTML = _blockHTML;
+			}
+
 		  }
 		}).catch(e => console.error('Save error:', e));
 
