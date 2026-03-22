@@ -648,24 +648,87 @@ app.post('/api/liqpay/callback', express.urlencoded({ extended: true }), async (
     });
     saveDb();
 
-    // Надсилаємо лист з підтвердженням
+    // ── Welcome email після оплати ──
     const email = payment.customer || payment.sender_phone;
     if(email && email.includes('@')){
-      const planName = (PLANS[planKey] || {}).name || 'PRO доступ';
+      const plan = PLANS[planKey] || {};
+      const planName = plan.name || 'PRO доступ';
+      const isPro = planKey === 'monthly' || planKey === 'yearly';
+      const planDetails = {
+        report:  { label: 'Одноразовий звіт', emoji: '📄', what: 'Повний аналіз 12 сфер + PDF-звіт + тижневий план дій' },
+        monthly: { label: 'Місячний PRO',      emoji: '🔥', what: 'Необмежені аналізи + трекінг прогресу + PDF-звіти' },
+        yearly:  { label: 'Річний PRO',        emoji: '💎', what: 'Все з місячного + річна статистика + пріоритетна підтримка' },
+      };
+      const pd = planDetails[planKey] || planDetails.monthly;
+      const amount = payment.amount + ' ' + (payment.currency === 'USD' ? '$' : '₴');
       try {
         await resend.emails.send({
-          from: 'Колесо Життя <noreply@koleso.live>',
+          from: 'Володимир з Колеса Життя <noreply@koleso.live>',
           to: email,
-          subject: '✅ Оплата підтверджена — Koleso.live',
-          html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#0a0a0f;color:#f0f0f8;border-radius:16px">
-            <h2 style="font-size:20px;margin-bottom:12px">✅ Оплату підтверджено!</h2>
-            <p style="color:#8888a8;line-height:1.7;margin-bottom:16px">Дякуємо за покупку <strong style="color:#22d3a0">\${planName}</strong>.</p>
-            <p style="color:#8888a8;line-height:1.7;margin-bottom:24px">Твій доступ активовано. Поверніться на сайт та пройди повний аналіз!</p>
-            <a href="https://koleso.live" style="display:inline-block;padding:14px 28px;background:#22d3a0;color:#080810;font-weight:700;border-radius:10px;text-decoration:none;font-size:14px">Відкрити Колесо Життя →</a>
-            <p style="color:#555570;font-size:12px;margin-top:32px">Koleso.live · <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a></p>
+          subject: `${pd.emoji} Доступ активовано — Koleso.live`,
+          html: `<!DOCTYPE html>
+<html lang="uk">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f4f0;font-family:Georgia,serif">
+  <div style="max-width:560px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a3a6a,#2878c8);padding:32px 32px 28px;text-align:center">
+      <div style="font-size:36px;margin-bottom:8px">${pd.emoji}</div>
+      <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px">Колесо Життя</div>
+      <h1 style="margin:0;font-size:24px;color:#fff;font-weight:700">Доступ активовано!</h1>
+      <div style="margin-top:10px;display:inline-block;background:rgba(255,255,255,.15);border-radius:100px;padding:6px 18px;font-size:13px;color:rgba(255,255,255,.9)">${pd.label} · ${amount}</div>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:32px">
+      <p style="margin:0 0 20px;font-size:16px;color:#2c1810;line-height:1.7">
+        Дякуємо за покупку! Твій <strong>${pd.label}</strong> активовано і вже готовий до роботи.
+      </p>
+
+      <!-- What you get -->
+      <div style="background:#f5f4f0;border-radius:12px;padding:20px;margin-bottom:24px">
+        <div style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Що входить у твій план</div>
+        <div style="font-size:15px;color:#333;line-height:1.8">${pd.what}</div>
+      </div>
+
+      <!-- Steps -->
+      <div style="margin-bottom:28px">
+        <div style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">З чого почати</div>
+        ${['Відкрий Koleso.live і оціни всі 12 сфер від 1 до 10','Натисни «Отримати план» — AI проаналізує твій баланс','Отримай повний звіт з планом на 30 днів','Повертайся через тиждень і відстежуй прогрес'].map((s,i) =>
+          `<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">
+            <div style="min-width:28px;height:28px;background:#2878c8;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:Arial,sans-serif">${i+1}</div>
+            <div style="font-size:15px;color:#333;line-height:1.6;padding-top:4px">${s}</div>
           </div>`
+        ).join('')}
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align:center;margin-bottom:28px">
+        <a href="https://koleso.live" style="display:inline-block;padding:16px 36px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;font-weight:700;border-radius:12px;text-decoration:none;font-size:16px;font-family:Arial,sans-serif">
+          Відкрити Колесо Життя →
+        </a>
+      </div>
+
+      <!-- Support -->
+      <div style="border-top:1px solid #eee;padding-top:20px;font-size:13px;color:#888;line-height:1.7">
+        Маєш питання? Пиши на
+        <a href="mailto:support@koleso.live" style="color:#2878c8">support@koleso.live</a>
+        або телефонуй <a href="tel:+380678366608" style="color:#2878c8">+38 067 836 66 08</a>.<br>
+        Гарантія повернення коштів — <strong>14 днів</strong> без запитань.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#f5f4f0;padding:16px 32px;text-align:center;font-family:Arial,sans-serif;font-size:11px;color:#aaa">
+      © 2026 ФОП Смоляр В.А. · Koleso.live ·
+      <a href="https://koleso.live/terms" style="color:#aaa">Умови</a>
+    </div>
+  </div>
+</body>
+</html>`
         });
-      } catch(e){ console.error('Email after payment error:', e); }
+      } catch(e){ console.error('Welcome email error:', e); }
     }
 
     res.sendStatus(200);
