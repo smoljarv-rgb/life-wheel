@@ -42,9 +42,20 @@ app.get('/favicon.svg', function(req, res) {
 // ══════════════════════════════════════════
 //  DATABASE (JSON file)
 // ══════════════════════════════════════════
+const DEFAULT_REVIEWS = [
+  { text: "Підняв кар'єру з 4 до 8 за 2 місяці. AI-план реально допоміг зрозуміти що змінити.", author: "Олексій, 32", location: "Київ", active: true },
+  { text: "Нарешті побачила де реально проблема. Здоров'я 2/10 — і я навіть не помічала.", author: "Наталія, 28", location: "Львів", active: true },
+  { text: "Використовую з клієнтами як коуч. Дуже зручно — одразу видно де фокусуватись.", author: "Марина, 35", location: "Коуч ICF", active: true },
+];
+
 function loadDB() {
   try {
-    if (fs.existsSync(DB_FILE)) return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    if (fs.existsSync(DB_FILE)) {
+      const db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+      // Якщо відгуків немає — додаємо дефолтні
+      if (!db.reviews || db.reviews.length === 0) db.reviews = DEFAULT_REVIEWS;
+      return db;
+    }
   } catch (e) {}
   return {
     events: [],

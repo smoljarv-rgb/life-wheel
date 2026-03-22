@@ -1076,7 +1076,8 @@ function applyFeatureFlags(cfg){
   // Social proof блок
   const spBlock = document.getElementById('socialProofBlock');
   if(spBlock){
-    spBlock.style.display = cfg.social_proof_enabled === true ? 'block' : 'none';
+    const hasReviews = (cfg.reviews||[]).filter(r=>r.active!==false).length > 0;
+    spBlock.style.display = (cfg.social_proof_enabled === true && hasReviews) ? 'block' : 'none';
     if(cfg.social_proof_enabled === true){
       renderSocialProofOnSite(cfg.reviews || []);
     }
@@ -1085,13 +1086,18 @@ function applyFeatureFlags(cfg){
 
 function renderSocialProofOnSite(reviews){
   const container = document.getElementById('socialProofReviews');
+  const block = document.getElementById('socialProofBlock');
   if(!container) return;
-  const active = reviews.filter(r => r.active !== false);
-  if(!active.length) return;
+  const active = (reviews||[]).filter(r => r.active !== false);
+  if(!active.length){
+    // Ховаємо блок якщо немає відгуків
+    if(block) block.style.display='none';
+    return;
+  }
   container.innerHTML = active.map(r => `
-    <div style="background:var(--sf1);border-radius:10px;padding:11px 14px">
-      <div style="font-size:.75rem;line-height:1.6;color:var(--tx)">«${r.text}»</div>
-      <div style="font-size:.63rem;color:var(--tl);margin-top:5px">— ${r.author} · ${r.location}</div>
+    <div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;transition:all 3s">
+      <div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«${r.text}»</div>
+      <div style="font-size:.63rem;color:var(--tl);margin-top:6px;font-weight:600;transition:color 3s">— ${r.author} · ${r.location}</div>
     </div>
   `).join('');
 }
