@@ -3036,14 +3036,23 @@ function triggerPayment(plan, currency) {
   })
   .then(function(res){ return res.json(); })
   .then(function(result){
+    if(!result.action || !result.formData) throw new Error('no data');
     var form = document.createElement('form');
     form.method = 'POST';
     form.action = result.action;
-    form.target = '_blank';
-    [['data', result.data], ['signature', result.signature]].forEach(function(pair){
-      var inp = document.createElement('input');
-      inp.type = 'hidden'; inp.name = pair[0]; inp.value = pair[1];
-      form.appendChild(inp);
+    Object.keys(result.formData).forEach(function(key){
+      var val = result.formData[key];
+      if(Array.isArray(val)){
+        val.forEach(function(v){
+          var inp = document.createElement('input');
+          inp.type='hidden'; inp.name=key; inp.value=v;
+          form.appendChild(inp);
+        });
+      } else {
+        var inp = document.createElement('input');
+        inp.type='hidden'; inp.name=key; inp.value=val;
+        form.appendChild(inp);
+      }
     });
     document.body.appendChild(form);
     form.submit();

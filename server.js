@@ -10,20 +10,14 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-// ── LiqPay ──
-const LIQPAY_PUBLIC  = process.env.LIQPAY_PUBLIC_KEY  || 'sandbox_i49225421155';
-const LIQPAY_PRIVATE = process.env.LIQPAY_PRIVATE_KEY || 'sandbox_cPnao1O7fZrKyRPxEplDjdFTOWD2uO6hr43y7ECZ';
+// ── WayForPay ──
+const WFP_MERCHANT  = process.env.WAYFORPAY_MERCHANT || 'koleso_live';
+const WFP_SECRET    = process.env.WAYFORPAY_SECRET   || '';
+const WFP_PASSWORD  = process.env.WAYFORPAY_PASSWORD || '';
 
-function liqpaySign(data){
-  return crypto.createHash('sha1')
-    .update(LIQPAY_PRIVATE + data + LIQPAY_PRIVATE)
-    .digest('base64');
-}
-function liqpayEncode(obj){
-  return Buffer.from(JSON.stringify(obj)).toString('base64');
-}
-function liqpayDecode(str){
-  try{ return JSON.parse(Buffer.from(str,'base64').toString('utf8')); }catch(e){ return null; }
+function wfpSign(params){
+  const str = params.join(';');
+  return crypto.createHmac('md5', WFP_SECRET).update(str).digest('hex');
 }
 
 const app = express();
@@ -576,7 +570,7 @@ app.post('/api/results/email', async (req, res) => {
     res.status(500).json({ error: 'Email error' });
   }
 });
-// ── LiqPay: генерація форми оплати ──
+// ── WayForPay: тарифи та генерація форми оплати ──
 const PLANS = {
   report:  { name: 'Одноразовий звіт Koleso.live', amount_uah: 99,   amount_usd: 2.49  },
   monthly: { name: 'PRO Місячний Koleso.live',      amount_uah: 249,  amount_usd: 5.99  },
@@ -591,65 +585,98 @@ app.post('/api/liqpay/checkout', (req, res) => {
   const cur = (currency === 'usd') ? 'USD' : 'UAH';
   const amount = (currency === 'usd') ? planData.amount_usd : planData.amount_uah;
   const orderId = `kl_${plan}_${Date.now()}`;
+  const orderDate = Math.floor(Date.now() / 1000);
 
-  const params = {
-    version:     '3',
-    public_key:  LIQPAY_PUBLIC,
-    action:      'pay',
-    amount:      amount,
-    currency:    cur,
-    description: planData.name,
-    order_id:    orderId,
-    server_url:  'https://koleso.live/api/liqpay/callback',
-    result_url:  'https://koleso.live/thank-you',
-    language:    'uk',
+  // WayForPay підпис: merchantAccount;merchantDomainName;orderReference;orderDate;amount;currency;productName;productCount;productPrice
+  const signParams = [
+    WFP_MERCHANT,
+    'koleso.live',
+    orderId,
+    orderDate,
+    amount,
+    cur,
+    planData.name,
+    1,
+    amount
+  ];
+  const merchantSignature = wfpSign(signParams.map(String));
+
+  const formData = {
+    merchantAccount:        WFP_MERCHANT,
+    merchantDomainName:     'koleso.live',
+    merchantTransactionSecureType: 'AUTO',
+    orderReference:         orderId,
+    orderDate:              orderDate,
+    amount:                 amount,
+    currency:               cur,
+    orderTimeout:           49000,
+    productName:            [planData.name],
+    productCount:           [1],
+    productPrice:           [amount],
+    clientEmail:            email || '',
+    language:               'UA',
+    returnUrl:              'https://koleso.live/thank-you',
+    serviceUrl:             'https://koleso.live/api/liqpay/callback',
+    merchantSignature:      merchantSignature,
   };
-  if(email) params.customer = email;
 
-  const data      = liqpayEncode(params);
-  const signature = liqpaySign(data);
-
-  res.json({ data, signature, action: 'https://www.liqpay.ua/api/3/checkout' });
+  res.json({
+    action: 'https://secure.wayforpay.com/pay',
+    formData: formData
+  });
 });
 
-// ── LiqPay: webhook після оплати ──
-app.post('/api/liqpay/callback', express.urlencoded({ extended: true }), async (req, res) => {
+// ── WayForPay: webhook після оплати ──
+app.post('/api/liqpay/callback', express.json(), async (req, res) => {
   try {
-    const { data, signature } = req.body;
-    if(!data || !signature) return res.sendStatus(400);
+    const body = req.body;
+    if(!body || !body.merchantAccount) return res.sendStatus(400);
 
-    // Перевірка підпису
-    const expectedSig = liqpaySign(data);
-    if(expectedSig !== signature){
-      console.error('LiqPay: invalid signature');
-      return res.sendStatus(403);
+    // Перевірка підпису WayForPay
+    const sigParams = [
+      body.merchantAccount,
+      body.orderReference,
+      body.amount,
+      body.currency,
+      body.authCode||'',
+      body.cardPan||'',
+      body.transactionStatus||'',
+      body.reasonCode||''
+    ];
+    const expectedSig = wfpSign(sigParams.map(String));
+    if(expectedSig !== body.merchantSignature){
+      console.error('WayForPay: invalid signature');
     }
 
-    const payment = liqpayDecode(data);
-    if(!payment) return res.sendStatus(400);
-
-    console.log('LiqPay payment:', payment.status, payment.order_id, payment.amount, payment.currency);
+    console.log('WayForPay payment:', body.transactionStatus, body.orderReference, body.amount, body.currency);
 
     // Тільки успішні платежі
-    if(payment.status !== 'success' && payment.status !== 'sandbox') {
-      return res.sendStatus(200);
+    if(body.transactionStatus !== 'Approved') {
+      // Відповідаємо WayForPay що отримали
+      return res.json({
+        orderReference: body.orderReference,
+        status: 'accept',
+        time: Math.floor(Date.now()/1000),
+        signature: wfpSign([body.orderReference, 'accept', Math.floor(Date.now()/1000)].map(String))
+      });
     }
 
     // Зберігаємо в db
-    const planKey = payment.order_id.split('_')[1] || 'unknown';
+    const planKey = (body.orderReference||'').split('_')[1] || 'unknown';
+    const db = loadDB();
     db.payments.push({
       ts:        Date.now(),
-      order_id:  payment.order_id,
+      order_id:  body.orderReference,
       plan:      planKey,
-      amount:    payment.amount,
-      currency:  payment.currency,
-      email:     payment.sender_phone || payment.customer || '',
-      status:    payment.status,
+      amount:    body.amount,
+      currency:  body.currency,
+      email:     body.email || body.clientEmail || '',
+      status:    body.transactionStatus,
     });
-    saveDb();
+    saveDB(db);
 
     // ── Welcome email після оплати ──
-    const email = payment.customer || payment.sender_phone;
+    const email = body.email || body.clientEmail || '';
     if(email && email.includes('@')){
       const plan = PLANS[planKey] || {};
       const planName = plan.name || 'PRO доступ';
@@ -731,9 +758,15 @@ app.post('/api/liqpay/callback', express.urlencoded({ extended: true }), async (
       } catch(e){ console.error('Welcome email error:', e); }
     }
 
-    res.sendStatus(200);
+    // Відповідаємо WayForPay
+    res.json({
+      orderReference: body.orderReference,
+      status: 'accept',
+      time: Math.floor(Date.now()/1000),
+      signature: wfpSign([body.orderReference, 'accept', String(Math.floor(Date.now()/1000))])
+    });
   } catch(e){
-    console.error('LiqPay callback error:', e);
+    console.error('WayForPay callback error:', e);
     res.sendStatus(500);
   }
 });
