@@ -1431,20 +1431,28 @@ function paywallPay(plan){
   })
   .then(function(res){ return res.json(); })
   .then(function(result){
-    if(!result.data || !result.signature) throw new Error('no data');
-    // Формуємо URL для переходу (без popup — обходимо блокування)
+    if(!result.action || !result.formData) throw new Error('no data');
     var form = document.createElement('form');
     form.method = 'POST';
     form.action = result.action;
     form.style.display = 'none';
-    [['data', result.data],['signature', result.signature]].forEach(function(p){
-      var i = document.createElement('input');
-      i.type='hidden'; i.name=p[0]; i.value=p[1];
-      form.appendChild(i);
+    Object.keys(result.formData).forEach(function(key){
+      var val = result.formData[key];
+      if(Array.isArray(val)){
+        val.forEach(function(v){
+          var inp = document.createElement('input');
+          inp.type='hidden'; inp.name=key; inp.value=v;
+          form.appendChild(inp);
+        });
+      } else {
+        var inp = document.createElement('input');
+        inp.type='hidden'; inp.name=key; inp.value=val;
+        form.appendChild(inp);
+      }
     });
     document.body.appendChild(form);
     closePaywall();
-    form.submit(); // В тій же вкладці — не блокується браузером
+    form.submit();
     document.body.removeChild(form);
   })
   .catch(function(e){
