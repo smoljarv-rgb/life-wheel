@@ -772,6 +772,16 @@ app.post('/api/liqpay/callback', express.json(), async (req, res) => {
 });
 
 // ── /pricing сторінка ──
+app.get('/pricing.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'public', 'pricing.js'));
+});
+
+app.get('/pricing.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'public', 'pricing.js'));
+});
+
 app.get('/sitemap.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
 });
