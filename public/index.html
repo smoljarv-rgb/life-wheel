@@ -543,10 +543,15 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <span class="mm" id="moodName">Мінливо</span>
 </div>
 
-<!-- Кнопка тарифів -->
-<a href="/pricing" target="_blank" id="pricingBtn" style="position:fixed;top:14px;right:14px;z-index:200;display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(20px);border-radius:30px;font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:700;color:var(--ac);text-decoration:none;box-shadow:0 4px 14px var(--sh);transition:all .2s;white-space:nowrap" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='var(--sf)'">
-  💎 PRO
-</a>
+<!-- Кнопки навігації -->
+<div style="position:fixed;top:14px;right:14px;z-index:200;display:flex;gap:8px;align-items:center">
+  <a href="/account" id="accountBtn" style="display:flex;align-items:center;gap:5px;padding:7px 12px;background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(20px);border-radius:30px;font-family:'Nunito',sans-serif;font-size:.65rem;font-weight:700;color:var(--tm);text-decoration:none;box-shadow:0 4px 14px var(--sh);transition:all .2s;white-space:nowrap" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='var(--sf)'">
+    👤 Кабінет
+  </a>
+  <a href="/pricing" target="_blank" id="pricingBtn" style="display:flex;align-items:center;gap:5px;padding:7px 12px;background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(20px);border-radius:30px;font-family:'Nunito',sans-serif;font-size:.65rem;font-weight:700;color:var(--ac);text-decoration:none;box-shadow:0 4px 14px var(--sh);transition:all .2s;white-space:nowrap" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='var(--sf)'">
+    💎 PRO
+  </a>
+</div>
 
 <!-- ONBOARDING -->
 <div class="modal-overlay" id="modalOverlay">

@@ -675,6 +675,26 @@ app.post('/api/liqpay/callback', express.json(), async (req, res) => {
     });
     saveDB(db);
 
+    // Зберігаємо підписку в Supabase
+    const payEmail = body.email || body.clientEmail || '';
+    if(payEmail && payEmail.includes('@')){
+      const planDurations = { report: 365, monthly: 30, yearly: 365 };
+      const days = planDurations[planKey] || 30;
+      const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      try {
+        await supabase.from('subscriptions').insert({
+          email:      payEmail,
+          plan:       planKey,
+          status:     'active',
+          amount:     body.amount,
+          currency:   body.currency,
+          order_id:   body.orderReference,
+          expires_at: expiresAt,
+        });
+        console.log('Subscription saved for:', payEmail);
+      } catch(e){ console.error('Subscription save error:', e); }
+    }
+
     // ── Welcome email після оплати ──
     const email = body.email || body.clientEmail || '';
     if(email && email.includes('@')){
@@ -772,9 +792,17 @@ app.post('/api/liqpay/callback', express.json(), async (req, res) => {
 });
 
 // ── /pricing сторінка ──
+app.get('/account', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'account.html'));
+});
+
 app.get('/pricing.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.sendFile(path.join(__dirname, 'public', 'pricing.js'));
+});
+
+app.get('/account', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'account.html'));
 });
 
 app.get('/pricing.js', (req, res) => {
