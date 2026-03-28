@@ -435,14 +435,16 @@ function showToast(msg){
   setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
-// ── Зберігаємо email в таблицю subscribers після входу ──
+// ── Зберігаємо email через сервер після входу ──
 async function saveSubscriberEmail(email){
   if(!email) return;
   try {
-    await sb.from('subscribers').upsert(
-      { email: email, source: 'google_auth', updated_at: new Date().toISOString() },
-      { onConflict: 'email', ignoreDuplicates: true }
-    );
+    await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'google_auth' })
+    });
+    // Ігноруємо 409 (дублікат) — це нормально
   } catch(e) {
     console.warn('Не вдалось зберегти email підписника:', e);
   }

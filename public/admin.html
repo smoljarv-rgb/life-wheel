@@ -306,13 +306,7 @@ tr:hover td{background:#1e2d48}
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-          <label class="toggle"><input type="checkbox" id="liqpayToggle"><span class="toggle-slider"></span></label>
-          <div>
-            <div style="font-size:.8rem">LiqPay оплата активна</div>
-            <div style="font-size:.65rem;color:#4a6a8a">Вмикати після підключення ФОП + LiqPay</div>
-          </div>
-        </div>
+
 
         <div style="padding:10px 14px;background:#0f2a1a;border-radius:8px;border:1px solid #1a4a2a;margin-bottom:16px">
           <div style="font-size:.7rem;color:#4ade80;font-weight:700;margin-bottom:4px">📊 Статус функцій</div>
@@ -685,7 +679,7 @@ function renderSettings(s){
   document.getElementById('counterToggle').checked = s.counter_enabled !== false;
   document.getElementById('scaleToggle').checked = s.scale_visible !== false;
   document.getElementById('socialProofToggle').checked = s.social_proof_enabled === true;
-  document.getElementById('liqpayToggle').checked = s.liqpay_enabled === true;
+
   updateFeatureStatus(s);
 }
 
@@ -698,7 +692,7 @@ function updateFeatureStatus(s){
     { label: 'Лічильник', on: s.counter_enabled !== false },
     { label: 'Шкала оцінювання', on: s.scale_visible !== false },
     { label: 'Social proof', on: s.social_proof_enabled === true },
-    { label: 'LiqPay оплата', on: s.liqpay_enabled === true },
+
   ];
   el.innerHTML = items.map(i =>
     `<span style="margin-right:12px">${i.on ? '🟢' : '🔴'} ${i.label}</span>`
@@ -712,10 +706,10 @@ function saveSettings(){
   const counter_enabled = document.getElementById('counterToggle').checked;
   const scale_visible = document.getElementById('scaleToggle').checked;
   const social_proof_enabled = document.getElementById('socialProofToggle').checked;
-  const liqpay_enabled = document.getElementById('liqpayToggle').checked;
+
 
   const settings = { price, paywall_enabled, waitlist_enabled, counter_enabled,
-                     scale_visible, social_proof_enabled, liqpay_enabled };
+                     scale_visible, social_proof_enabled };
 
   api('/api/admin/settings', 'POST', settings).then(() => {
     showToast('✅ Налаштування збережено');
