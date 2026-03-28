@@ -205,10 +205,10 @@ footer{border-top:1px solid var(--b1);padding:24px 5vw;display:flex;justify-cont
   <div class="footer-links">
     <a href="/terms">Умови</a>
     <a href="/#privacy">Конфіденційність</a>
-    <a href="/cdn-cgi/l/email-protection#41323431312e3335012a2e2d24322e6f2d283724">Підтримка</a>
+    <a href="mailto:support@koleso.live">Підтримка</a>
   </div>
 </footer>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 var PRICES = {
   uah: {
     report:  { amount: 99,   period: '₴ · разова оплата',      savings: '' },
@@ -279,3 +279,6 @@ function startPayment(plan, btn) {
   .catch(function(e){
     console.error('Payment error:', e);
     alert('Помилка. Спробуй ще раз або напиш
+<script src="/js/pricing-app.js"></script>
+</body>
+</html>

@@ -149,6 +149,7 @@ tr:hover td{background:#1e2d48}
     <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span> Дашборд</div>
     <div class="nav-item" onclick="showPage('ads',this)"><span class="icon">📢</span> Реклама</div>
     <div class="nav-item" onclick="showPage('emails',this)"><span class="icon">📧</span> Email-база</div>
+    <div class="nav-item" onclick="showPage('subscribers',this)"><span class="icon">👥</span> Підписники</div>
     <div class="nav-item" onclick="showPage('settings',this)"><span class="icon">⚙️</span> Налаштування</div>
     <div class="nav-item" onclick="showPage('promos',this)"><span class="icon">🎁</span> Промокоди</div>
     <div class="nav-item" onclick="showPage('socialproof',this)"><span class="icon">💬</span> Social proof</div>
@@ -219,6 +220,43 @@ tr:hover td{background:#1e2d48}
     <span id="broadcastResult" style="font-size:.75rem;color:#4a6a8a"></span>
   </div>
 </div>
+    <!-- SUBSCRIBERS -->
+    <div class="page" id="page-subscribers">
+      <div class="page-title">👥 Підписники</div>
+      <div class="card">
+        <h3>📋 Всі підписники <span id="subCount" style="color:#4a6a8a;font-weight:400"></span>
+          <a class="export-btn" id="exportSubCsvBtn" style="margin-left:auto">⬇ CSV</a>
+        </h3>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <input type="text" id="subSearch" placeholder="Пошук за email..." style="flex:1;min-width:200px;padding:6px 10px;border:1px solid #d0dae8;border-radius:6px;font-size:.75rem"
+            oninput="filterSubs()">
+          <button class="btn" onclick="loadSubscribers()" style="padding:6px 14px;font-size:.72rem">🔄 Оновити</button>
+        </div>
+        <table>
+          <thead><tr><th>Email</th><th>Дата реєстрації</th><th>Джерело</th><th>Дія</th></tr></thead>
+          <tbody id="subsTbl"></tbody>
+        </table>
+        <div id="subsPagination" style="margin-top:12px;text-align:center;font-size:.72rem;color:#4a6a8a"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>📊 Статистика підписників</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">
+          <div style="background:#f0f6ff;border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:1.4rem;font-weight:800;color:#2878c8" id="subTotal">—</div>
+            <div style="font-size:.65rem;color:#4a6a8a;margin-top:2px">Всього</div>
+          </div>
+          <div style="background:#f0fff4;border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:1.4rem;font-weight:800;color:#207040" id="subWeek">—</div>
+            <div style="font-size:.65rem;color:#4a6a8a;margin-top:2px">За тиждень</div>
+          </div>
+          <div style="background:#fffbf0;border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:1.4rem;font-weight:800;color:#c07820" id="subToday">—</div>
+            <div style="font-size:.65rem;color:#4a6a8a;margin-top:2px">Сьогодні</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="page-title">⚙️ Налаштування</div>
@@ -403,6 +441,7 @@ function showPage(id, el){
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
   if(id === 'emails') loadEmails();
+  if(id === 'subscribers') loadSubscribers();
   if(id === 'ads' && statsData) renderAds(statsData.ads);
   if(id === 'socialproof') loadSocialProof();
   if(id === 'settings' && statsData) renderSettings(statsData.settings);
@@ -588,6 +627,58 @@ function sendBroadcast(){
         : '<tr><td colspan="3" style="color:#4a6a8a;text-align:center;padding:20px">Email-ів поки немає</td></tr>';
     });
   });
+
+// ── ПІДПИСНИКИ ──
+var allSubs = [];
+function loadSubscribers(){
+  api('/api/admin/subscribers').then(function(subs){
+    allSubs = subs || [];
+    renderSubs(allSubs);
+    // Stats
+    var now = Date.now();
+    var week = subs.filter(function(s){ return new Date(s.created_at).getTime() > now - 7*24*3600*1000; }).length;
+    var today = subs.filter(function(s){ return new Date(s.created_at).getTime() > now - 24*3600*1000; }).length;
+    document.getElementById('subTotal').textContent = subs.length;
+    document.getElementById('subWeek').textContent = week;
+    document.getElementById('subToday').textContent = today;
+    document.getElementById('subCount').textContent = '('+subs.length+')';
+    // CSV export
+    document.getElementById('exportSubCsvBtn').onclick = function(){
+      var csv = 'Email,Дата,Джерело\n' + subs.map(function(s){
+        return s.email+','+new Date(s.created_at).toLocaleDateString('uk-UA')+','+(s.source||'—');
+      }).join('\n');
+      var a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'subscribers_'+new Date().toISOString().slice(0,10)+'.csv';
+      a.click();
+    };
+  }).catch(function(){ document.getElementById('subsTbl').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#4a6a8a;padding:20px">Помилка завантаження</td></tr>'; });
+}
+
+function renderSubs(subs){
+  document.getElementById('subsTbl').innerHTML = subs.length
+    ? subs.map(function(s){
+        var date = new Date(s.created_at).toLocaleDateString('uk-UA', {day:'numeric',month:'short',year:'numeric'});
+        var source = s.source || 'сайт';
+        return '<tr><td>'+s.email+'</td><td style="color:#4a6a8a">'+date+'</td><td><span style="background:#e8f0fe;color:#2878c8;padding:2px 8px;border-radius:4px;font-size:.65rem">'+source+'</span></td><td><button onclick="deleteSub(''+s.email+'')" style="background:none;border:1px solid #fcc;color:#c04;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">✕</button></td></tr>';
+      }).join('')
+    : '<tr><td colspan="4" style="color:#4a6a8a;text-align:center;padding:20px">Підписників поки немає</td></tr>';
+}
+
+function filterSubs(){
+  var q = document.getElementById('subSearch').value.toLowerCase();
+  renderSubs(q ? allSubs.filter(function(s){ return s.email.toLowerCase().includes(q); }) : allSubs);
+}
+
+function deleteSub(email){
+  if(!confirm('Видалити '+email+' зі списку підписників?')) return;
+  api('/api/admin/subscribers/'+encodeURIComponent(email), 'DELETE').then(function(){
+    allSubs = allSubs.filter(function(s){ return s.email !== email; });
+    renderSubs(allSubs);
+    document.getElementById('subCount').textContent = '('+allSubs.length+')';
+    document.getElementById('subTotal').textContent = allSubs.length;
+  });
+}
 
 // ── SETTINGS ──
 function renderSettings(s){

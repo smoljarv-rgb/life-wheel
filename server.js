@@ -181,6 +181,13 @@ app.post('/api/subscribe', async (req, res) => {
     return res.status(500).json({ error: 'DB error' });
   }
 
+  // Також зберігаємо в db.emails як backup
+  const db = loadDB();
+  if (!db.emails.find(e => e.email === email)) {
+    db.emails.push({ ts: Date.now(), email, ip, source: 'subscribe' });
+    saveDB(db);
+  }
+
   // Відправляємо підтвердження на email
   try {
    await resend.emails.send({
@@ -233,10 +240,10 @@ app.post('/api/subscribe', async (req, res) => {
   }
 
   // Зберігаємо локально для статистики
-  const db = loadDB();
-  if (!db.emails.find(e => e.email === email)) {
-    db.emails.push({ ts: Date.now(), email, ip });
-    saveDB(db);
+  const dbLocal = loadDB();
+  if (!dbLocal.emails.find(e => e.email === email)) {
+    dbLocal.emails.push({ ts: Date.now(), email, ip });
+    saveDB(dbLocal);
   }
 
   res.json({ ok: true });
@@ -470,6 +477,31 @@ app.post('/api/admin/broadcast', adminAuth, async function(req, res) {
 app.get('/api/admin/emails', adminAuth, function(req, res) {
   const db = loadDB();
   res.json(db.emails.sort(function(a,b){ return b.ts-a.ts; }));
+});
+
+// ── Підписники з Supabase ──
+app.get('/api/admin/subscribers', adminAuth, async function(req, res) {
+  try {
+    const { data, error } = await supabase
+      .from('subscribers')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    res.json(data || []);
+  } catch(e) {
+    console.error('Subscribers error:', e);
+    res.json([]);
+  }
+});
+
+app.delete('/api/admin/subscribers/:email', adminAuth, async function(req, res) {
+  try {
+    const email = decodeURIComponent(req.params.email);
+    await supabase.from('subscribers').delete().eq('email', email);
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post('/api/admin/settings', adminAuth, async function(req, res) {
@@ -792,6 +824,13 @@ app.post('/api/liqpay/callback', express.json(), async (req, res) => {
 });
 
 // ── /pricing сторінка ──
+// ── JS файли для сторінок (обходять Cloudflare) ──
+app.get('/js/pricing-app.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(__dirname, 'public', 'pricing-app.js'));
+});
+
 app.get('/account', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'account.html'));
 });
@@ -799,6 +838,13 @@ app.get('/account', (req, res) => {
 app.get('/pricing.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.sendFile(path.join(__dirname, 'public', 'pricing.js'));
+});
+
+// ── JS файли для сторінок (обходять Cloudflare) ──
+app.get('/js/pricing-app.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(__dirname, 'public', 'pricing-app.js'));
 });
 
 app.get('/account', (req, res) => {
