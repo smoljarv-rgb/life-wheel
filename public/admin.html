@@ -597,36 +597,33 @@ function sendBroadcast(){
     })
     .catch(() => result.textContent = '❌ Помилка з\'єднання');
 }
-  // Завантажуємо з Supabase напряму
-  fetch('https://dzvvxysjovczgepxueby.supabase.co/rest/v1/subscribers?select=*&order=created_at.desc', {
-    headers: {
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6dnZ4eXNqb3ZjemdlcHh1ZWJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NjA1NDgsImV4cCI6MjA4OTIzNjU0OH0.eToNEzOjrf19WEPQZRK0JjBml2ratGOrzWTBFjdi41M',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6dnZ4eXNqb3ZjemdlcHh1ZWJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NjA1NDgsImV4cCI6MjA4OTIzNjU0OH0.eToNEzOjrf19WEPQZRK0JjBml2ratGOrzWTBFjdi41M'
-    }
-  })
-  .then(r => r.json())
-  .then(emails => {
+// ── EMAILS ──
+function loadEmails(){
+  // Завантажуємо через admin API (з авторизацією)
+  api('/api/admin/subscribers').then(function(emails){
     document.getElementById('emailCount').textContent = '('+emails.length+')';
     document.getElementById('emailsTbl').innerHTML = emails.length
-      ? emails.map(e => `<tr><td>${e.email}</td><td>${new Date(e.created_at).toLocaleDateString('uk-UA')}</td><td style="color:#4a6a8a">—</td></tr>`).join('')
+      ? emails.map(function(e){
+          var date = e.created_at ? new Date(e.created_at).toLocaleDateString('uk-UA') : '—';
+          return '<tr><td>'+e.email+'</td><td>'+date+'</td><td style="color:#4a6a8a">'+(e.source||'—')+'</td></tr>';
+        }).join('')
       : '<tr><td colspan="3" style="color:#4a6a8a;text-align:center;padding:20px">Email-ів поки немає</td></tr>';
-    document.getElementById('exportCsvBtn').onclick = () => {
-      const csv = 'Email,Дата\n' + emails.map(e => e.email+','+new Date(e.created_at).toLocaleDateString('uk-UA')).join('\n');
-      const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'emails_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+    document.getElementById('exportCsvBtn').onclick = function(){
+      var csv = 'Email,Дата\n' + emails.map(function(e){
+        return e.email+','+(e.created_at ? new Date(e.created_at).toLocaleDateString('uk-UA') : '—');
+      }).join('\n');
+      var a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'emails_'+new Date().toISOString().slice(0,10)+'.csv';
+      a.click();
     };
-    // Також оновлюємо лічильник на дашборді
-    const emailStatEl = document.querySelector('.stat-card:last-child .sub');
+    // Оновлюємо лічильник на дашборді
+    var emailStatEl = document.querySelector('.stat-card:last-child .sub');
     if(emailStatEl) emailStatEl.textContent = 'Email-база: '+emails.length;
-  })
-  .catch(() => {
-    // Fallback на локальний API
-    api('/api/admin/emails').then(emails => {
-      document.getElementById('emailCount').textContent = '('+emails.length+')';
-      document.getElementById('emailsTbl').innerHTML = emails.length
-        ? emails.map(e => `<tr><td>${e.email}</td><td>${new Date(e.ts).toLocaleDateString('uk-UA')}</td><td style="color:#4a6a8a">${e.ip}</td></tr>`).join('')
-        : '<tr><td colspan="3" style="color:#4a6a8a;text-align:center;padding:20px">Email-ів поки немає</td></tr>';
-    });
+  }).catch(function(){
+    document.getElementById('emailsTbl').innerHTML = '<tr><td colspan="3" style="color:#f87171;text-align:center;padding:20px">Помилка завантаження</td></tr>';
   });
+}
 
 // ── ПІДПИСНИКИ ──
 var allSubs = [];
