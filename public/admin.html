@@ -535,7 +535,7 @@ function renderAds(ads){
         </div>
       </div>
       <div class="ad-preview" id="adPreview_${slot}">
-        ${ad.enabled && ad.title ? renderAdPreview(ad) : '<span style="color:#2a3a5a">Попередній перегляд з\'явиться після заповнення</span>'}
+        ${ad.enabled && ad.title ? renderAdPreview(ad) : '<span style="color:#2a3a5a">Попередній перегляд з’явиться після заповнення</span>'}
       </div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn" onclick="saveAd('${slot}',true)">✅ Увімкнути та зберегти</button>
@@ -595,11 +595,10 @@ function sendBroadcast(){
         result.textContent = '❌ Помилка розсилки';
       }
     })
-    .catch(() => result.textContent = '❌ Помилка з\'єднання');
+    .catch(() => result.textContent = '❌ Помилка з’єднання');
 }
-// ── EMAILS ──
 function loadEmails(){
-  // Завантажуємо через admin API (з авторизацією)
+  // Завантажуємо підписників через захищений admin API
   api('/api/admin/subscribers').then(function(emails){
     document.getElementById('emailCount').textContent = '('+emails.length+')';
     document.getElementById('emailsTbl').innerHTML = emails.length
@@ -617,7 +616,6 @@ function loadEmails(){
       a.download = 'emails_'+new Date().toISOString().slice(0,10)+'.csv';
       a.click();
     };
-    // Оновлюємо лічильник на дашборді
     var emailStatEl = document.querySelector('.stat-card:last-child .sub');
     if(emailStatEl) emailStatEl.textContent = 'Email-база: '+emails.length;
   }).catch(function(){
@@ -657,7 +655,7 @@ function renderSubs(subs){
     ? subs.map(function(s){
         var date = new Date(s.created_at).toLocaleDateString('uk-UA', {day:'numeric',month:'short',year:'numeric'});
         var source = s.source || 'сайт';
-        return '<tr><td>'+s.email+'</td><td style="color:#4a6a8a">'+date+'</td><td><span style="background:#e8f0fe;color:#2878c8;padding:2px 8px;border-radius:4px;font-size:.65rem">'+source+'</span></td><td><button onclick="deleteSub(''+s.email+'')" style="background:none;border:1px solid #fcc;color:#c04;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">✕</button></td></tr>';
+        return '<tr><td>'+s.email+'</td><td style="color:#4a6a8a">'+date+'</td><td><span style="background:#e8f0fe;color:#2878c8;padding:2px 8px;border-radius:4px;font-size:.65rem">'+source+'</span></td><td><button onclick="deleteSub(this.dataset.email)" data-email="'+s.email+'" style="background:none;border:1px solid #fcc;color:#c04;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">✕</button></td></tr>';
       }).join('')
     : '<tr><td colspan="4" style="color:#4a6a8a;text-align:center;padding:20px">Підписників поки немає</td></tr>';
 }

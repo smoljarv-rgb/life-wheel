@@ -208,8 +208,7 @@ footer{border-top:1px solid var(--b1);padding:24px 5vw;display:flex;justify-cont
     <a href="/cdn-cgi/l/email-protection#186b6d6868776a6c587377747d6b773674716e7d">Підтримка</a>
   </div>
 </footer>
-<script>
-
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var PRICES = {
   uah: {
     report:  { amount: 99,   period: '₴ · разова оплата',      savings: '' },
@@ -278,4 +277,12 @@ function startPayment(plan, btn) {
     document.body.removeChild(form);
   })
   .catch(function(e){
-    console.error('P
+    console.error('Pомилка. Спробуй ще раз або напиши на support@koleso.live');
+    btn.textContent = origText;
+    btn.disabled = false;
+  });
+}
+</script>
+
+</body>
+</html>
