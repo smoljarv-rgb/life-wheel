@@ -246,6 +246,8 @@ async function init(){
   sb.auth.onAuthStateChange(function(event, session){
     if(event === 'SIGNED_IN' && session){
       currentUser = session.user;
+      // Зберігаємо email в таблицю subscribers (якщо ще немає)
+      saveSubscriberEmail(session.user.email);
       showAccount();
     } else if(event === 'SIGNED_OUT'){
       currentUser = null;
@@ -258,7 +260,10 @@ async function init(){
 async function signInGoogle(){
   var result = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/account' }
+    options: {
+      redirectTo: window.location.origin + '/account',
+      queryParams: { prompt: 'select_account' } // завжди показуємо вибір акаунту
+    }
   });
   if(result.error) showToast('❌ Помилка: ' + result.error.message);
 }
@@ -284,7 +289,12 @@ async function sendMagicLink(){
 
 async function signOut(){
   await sb.auth.signOut();
+  currentUser = null;
   showToast('👋 До побачення!');
+  // Скидаємо форму входу щоб можна було обрати інший акаунт
+  document.getElementById('magicLinkForm').style.display = 'block';
+  document.getElementById('magicSent').style.display = 'none';
+  document.getElementById('loginEmail').value = '';
 }
 
 // ── UI ──
@@ -423,6 +433,19 @@ function showToast(msg){
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+// ── Зберігаємо email в таблицю subscribers після входу ──
+async function saveSubscriberEmail(email){
+  if(!email) return;
+  try {
+    await sb.from('subscribers').upsert(
+      { email: email, source: 'google_auth', updated_at: new Date().toISOString() },
+      { onConflict: 'email', ignoreDuplicates: true }
+    );
+  } catch(e) {
+    console.warn('Не вдалось зберегти email підписника:', e);
+  }
 }
 
 init();
