@@ -655,7 +655,8 @@ function renderSubs(subs){
     ? subs.map(function(s){
         var date = new Date(s.created_at).toLocaleDateString('uk-UA', {day:'numeric',month:'short',year:'numeric'});
         var source = s.source || 'сайт';
-        return '<tr><td>'+s.email+'</td><td style="color:#4a6a8a">'+date+'</td><td><span style="background:#e8f0fe;color:#2878c8;padding:2px 8px;border-radius:4px;font-size:.65rem">'+source+'</span></td><td><button onclick="deleteSub(this.dataset.email)" data-email="'+s.email+'" style="background:none;border:1px solid #fcc;color:#c04;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">✕</button></td></tr>';
+        var emailB64 = btoa(unescape(encodeURIComponent(s.email)));
+        return '<tr><td>'+s.email+'</td><td style="color:#4a6a8a">'+date+'</td><td><span style="background:#e8f0fe;color:#2878c8;padding:2px 8px;border-radius:4px;font-size:.65rem">'+source+'</span></td><td><button onclick="deleteSub(decodeURIComponent(escape(atob(this.dataset.e))))" data-e="'+emailB64+'" style="background:none;border:1px solid #fcc;color:#c04;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">✕</button></td></tr>';
       }).join('')
     : '<tr><td colspan="4" style="color:#4a6a8a;text-align:center;padding:20px">Підписників поки немає</td></tr>';
 }
