@@ -245,42 +245,64 @@ function startPayment(plan, btn) {
   btn.textContent = '⏳ Завантаження...';
   btn.disabled = true;
 
-  var email = prompt("Введи email для підтвердження оплати (необов\'язково):") || '';
+  var email = prompt('Введи email для отримання доступу (необов\'язково):') || '';
 
-  fetch('/api/liqpay/checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ plan: plan, currency: currentCurrency, email: email })
-  })
-  .then(function(res){ return res.json(); })
-  .then(function(result){
-    if(!result.action || !result.formData) throw new Error('no data');
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = result.action;
-    Object.keys(result.formData).forEach(function(key){
-      var val = result.formData[key];
-      if(Array.isArray(val)){
-        val.forEach(function(v){
-          var inp = document.createElement('input');
-          inp.type='hidden'; inp.name=key; inp.value=v;
-          form.appendChild(inp);
-        });
-      } else {
-        var inp = document.createElement('input');
-        inp.type='hidden'; inp.name=key; inp.value=val;
-        form.appendChild(inp);
-      }
+  // UAH → WayForPay, USD → Lemon Squeezy
+  if (currentCurrency === 'usd') {
+    // Lemon Squeezy checkout
+    fetch('/api/lemonsqueezy/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: plan, email: email })
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(result){
+      if (!result.url) throw new Error('no url');
+      window.location.href = result.url;
+    })
+    .catch(function(e){
+      console.error('LS error:', e);
+      alert('Помилка. Спробуй ще раз або напиши на support@koleso.live');
+      btn.textContent = origText;
+      btn.disabled = false;
     });
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-  })
-  .catch(function(e){
-    console.error('Pомилка. Спробуй ще раз або напиши на support@koleso.live');
-    btn.textContent = origText;
-    btn.disabled = false;
-  });
+  } else {
+    // WayForPay checkout (UAH)
+    fetch('/api/liqpay/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: plan, currency: currentCurrency, email: email })
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(result){
+      if (!result.action || !result.formData) throw new Error('no data');
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = result.action;
+      Object.keys(result.formData).forEach(function(key){
+        var val = result.formData[key];
+        if (Array.isArray(val)) {
+          val.forEach(function(v){
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = key; inp.value = v;
+            form.appendChild(inp);
+          });
+        } else {
+          var inp = document.createElement('input');
+          inp.type = 'hidden'; inp.name = key; inp.value = val;
+          form.appendChild(inp);
+        }
+      });
+      document.body.appendChild(form);
+      form.submit();
+    })
+    .catch(function(e){
+      console.error('WFP error:', e);
+      alert('Помилка. Спробуй ще раз або напиши на support@koleso.live');
+      btn.textContent = origText;
+      btn.disabled = false;
+    });
+  }
 }
 </script>
 

@@ -15,6 +15,18 @@ const WFP_MERCHANT  = process.env.WAYFORPAY_MERCHANT || 'koleso_live';
 const WFP_SECRET    = process.env.WAYFORPAY_SECRET   || '';
 const WFP_PASSWORD  = process.env.WAYFORPAY_PASSWORD || '';
 
+// ── Lemon Squeezy ──
+const LS_API_KEY    = process.env.LEMONSQUEEZY_API_KEY || '';
+const LS_STORE_ID   = process.env.LEMONSQUEEZY_STORE_ID || '329907';
+const LS_WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET || '';
+
+// ID продуктів Lemon Squeezy (варіанти/variants)
+const LS_VARIANTS = {
+  report:  process.env.LS_VARIANT_REPORT  || '929741',
+  monthly: process.env.LS_VARIANT_MONTHLY || '929746',
+  yearly:  process.env.LS_VARIANT_YEARLY  || '929749',
+};
+
 function wfpSign(params){
   const str = params.join(';');
   return crypto.createHmac('md5', WFP_SECRET).update(str).digest('hex');
@@ -875,6 +887,147 @@ app.get('/pricing', (req, res) => {
 // ── /thank-you сторінка ──
 app.get('/thank-you', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'thank-you.html'));
+});
+
+
+// ── Lemon Squeezy: створення checkout сесії ──
+app.post('/api/lemonsqueezy/checkout', async (req, res) => {
+  // Явні CORS заголовки
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  const { plan, email } = req.body;
+  const variantId = LS_VARIANTS[plan];
+  if (!variantId) return res.status(400).json({ error: 'Невірний план' });
+
+  if (!LS_API_KEY) return res.status(500).json({ error: 'Lemon Squeezy не налаштований' });
+
+  try {
+    // Формуємо checkout через Lemon Squeezy API
+    const body = {
+      data: {
+        type: 'checkouts',
+        attributes: {
+          checkout_options: {
+            embed: false,
+            media: false,
+            logo: true,
+          },
+          checkout_data: {
+            email: email || '',
+            custom: { plan: plan },
+          },
+          product_options: {
+            redirect_url: 'https://koleso.live/thank-you',
+          },
+          expires_at: null,
+        },
+        relationships: {
+          store: {
+            data: { type: 'stores', id: String(LS_STORE_ID) }
+          },
+          variant: {
+            data: { type: 'variants', id: String(variantId) }
+          }
+        }
+      }
+    };
+
+    const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Authorization': `Bearer ${LS_API_KEY}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('LS error:', JSON.stringify(data));
+      return res.status(500).json({ error: 'Помилка створення checkout' });
+    }
+
+    const checkoutUrl = data?.data?.attributes?.url;
+    if (!checkoutUrl) return res.status(500).json({ error: 'Немає URL checkout' });
+
+    res.json({ url: checkoutUrl });
+  } catch (e) {
+    console.error('LS checkout error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Lemon Squeezy: webhook після успішної оплати ──
+app.post('/api/lemonsqueezy/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  // Перевірка підпису webhook
+  const secret = LS_WEBHOOK_SECRET;
+  const signature = req.headers['x-signature'];
+
+  if (secret && signature) {
+    const hmac = crypto.createHmac('sha256', secret);
+    const digest = hmac.update(req.body).digest('hex');
+    if (digest !== signature) {
+      console.error('LS webhook: невірний підпис');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+  }
+
+  const payload = JSON.parse(req.body.toString());
+  const eventName = payload?.meta?.event_name;
+  const attrs = payload?.data?.attributes;
+
+  console.log('LS webhook event:', eventName);
+
+  // Обробляємо успішну оплату
+  if (eventName === 'order_created' && attrs?.status === 'paid') {
+    const email = attrs?.user_email || attrs?.checkout_data?.email || '';
+    const planKey = attrs?.first_order_item?.variant_name || 
+                    payload?.meta?.custom_data?.plan || 'report';
+
+    // Зберігаємо в Supabase
+    if (email && email.includes('@')) {
+      const planDurations = { report: 365, monthly: 30, yearly: 365 };
+      const days = planDurations[planKey] || 30;
+      const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+      try {
+        await supabase.from('subscriptions').insert({
+          email:      email,
+          plan:       planKey,
+          status:     'active',
+          expires_at: expiresAt,
+          created_at: new Date().toISOString(),
+        });
+
+        // Також зберігаємо в subscribers
+        await supabase.from('subscribers').upsert(
+          { email: email, source: 'lemonsqueezy' },
+          { onConflict: 'email', ignoreDuplicates: true }
+        );
+      } catch (e) {
+        console.error('LS webhook DB error:', e);
+      }
+
+      // Зберігаємо в db як backup
+      const db = loadDB();
+      db.payments.push({
+        ts:       Date.now(),
+        email:    email,
+        plan:     planKey,
+        amount:   attrs?.total ? attrs.total / 100 : 0,
+        currency: attrs?.currency || 'UAH',
+        status:   'paid',
+        provider: 'lemonsqueezy',
+      });
+      saveDB(db);
+    }
+  }
+
+  res.json({ ok: true });
 });
 
 app.get('/result/:slug', function(req, res) {
