@@ -2354,6 +2354,9 @@ function renderAdvice(parsed){
   }catch(e){ console.error('Snapshot error:', e); }
 
   // Зберігаємо результат в Supabase
+	// Зберігаємо advice з AI аналізу
+	const adviceData = (typeof parsed !== 'undefined' && parsed && parsed.advice) ? parsed.advice : [];
+
 	fetch('/api/results/save', {
 	  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },
@@ -2362,6 +2365,7 @@ function renderAdvice(parsed){
 			analysis: {
 			  analysedKeys: analysedKeys,
 			  isFree: isFreeResult,
+			  advice: adviceData,
 			  weekPlan: [],
 			  spheres: {}
 			}
@@ -2371,7 +2375,7 @@ function renderAdvice(parsed){
 			localStorage.setItem('lw_last_result', saved.slug);
 			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
 			  scores: allScoresSnapshot,
-			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult }
+			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult, advice: adviceData }
 			}));
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
