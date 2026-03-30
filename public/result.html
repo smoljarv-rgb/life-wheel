@@ -1215,7 +1215,7 @@ async function sendNotif(){
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, source: 'result_capture' })
+      body: JSON.stringify({ email, source: 'result_capture', slug: currentSlug })
     });
     if(res.ok || res.status === 409){
       // Зберігаємо локально щоб не показувати знову

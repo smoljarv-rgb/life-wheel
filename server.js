@@ -1,5 +1,6 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
+const PDFDocument = require('pdfkit');
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
@@ -30,6 +31,129 @@ const LS_VARIANTS = {
 function wfpSign(params){
   const str = params.join(';');
   return crypto.createHmac('md5', WFP_SECRET).update(str).digest('hex');
+}
+
+
+// ── Генерація PDF звіту ──
+async function generateResultPDF(resultData) {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ margin: 50, size: 'A4' });
+      const chunks = [];
+
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      const scores = resultData.scores || {};
+      const analysis = resultData.analysis || {};
+
+      // Назви сфер
+      const SPHERES = [
+        { key: 'love',    name: "Любов" },
+        { key: 'family',  name: "Сім'я" },
+        { key: 'friends', name: 'Друзі' },
+        { key: 'career',  name: "Кар'єра" },
+        { key: 'finance', name: 'Фінанси' },
+        { key: 'health',  name: "Здоров'я" },
+        { key: 'selfdev', name: 'Саморозвиток' },
+        { key: 'spirit',  name: 'Духовність' },
+        { key: 'rest',    name: 'Відпочинок' },
+        { key: 'env',     name: 'Середовище' },
+        { key: 'comm',    name: 'Комунікація' },
+        { key: 'appear',  name: 'Зовнішність' },
+      ];
+
+      const vals = SPHERES.map(s => parseFloat(scores[s.key]) || 5);
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const avgR = Math.round(avg * 10) / 10;
+      const sorted = SPHERES.map((s, i) => ({ ...s, score: parseFloat(scores[s.key]) || 5 }))
+        .sort((a, b) => b.score - a.score);
+      const topS = sorted[0];
+      const botS = sorted[sorted.length - 1];
+
+      // ── Заголовок ──
+      doc.rect(0, 0, 595, 120).fill('#0f1a10');
+      doc.fillColor('#20d8a0').fontSize(28).font('Helvetica-Bold')
+        .text('Колесо Життя', 50, 35);
+      doc.fillColor('#ffffff').fontSize(14).font('Helvetica')
+        .text('Твій персональний AI-звіт', 50, 70);
+      doc.fillColor('#20d8a0').fontSize(12)
+        .text(`koleso.live`, 50, 92);
+
+      // ── Загальний бал ──
+      doc.fillColor('#1a1a2e').rect(50, 140, 495, 80).fill('#f0f8ff');
+      doc.fillColor('#1a1a2e').fontSize(14).font('Helvetica-Bold')
+        .text('ЗАГАЛЬНИЙ БАЛАНС', 70, 155);
+      doc.fillColor('#20d8a0').fontSize(42).font('Helvetica-Bold')
+        .text(`${avgR}`, 70, 172);
+      doc.fillColor('#666666').fontSize(14).font('Helvetica')
+        .text('/10', 70 + (avgR >= 10 ? 55 : 40), 186);
+      doc.fillColor('#444444').fontSize(12).font('Helvetica')
+        .text(`Топ сфера: ${topS.name} (${topS.score})   ·   Критична: ${botS.name} (${botS.score})`, 160, 175);
+
+      // ── Всі 12 сфер ──
+      doc.fillColor('#1a1a2e').fontSize(16).font('Helvetica-Bold')
+        .text('Оцінки по всіх 12 сферах', 50, 250);
+
+      let y = 280;
+      sorted.forEach((s, i) => {
+        const barW = Math.round(s.score * 38);
+        const color = s.score >= 7 ? '#20d8a0' : s.score >= 4 ? '#e8c060' : '#e05050';
+
+        // Назва і бал
+        doc.fillColor('#222222').fontSize(11).font('Helvetica-Bold')
+          .text(s.name, 50, y);
+        doc.fillColor(color).fontSize(11).font('Helvetica-Bold')
+          .text(`${s.score}`, 160, y);
+
+        // Прогрес-бар фон
+        doc.fillColor('#e8e8e8').rect(185, y + 2, 300, 10).fill();
+        // Прогрес-бар заповнення
+        doc.fillColor(color).rect(185, y + 2, barW, 10).fill();
+
+        // Підпис
+        doc.fillColor('#888888').fontSize(9).font('Helvetica')
+          .text('/10', 490, y + 1);
+
+        y += 28;
+        if (i === 5) {
+          y += 10; // невелика пауза між колонками
+        }
+      });
+
+      // ── AI Аналіз ──
+      if (analysis.summary || analysis.text) {
+        doc.addPage();
+        doc.rect(0, 0, 595, 80).fill('#0f1a10');
+        doc.fillColor('#20d8a0').fontSize(20).font('Helvetica-Bold')
+          .text('AI Аналіз твого Колеса Життя', 50, 28);
+
+        const summaryText = analysis.summary || analysis.text || '';
+        doc.fillColor('#222222').fontSize(11).font('Helvetica')
+          .text(summaryText.slice(0, 2000), 50, 100, {
+            width: 495,
+            lineGap: 4,
+            align: 'left'
+          });
+      }
+
+      // ── Футер ──
+      const pageCount = doc.bufferedPageRange().count;
+      for (let i = 0; i < pageCount; i++) {
+        doc.switchToPage(i);
+        doc.fillColor('#888888').fontSize(9).font('Helvetica')
+          .text(
+            `Koleso.live · AI-коуч для балансу 12 сфер · ${new Date().toLocaleDateString('uk-UA')}`,
+            50, 800, { align: 'center', width: 495 }
+          );
+      }
+
+      doc.end();
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
 const app = express();
@@ -180,33 +304,112 @@ app.get('/api/results/:slug', async (req, res) => {
 
 app.post('/api/subscribe', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
-  const { email } = req.body;
+  const { email, source, slug } = req.body;
   if (!email || !email.includes('@'))
     return res.status(400).json({ error: 'Invalid email' });
 
   const { error } = await supabase
     .from('subscribers')
-    .insert([{ email }]);
+    .insert([{ email, source: source || 'site' }])
+    .select();
 
   if (error && error.code !== '23505') {
     console.error('Supabase error:', error);
     return res.status(500).json({ error: 'DB error' });
   }
 
-  // Також зберігаємо в db.emails як backup
+  // Зберігаємо в db.emails як backup
   const db = loadDB();
   if (!db.emails.find(e => e.email === email)) {
-    db.emails.push({ ts: Date.now(), email, ip, source: 'subscribe' });
+    db.emails.push({ ts: Date.now(), email, ip, source: source || 'site' });
     saveDB(db);
   }
 
-  // Відправляємо підтвердження на email
+  // Відправляємо лист залежно від джерела
   try {
-   await resend.emails.send({
-  from: 'Володимир з Колеса Життя <noreply@koleso.live>',
-  to: email,
-  subject: 'Ти в списку очікування Колеса Життя',
-  html: `
+    const isResultCapture = source === 'result_capture';
+    let pdfAttachment = null;
+
+    // Якщо є slug — генеруємо PDF
+    if (isResultCapture && slug) {
+      try {
+        // Завантажуємо дані результату з Supabase
+        const { data: resultRow } = await supabase
+          .from('results')
+          .select('scores, analysis')
+          .eq('slug', slug)
+          .single();
+
+        if (resultRow) {
+          const pdfBuffer = await generateResultPDF(resultRow);
+          pdfAttachment = [{
+            filename: 'koleso-life-report.pdf',
+            content: pdfBuffer.toString('base64'),
+            type: 'application/pdf',
+            disposition: 'attachment'
+          }];
+        }
+      } catch (pdfErr) {
+        console.error('PDF generation error:', pdfErr);
+        // Продовжуємо без PDF якщо помилка
+      }
+    }
+
+    const resultUrl = slug ? `https://koleso.live/result/${slug}` : 'https://koleso.live';
+
+    const emailPayload = {
+      from: 'Володимир з Колеса Життя <noreply@koleso.live>',
+      to: email,
+      subject: isResultCapture
+        ? '📊 Твій звіт Колеса Життя збережено'
+        : 'Ти в списку очікування Колеса Життя',
+      html: isResultCapture ? `
+<!DOCTYPE html>
+<html lang="uk">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td>
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:32px 40px">
+    <h1 style="margin:0;font-size:24px;color:#20d8a0;font-family:Arial,sans-serif">Колесо Життя</h1>
+    <p style="margin:8px 0 0;font-size:14px;color:#aaaaaa">Твій персональний AI-звіт</p>
+  </td></tr>
+  <tr><td style="padding:36px 40px">
+    <p style="margin:0 0 16px;font-size:16px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#333;line-height:1.7">
+      Твій звіт Колеса Життя збережено і прикріплено до цього листа у форматі PDF.
+    </p>
+    <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.7">
+      Також ти можеш переглянути повний інтерактивний звіт онлайн:
+    </p>
+    <table cellpadding="0" cellspacing="0" style="margin:0 0 32px">
+      <tr><td style="background:#20d8a0;border-radius:8px;padding:14px 28px">
+        <a href="${resultUrl}" style="color:#0f1a10;font-size:15px;font-weight:bold;text-decoration:none">
+          Переглянути мій звіт →
+        </a>
+      </td></tr>
+    </table>
+    <div style="background:#f8f8f8;border-radius:8px;padding:20px;margin:0 0 24px">
+      <p style="margin:0 0 8px;font-size:13px;color:#666;font-weight:bold">💡 Порада</p>
+      <p style="margin:0;font-size:13px;color:#666;line-height:1.6">
+        Через 30 днів пройди тест повторно — ти побачиш як змінився твій баланс.
+        Нагадуємо автоматично.
+      </p>
+    </div>
+    <p style="margin:0 0 8px;font-size:15px;color:#333">З повагою,</p>
+    <p style="margin:0 0 32px;font-size:15px;color:#333;font-weight:bold">Володимир</p>
+    <hr style="border:none;border-top:1px solid #eeeeee;margin:0 0 16px">
+    <p style="margin:0;font-size:12px;color:#999;line-height:1.6">
+      Ти отримав цей лист тому що залишив email на <a href="https://koleso.live" style="color:#20d8a0">koleso.live</a>.<br>
+      <a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a>
+    </p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>` : `
 <!DOCTYPE html>
 <html lang="uk">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -219,23 +422,18 @@ app.post('/api/subscribe', async (req, res) => {
     <p style="margin:0 0 16px;font-size:15px;color:#333;line-height:1.7">
       Мене звати Володимир, я розробляю Колесо Життя — інструмент для оцінки балансу 12 сфер з AI-аналізом.
     </p>
-    <p style="margin:0 0 16px;font-size:15px;color:#333;line-height:1.7">
-      Ти залишив email і тепер у списку очікування. Я особисто напишу тобі коли відкриється повний доступ.
-    </p>
     <p style="margin:0 0 32px;font-size:15px;color:#333;line-height:1.7">
-      Поки що можеш безкоштовно оцінити своє колесо на сайті — просто натисни кнопку:
+      Ти у списку очікування. Напишу особисто коли відкриється повний доступ.
     </p>
     <table cellpadding="0" cellspacing="0" style="margin:0 0 32px">
       <tr><td style="background:#22d3a0;border-radius:8px;padding:14px 28px">
         <a href="https://koleso.live" style="color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none">Відкрити Колесо Життя</a>
       </td></tr>
     </table>
-    <p style="margin:0 0 8px;font-size:15px;color:#333;line-height:1.7">З повагою,</p>
-    <p style="margin:0 0 32px;font-size:15px;color:#333;font-weight:bold;line-height:1.7">Володимир</p>
+    <p style="margin:0 0 8px;font-size:15px;color:#333">З повагою,</p>
+    <p style="margin:0 0 32px;font-size:15px;color:#333;font-weight:bold">Володимир</p>
     <hr style="border:none;border-top:1px solid #eeeeee;margin:0 0 20px">
     <p style="margin:0;font-size:12px;color:#999;line-height:1.6">
-      Ти отримав цей лист тому що залишив email на <a href="https://koleso.live" style="color:#22d3a0">koleso.live</a>.<br>
-      Якщо це була помилка — просто ігноруй цей лист.<br>
       <a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a>
     </p>
   </td></tr>
@@ -243,12 +441,18 @@ app.post('/api/subscribe', async (req, res) => {
 </td></tr>
 </table>
 </body>
-</html>
-  `
-});
+</html>`
+    };
+
+    // Додаємо PDF якщо є
+    if (pdfAttachment) {
+      emailPayload.attachments = pdfAttachment;
+    }
+
+    await resend.emails.send(emailPayload);
   } catch(emailErr) {
     console.error('Resend error:', emailErr);
-    // Не повертаємо помилку користувачу — email не критичний
+    // Не повертаємо помилку — email не критичний
   }
 
   // Зберігаємо локально для статистики
