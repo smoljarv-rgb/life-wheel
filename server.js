@@ -46,10 +46,17 @@ async function generateResultPDF(resultData) {
       doc.on('error', reject);
 
       // Шрифти з підтримкою кирилиці
-      const fontsDir = path.join(__dirname, 'public', 'fonts');
+      // Vercel: шукаємо шрифти відносно process.cwd() і __dirname
+      const possibleDirs = [
+        path.join(__dirname, 'public', 'fonts'),
+        path.join(process.cwd(), 'public', 'fonts'),
+        path.join(__dirname, '..', 'public', 'fonts'),
+      ];
+      const fontsDir = possibleDirs.find(d => fs.existsSync(path.join(d, 'Roboto-Regular.ttf'))) || possibleDirs[0];
       const regularFont = path.join(fontsDir, 'Roboto-Regular.ttf');
       const boldFont = path.join(fontsDir, 'Roboto-Bold.ttf');
       const hasFont = fs.existsSync(regularFont) && fs.existsSync(boldFont);
+      console.log('PDF fonts dir:', fontsDir, 'hasFont:', hasFont);
 
       if (hasFont) {
         doc.registerFont('Regular', regularFont);
@@ -186,7 +193,7 @@ async function generateResultPDF(resultData) {
       // Футер на всіх сторінках
       const range = doc.bufferedPageRange();
       for (let i = 0; i < range.count; i++) {
-        doc.switchToPage(i);
+        doc.switchToPage(range.start + i);
         doc.fillColor('#aaaaaa').font(F(false)).fontSize(8)
           .text('Koleso.live · AI-коуч для балансу 12 сфер · ' + date,
             50, 820, { align: 'center', width: 495 });
