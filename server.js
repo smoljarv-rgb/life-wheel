@@ -34,7 +34,7 @@ function wfpSign(params){
 }
 
 
-// ── Генерація PDF звіту ──
+// ── Генерація PDF звіту з кирилицею ──
 async function generateResultPDF(resultData) {
   return new Promise((resolve, reject) => {
     try {
@@ -45,12 +45,24 @@ async function generateResultPDF(resultData) {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
+      // Шрифти з підтримкою кирилиці
+      const fontsDir = path.join(__dirname, 'public', 'fonts');
+      const regularFont = path.join(fontsDir, 'Roboto-Regular.ttf');
+      const boldFont = path.join(fontsDir, 'Roboto-Bold.ttf');
+      const hasFont = fs.existsSync(regularFont) && fs.existsSync(boldFont);
+
+      if (hasFont) {
+        doc.registerFont('Regular', regularFont);
+        doc.registerFont('Bold', boldFont);
+      }
+
+      const F = (bold) => hasFont ? (bold ? 'Bold' : 'Regular') : (bold ? 'Helvetica-Bold' : 'Helvetica');
+
       const scores = resultData.scores || {};
       const analysis = resultData.analysis || {};
 
-      // Назви сфер
       const SPHERES = [
-        { key: 'love',    name: "Любов" },
+        { key: 'love',    name: 'Любов' },
         { key: 'family',  name: "Сім'я" },
         { key: 'friends', name: 'Друзі' },
         { key: 'career',  name: "Кар'єра" },
@@ -64,89 +76,120 @@ async function generateResultPDF(resultData) {
         { key: 'appear',  name: 'Зовнішність' },
       ];
 
+      const ACTIONS = {
+        love:    { action: 'Вимкни телефон на 30 хв і поговори без відволікань' },
+        family:  { action: 'Заплануй один спільний обід цього тижня' },
+        friends: { action: "Напиши одному другу прямо зараз — «привіт, як ти?»" },
+        career:  { action: 'Запиши 3 свої досягнення за останній місяць' },
+        finance: { action: 'Запиши всі витрати за вчора і сьогодні' },
+        health:  { action: 'Пройдись 20 хвилин сьогодні ввечері без телефону' },
+        selfdev: { action: 'Прочитай 10 сторінок книги або 1 відео-урок сьогодні' },
+        spirit:  { action: '5 хвилин тиші вранці — сиди і дихай' },
+        rest:    { action: 'Сьогодні ввечері — 1 година тільки для себе' },
+        env:     { action: 'Прибери один ящик або полицю — 15 хвилин' },
+        comm:    { action: 'Скажи одній людині щось конкретне і приємне сьогодні' },
+        appear:  { action: 'Один маленький крок для свого зовнішнього вигляду сьогодні' },
+      };
+
       const vals = SPHERES.map(s => parseFloat(scores[s.key]) || 5);
       const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
       const avgR = Math.round(avg * 10) / 10;
-      const sorted = SPHERES.map((s, i) => ({ ...s, score: parseFloat(scores[s.key]) || 5 }))
+      const sorted = SPHERES.map(s => ({ ...s, score: parseFloat(scores[s.key]) || 5 }))
         .sort((a, b) => b.score - a.score);
       const topS = sorted[0];
       const botS = sorted[sorted.length - 1];
+      const criticals = sorted.filter(s => s.score < 4);
+      const date = new Date().toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
 
-      // ── Заголовок ──
-      doc.rect(0, 0, 595, 120).fill('#0f1a10');
-      doc.fillColor('#20d8a0').fontSize(28).font('Helvetica-Bold')
-        .text('Колесо Життя', 50, 35);
-      doc.fillColor('#ffffff').fontSize(14).font('Helvetica')
-        .text('Твій персональний AI-звіт', 50, 70);
-      doc.fillColor('#20d8a0').fontSize(12)
-        .text(`koleso.live`, 50, 92);
+      // ══ СТОРІНКА 1: Огляд ══
 
-      // ── Загальний бал ──
-      doc.fillColor('#1a1a2e').rect(50, 140, 495, 80).fill('#f0f8ff');
-      doc.fillColor('#1a1a2e').fontSize(14).font('Helvetica-Bold')
-        .text('ЗАГАЛЬНИЙ БАЛАНС', 70, 155);
-      doc.fillColor('#20d8a0').fontSize(42).font('Helvetica-Bold')
-        .text(`${avgR}`, 70, 172);
-      doc.fillColor('#666666').fontSize(14).font('Helvetica')
-        .text('/10', 70 + (avgR >= 10 ? 55 : 40), 186);
-      doc.fillColor('#444444').fontSize(12).font('Helvetica')
-        .text(`Топ сфера: ${topS.name} (${topS.score})   ·   Критична: ${botS.name} (${botS.score})`, 160, 175);
+      // Шапка
+      doc.rect(0, 0, 595, 110).fill('#0f1a10');
+      doc.fillColor('#20d8a0').font(F(true)).fontSize(26).text('Колесо Життя', 50, 30);
+      doc.fillColor('#cccccc').font(F(false)).fontSize(12).text('Персональний AI-звіт · ' + date, 50, 65);
+      doc.fillColor('#888888').font(F(false)).fontSize(10).text('koleso.live', 50, 85);
 
-      // ── Всі 12 сфер ──
-      doc.fillColor('#1a1a2e').fontSize(16).font('Helvetica-Bold')
-        .text('Оцінки по всіх 12 сферах', 50, 250);
+      // Загальний бал
+      doc.rect(50, 130, 495, 90).fill('#f0fff8');
+      doc.fillColor('#0f1a10').font(F(true)).fontSize(13).text('ЗАГАЛЬНИЙ БАЛАНС', 70, 147);
+      doc.fillColor('#20d8a0').font(F(true)).fontSize(48).text(String(avgR), 70, 158);
+      doc.fillColor('#666666').font(F(false)).fontSize(16).text('/10', 70 + (avgR >= 10 ? 60 : 48), 178);
+      doc.fillColor('#444444').font(F(false)).fontSize(11)
+        .text('Топ сфера: ' + topS.name + ' (' + topS.score + ')', 200, 155)
+        .text('Критична: ' + botS.name + ' (' + botS.score + ')', 200, 175)
+        .text('Дата: ' + date, 200, 195);
 
-      let y = 280;
-      sorted.forEach((s, i) => {
-        const barW = Math.round(s.score * 38);
+      // Заголовок таблиці балів
+      doc.fillColor('#1a1a2e').font(F(true)).fontSize(15).text('Оцінки по всіх 12 сферах', 50, 242);
+
+      // Бали по сферах
+      let y = 268;
+      sorted.forEach((s) => {
+        const barW = Math.round(s.score * 33);
         const color = s.score >= 7 ? '#20d8a0' : s.score >= 4 ? '#e8c060' : '#e05050';
 
-        // Назва і бал
-        doc.fillColor('#222222').fontSize(11).font('Helvetica-Bold')
-          .text(s.name, 50, y);
-        doc.fillColor(color).fontSize(11).font('Helvetica-Bold')
-          .text(`${s.score}`, 160, y);
-
-        // Прогрес-бар фон
-        doc.fillColor('#e8e8e8').rect(185, y + 2, 300, 10).fill();
-        // Прогрес-бар заповнення
-        doc.fillColor(color).rect(185, y + 2, barW, 10).fill();
-
-        // Підпис
-        doc.fillColor('#888888').fontSize(9).font('Helvetica')
-          .text('/10', 490, y + 1);
-
-        y += 28;
-        if (i === 5) {
-          y += 10; // невелика пауза між колонками
-        }
+        doc.fillColor('#222222').font(F(true)).fontSize(10).text(s.name, 50, y);
+        doc.fillColor(color).font(F(true)).fontSize(10).text(String(s.score), 155, y);
+        doc.fillColor('#e0e0e0').rect(180, y + 2, 280, 9).fill();
+        doc.fillColor(color).rect(180, y + 2, barW, 9).fill();
+        doc.fillColor('#888888').font(F(false)).fontSize(8).text('/10', 466, y + 1);
+        y += 26;
       });
 
-      // ── AI Аналіз ──
-      if (analysis.summary || analysis.text) {
-        doc.addPage();
-        doc.rect(0, 0, 595, 80).fill('#0f1a10');
-        doc.fillColor('#20d8a0').fontSize(20).font('Helvetica-Bold')
-          .text('AI Аналіз твого Колеса Життя', 50, 28);
+      // ══ СТОРІНКА 2: AI Аналіз та план дій ══
+      doc.addPage();
 
-        const summaryText = analysis.summary || analysis.text || '';
-        doc.fillColor('#222222').fontSize(11).font('Helvetica')
-          .text(summaryText.slice(0, 2000), 50, 100, {
-            width: 495,
-            lineGap: 4,
-            align: 'left'
-          });
+      // Шапка
+      doc.rect(0, 0, 595, 70).fill('#0f1a10');
+      doc.fillColor('#20d8a0').font(F(true)).fontSize(18).text('AI Аналіз та План дій', 50, 25);
+
+      // AI Аналіз
+      const summaryText = analysis.summary || analysis.text || '';
+      if (summaryText) {
+        doc.fillColor('#1a1a2e').font(F(true)).fontSize(13).text('AI Аналіз', 50, 90);
+        doc.fillColor('#333333').font(F(false)).fontSize(10)
+          .text(summaryText.slice(0, 800), 50, 112, { width: 495, lineGap: 3 });
       }
 
-      // ── Футер ──
-      const pageCount = doc.bufferedPageRange().count;
-      for (let i = 0; i < pageCount; i++) {
+      // План дій для критичних сфер
+      let planY = summaryText ? 260 : 90;
+      doc.fillColor('#1a1a2e').font(F(true)).fontSize(13).text('План дій на цей тиждень', 50, planY);
+      planY += 22;
+
+      const planSpheres = criticals.length > 0 ? criticals.slice(0, 5) : sorted.slice(-5).reverse();
+      planSpheres.forEach((s, i) => {
+        const action = ACTIONS[s.key] ? ACTIONS[s.key].action : 'Приділи увагу цій сфері сьогодні';
+        const color = s.score >= 7 ? '#20d8a0' : s.score >= 4 ? '#e8a000' : '#e05050';
+
+        // Фон картки
+        doc.rect(50, planY, 495, 52).fill(i % 2 === 0 ? '#f8f8f8' : '#ffffff');
+        doc.rect(50, planY, 4, 52).fill(color);
+
+        // Назва сфери і бал
+        doc.fillColor(color).font(F(true)).fontSize(11)
+          .text(s.name + ' · ' + s.score + '/10', 62, planY + 8);
+
+        // Дія
+        doc.fillColor('#333333').font(F(false)).fontSize(10)
+          .text('→ ' + action, 62, planY + 26, { width: 470 });
+
+        planY += 58;
+      });
+
+      // Заклик до дії
+      doc.rect(50, planY + 10, 495, 60).fill('#e8f5f0');
+      doc.fillColor('#0f6a40').font(F(true)).fontSize(12)
+        .text('Хочеш покращити результат?', 70, planY + 22);
+      doc.fillColor('#1a5a38').font(F(false)).fontSize(10)
+        .text('Активуй PRO підписку на koleso.live — необмежені аналізи,\nтрекінг прогресу та персональний план на кожну сферу.', 70, planY + 40);
+
+      // Футер на всіх сторінках
+      const range = doc.bufferedPageRange();
+      for (let i = 0; i < range.count; i++) {
         doc.switchToPage(i);
-        doc.fillColor('#888888').fontSize(9).font('Helvetica')
-          .text(
-            `Koleso.live · AI-коуч для балансу 12 сфер · ${new Date().toLocaleDateString('uk-UA')}`,
-            50, 800, { align: 'center', width: 495 }
-          );
+        doc.fillColor('#aaaaaa').font(F(false)).fontSize(8)
+          .text('Koleso.live · AI-коуч для балансу 12 сфер · ' + date,
+            50, 820, { align: 'center', width: 495 });
       }
 
       doc.end();
@@ -155,6 +198,7 @@ async function generateResultPDF(resultData) {
     }
   });
 }
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
