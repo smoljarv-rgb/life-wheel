@@ -793,15 +793,18 @@ body::after{
 </div>
 </div>
 
-<!-- MODAL -->
+<!-- EMAIL CAPTURE MODAL -->
 <div class="modal-ov" id="notifModal">
   <div class="modal">
-    <h3>🔔 Нагадати завтра</h3>
-    <p>Надішлемо нагадування з планом о 8:00 вранці.</p>
-    <input type="email" id="notifEmail" placeholder="твій@email.com">
+    <h3>📊 Збережи свій результат</h3>
+    <p>Введи email — надішлемо твій звіт та нагадаємо перевірити прогрес через 30 днів.</p>
+    <input type="email" id="notifEmail" placeholder="твій@email.com" onkeydown="if(event.key==='Enter')sendNotif()">
     <div class="modal-btns">
-      <button class="btn" onclick="closeNotif()">Скасувати</button>
-      <button class="btn btn-acc" onclick="sendNotif()">Надіслати →</button>
+      <button class="btn" onclick="closeNotif()">Пропустити</button>
+      <button class="btn btn-acc" id="notifBtn" onclick="sendNotif()">Зберегти звіт →</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--ink3);text-align:center;font-family:'Patrick Hand',cursive">
+      Без спаму · Відписатись можна в будь-який момент
     </div>
   </div>
 </div>
@@ -1182,19 +1185,61 @@ function copyLink(){
   navigator.clipboard.writeText(window.location.href)
     .then(()=>showToast('✅ Посилання скопійовано!'))
     .catch(()=>showToast('❌ Не вдалось скопіювати'));
+  // Показуємо email capture
+  maybeShowEmailCapture();
 }
 
-function openNotif(){document.getElementById('notifModal').classList.add('open');}
-function closeNotif(){document.getElementById('notifModal').classList.remove('open');}
+// ── Email capture ──
+function openNotif(){
+  // Показуємо тільки якщо email ще не введено
+  if(localStorage.getItem('lw_email_captured')) return;
+  document.getElementById('notifModal').classList.add('open');
+  setTimeout(()=>{document.getElementById('notifEmail').focus();},200);
+}
+
+function closeNotif(){
+  document.getElementById('notifModal').classList.remove('open');
+}
 
 async function sendNotif(){
-  const email=document.getElementById('notifEmail').value.trim();
-  if(!email||!email.includes('@')){showToast('⚠️ Введи правильний email');return;}
+  const email = document.getElementById('notifEmail').value.trim();
+  if(!email || !email.includes('@')){
+    showToast('⚠️ Введи правильний email');
+    return;
+  }
+  const btn = document.getElementById('notifBtn');
+  btn.textContent = '⏳ Зберігаємо...';
+  btn.disabled = true;
   try{
-    const res=await fetch('/api/results/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,slug:currentSlug,url:window.location.href})});
-    if(res.ok){closeNotif();showToast('📧 Нагадування надіслано!');}
-    else showToast('❌ Помилка надсилання');
-  }catch(e){showToast("❌ Помилка з'єднання");}
+    // Зберігаємо email через /api/subscribe
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, source: 'result_capture' })
+    });
+    if(res.ok || res.status === 409){
+      // Зберігаємо локально щоб не показувати знову
+      localStorage.setItem('lw_email_captured', email);
+      closeNotif();
+      showToast('📧 Звіт збережено! Перевір пошту.');
+    } else {
+      showToast('❌ Помилка. Спробуй ще раз');
+      btn.textContent = 'Зберегти звіт →';
+      btn.disabled = false;
+    }
+  } catch(e){
+    showToast("❌ Помилка з'єднання");
+    btn.textContent = 'Зберегти звіт →';
+    btn.disabled = false;
+  }
+}
+
+// ── Автоматичний показ email capture після завантаження результату ──
+function maybeShowEmailCapture(){
+  // Не показуємо якщо email вже є
+  if(localStorage.getItem('lw_email_captured')) return;
+  // Показуємо через 3 секунди після відображення результату
+  setTimeout(openNotif, 3000);
 }
 
 function showToast(msg){
