@@ -1248,7 +1248,14 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-loadResult();
+loadResult().then(function(){
+  // Показуємо email capture через 3 сек після завантаження
+  setTimeout(function(){
+    if(!localStorage.getItem('lw_email_captured')){
+      document.getElementById('notifModal').classList.add('open');
+    }
+  }, 3000);
+});
 </script>
 </body>
 </html>
