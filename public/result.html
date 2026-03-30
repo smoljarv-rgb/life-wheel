@@ -745,6 +745,7 @@ body::after{
     <div id="progressBlock"></div>
 
     <div class="btn-row">
+      <button class="btn" onclick="shareStory()">📸 Story</button>
       <button class="btn" onclick="copyLink()">🔗 Поділитись</button>
       <button class="btn" onclick="openNotif()">🔔 Нагадати</button>
       <button class="btn" onclick="exportPDF()">📄 PDF</button>
@@ -783,6 +784,7 @@ body::after{
     <div class="roadmap" id="roadmap"></div>
 
     <div class="btn-row">
+      <button class="btn" onclick="shareStory()">📸 Story</button>
       <button class="btn btn-acc" onclick="openNotif()">🔔 Нагадати завтра о 8:00</button>
       <button class="btn" onclick="exportPDF()">📄 PDF</button>
       <button class="btn" onclick="copyLink()">🔗 Поділитись</button>
@@ -1179,6 +1181,196 @@ function exportPDF(){
     if(active){const map={'Знімок':'snap','Сфери':'spheres','План':'plan'};const txt=active.textContent.trim();const id=Object.entries(map).find(([k])=>txt.includes(k));if(id)document.getElementById('sc-'+id[1]).classList.add('on');}
     else document.getElementById('sc-snap').classList.add('on');
   },500);
+}
+
+
+// ── Share Story — генерація Instagram Story картинки ──
+function shareStory(){
+  if(!resultData){ showToast('⚠️ Завантажуємо дані...'); return; }
+
+  const scores = resultData.scores || {};
+  const SPHERES = [
+    {key:'love',name:'Любов'},{key:'family',name:"Сім'я"},
+    {key:'friends',name:'Друзі'},{key:'career',name:"Кар'єра"},
+    {key:'finance',name:'Фінанси'},{key:'health',name:"Здоров'я"},
+    {key:'selfdev',name:'Саморозвиток'},{key:'spirit',name:'Духовність'},
+    {key:'rest',name:'Відпочинок'},{key:'env',name:'Середовище'},
+    {key:'comm',name:'Комунікація'},{key:'appear',name:'Зовнішність'}
+  ];
+
+  const vals = SPHERES.map(s => parseFloat(scores[s.key]) || 5);
+  const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+  const avgR = Math.round(avg * 10) / 10;
+  const sorted = SPHERES.map(s=>({...s, score: parseFloat(scores[s.key])||5}))
+    .sort((a,b)=>b.score-a.score);
+  const topS = sorted[0];
+  const botS = sorted[sorted.length-1];
+
+  // Створюємо canvas 1080x1920 (Instagram Story формат)
+  const W = 1080, H = 1920;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // ── Фон ──
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0a1a0e');
+  bg.addColorStop(0.5, '#0f1a10');
+  bg.addColorStop(1, '#071510');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Декоративні кола
+  ctx.beginPath();
+  ctx.arc(W * 0.85, H * 0.12, 280, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(32,216,160,0.04)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(W * 0.15, H * 0.88, 220, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(32,216,160,0.03)';
+  ctx.fill();
+
+  // ── Логотип ──
+  ctx.fillStyle = '#20d8a0';
+  ctx.font = 'bold 42px Arial';
+  ctx.fillText('Koleso.live', 80, 140);
+
+  ctx.fillStyle = '#4a7a60';
+  ctx.font = '32px Arial';
+  ctx.fillText('AI-коуч для балансу життя', 80, 195);
+
+  // ── Великий бал ──
+  ctx.fillStyle = 'rgba(32,216,160,0.1)';
+  ctx.beginPath();
+  roundRect(ctx, 60, 280, W - 120, 320, 40);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(32,216,160,0.3)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  roundRect(ctx, 60, 280, W - 120, 320, 40);
+  ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 52px Arial';
+  ctx.fillText('Мій баланс сьогодні', 80, 360);
+
+  ctx.fillStyle = '#20d8a0';
+  ctx.font = 'bold 180px Arial';
+  ctx.fillText(String(avgR), 80, 530);
+
+  ctx.fillStyle = '#4a7a60';
+  ctx.font = 'bold 60px Arial';
+  ctx.fillText('/10', 80 + (avgR >= 10 ? 220 : 180), 510);
+
+  // ── Топ і слабка сфера ──
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.beginPath();
+  roundRect(ctx, 60, 650, (W - 150) / 2, 150, 20);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.beginPath();
+  roundRect(ctx, 60 + (W - 150) / 2 + 30, 650, (W - 150) / 2, 150, 20);
+  ctx.fill();
+
+  ctx.fillStyle = '#20d8a0';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText('🏆 Топ сфера', 80, 700);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 36px Arial';
+  ctx.fillText(topS.name + ' · ' + topS.score, 80, 748);
+
+  const col2x = 60 + (W - 150) / 2 + 50;
+  ctx.fillStyle = '#e05050';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText('⚡ Увага', col2x, 700);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 36px Arial';
+  ctx.fillText(botS.name + ' · ' + botS.score, col2x, 748);
+
+  // ── Всі 12 сфер ──
+  ctx.fillStyle = '#cccccc';
+  ctx.font = 'bold 36px Arial';
+  ctx.fillText('Всі 12 сфер:', 80, 880);
+
+  const barX = 80, barW = W - 160, barH = 28;
+  let barY = 910;
+  sorted.forEach(s => {
+    const fill = s.score >= 7 ? '#20d8a0' : s.score >= 4 ? '#e8c060' : '#e05050';
+    const pct = s.score / 10;
+
+    // Фон бару
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath();
+    roundRect(ctx, barX, barY, barW, barH, 6);
+    ctx.fill();
+
+    // Заповнення бару
+    ctx.fillStyle = fill + '99';
+    ctx.beginPath();
+    roundRect(ctx, barX, barY, barW * pct, barH, 6);
+    ctx.fill();
+
+    // Текст
+    ctx.fillStyle = '#dddddd';
+    ctx.font = '24px Arial';
+    ctx.fillText(s.name, barX + 10, barY + 21);
+
+    ctx.fillStyle = fill;
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(String(s.score), barX + barW - 10, barY + 21);
+    ctx.textAlign = 'left';
+
+    barY += 40;
+  });
+
+  // ── Заклик ──
+  ctx.fillStyle = 'rgba(32,216,160,0.12)';
+  ctx.beginPath();
+  roundRect(ctx, 60, H - 280, W - 120, 180, 30);
+  ctx.fill();
+
+  ctx.fillStyle = '#20d8a0';
+  ctx.font = 'bold 40px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('А який твій баланс?', W/2, H - 200);
+
+  ctx.fillStyle = '#aaaaaa';
+  ctx.font = '34px Arial';
+  ctx.fillText('koleso.live', W/2, H - 148);
+
+  ctx.fillStyle = '#666666';
+  ctx.font = '26px Arial';
+  ctx.fillText('Безкоштовний AI-аналіз 12 сфер', W/2, H - 106);
+  ctx.textAlign = 'left';
+
+  // ── Завантажуємо картинку ──
+  canvas.toBlob(function(blob){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'koleso-life-story.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📸 Story картинка завантажена!');
+  }, 'image/png');
+}
+
+// Допоміжна функція — закруглені прямокутники
+function roundRect(ctx, x, y, w, h, r){
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 function copyLink(){
