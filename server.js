@@ -376,6 +376,13 @@ app.post('/api/subscribe', async (req, res) => {
     saveDB(db);
   }
 
+  // Додаємо в чергу email-послідовності (тільки нові підписники)
+  if (error?.code === '23505') {
+    // Вже існує — не додаємо в чергу
+  } else {
+    addToEmailQueue(email).catch(e => console.error('Queue error:', e));
+  }
+
   // Відправляємо лист залежно від джерела
   try {
     const isResultCapture = source === 'result_capture';
@@ -1283,6 +1290,379 @@ app.post('/api/lemonsqueezy/webhook', express.raw({ type: 'application/json' }),
   }
 
   res.json({ ok: true });
+});
+
+
+// ══════════════════════════════════════════
+//  EMAIL SEQUENCE — 7 листів
+// ══════════════════════════════════════════
+
+// Тексти листів
+const EMAIL_LETTERS = {
+  1: {
+    subject: '📊 Твій звіт Колеса Життя збережено',
+    // Лист 1 вже відправляється в /api/subscribe — пропускаємо
+    skip: true
+  },
+  2: {
+    subject: '3 речі, які твій результат означає насправді',
+    html: (email, resultUrl) => `
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:28px 40px">
+    <h1 style="margin:0;font-size:22px;color:#20d8a0">Колесо Життя</h1>
+  </td></tr>
+  <tr><td style="padding:32px 40px">
+    <p style="font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="font-size:15px;color:#333;line-height:1.7">Вчора ти пройшов тест Колеса Життя. Ось що твій результат означає насправді:</p>
+    <div style="background:#f0fff8;border-left:4px solid #20d8a0;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0">
+      <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0f6a40">💡 Факт 1: Твій мозок звикає до поточного рівня</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.6">Навіть якщо якась сфера низька — мозок сприймає це як «норму». Перший крок до змін — усвідомлення.</p>
+    </div>
+    <div style="background:#f0fff8;border-left:4px solid #20d8a0;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0">
+      <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0f6a40">💡 Факт 2: Одна сфера тягне за собою інші</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.6">Дослідження показують: покращення у здоров'ї на 1 бал підвищує продуктивність на роботі на 23%. Сфери пов'язані.</p>
+    </div>
+    <div style="background:#f0fff8;border-left:4px solid #20d8a0;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0">
+      <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0f6a40">💡 Факт 3: 15 хвилин на день = +1 бал за місяць</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.6">Не потрібні радикальні зміни. Маленькі щоденні дії дають реальний результат через 30 днів.</p>
+    </div>
+    <p style="font-size:14px;color:#333;line-height:1.7">Переглянь свій звіт — там є конкретний план для твоєї ситуації:</p>
+    <table cellpadding="0" cellspacing="0" style="margin:20px 0">
+      <tr><td style="background:#20d8a0;border-radius:8px;padding:13px 26px">
+        <a href="${resultUrl || 'https://koleso.live'}" style="color:#0f1a10;font-size:14px;font-weight:bold;text-decoration:none">Переглянути мій звіт →</a>
+      </td></tr>
+    </table>
+    <p style="font-size:15px;color:#333">З повагою,<br><strong>Володимир</strong></p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+    <p style="font-size:12px;color:#999"><a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a></p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  },
+  3: {
+    subject: 'Ось що роблять люди з балом 8+ у твоїй слабкій сфері',
+    html: (email, resultUrl) => `
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:28px 40px">
+    <h1 style="margin:0;font-size:22px;color:#20d8a0">Колесо Життя</h1>
+  </td></tr>
+  <tr><td style="padding:32px 40px">
+    <p style="font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="font-size:15px;color:#333;line-height:1.7">Я проаналізував дані тисяч людей які пройшли Колесо Життя. Ось що об'єднує тих, хто підняв свій бал до 8+:</p>
+    <div style="background:#fff8e7;border-radius:10px;padding:20px;margin:20px 0">
+      <p style="margin:0 0 12px;font-size:15px;font-weight:bold;color:#b8860b">🏆 Що роблять люди з балом 8+</p>
+      <p style="margin:0 0 8px;font-size:13px;color:#333;line-height:1.6">✓ Вони не чекають «правильного моменту» — починають з мікродій сьогодні</p>
+      <p style="margin:0 0 8px;font-size:13px;color:#333;line-height:1.6">✓ Перевіряють прогрес раз на місяць — не рідше</p>
+      <p style="margin:0 0 8px;font-size:13px;color:#333;line-height:1.6">✓ Фокусуються на 1-2 сферах одночасно, а не на всіх</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.6">✓ Ведуть короткий щоденник прогресу (5 хвилин на день)</p>
+    </div>
+    <p style="font-size:14px;color:#333;line-height:1.7">Твій звіт вже містить персональний план. Почни з однієї дії сьогодні:</p>
+    <table cellpadding="0" cellspacing="0" style="margin:20px 0">
+      <tr><td style="background:#20d8a0;border-radius:8px;padding:13px 26px">
+        <a href="${resultUrl || 'https://koleso.live'}" style="color:#0f1a10;font-size:14px;font-weight:bold;text-decoration:none">Відкрити мій план →</a>
+      </td></tr>
+    </table>
+    <p style="font-size:15px;color:#333">З повагою,<br><strong>Володимир</strong></p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+    <p style="font-size:12px;color:#999"><a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a></p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  },
+  4: {
+    subject: 'Твій 7-денний план — частина 1 (безкоштовно)',
+    html: (email, resultUrl) => `
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:28px 40px">
+    <h1 style="margin:0;font-size:22px;color:#20d8a0">Колесо Життя</h1>
+  </td></tr>
+  <tr><td style="padding:32px 40px">
+    <p style="font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="font-size:15px;color:#333;line-height:1.7">Ось твій безкоштовний 7-денний старт для покращення балансу:</p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${[
+        ['День 1', 'Запиши 3 речі за які вдячний сьогодні', '5 хв'],
+        ['День 2', 'Вийди на 20-хвилинну прогулянку без телефону', '20 хв'],
+        ['День 3', 'Напиши одній людині яку давно не бачив', '5 хв'],
+        ['День 4', 'Прочитай 10 сторінок книги що відклав', '20 хв'],
+        ['День 5', 'Приготуй здорову їжу замість замовлення', '30 хв'],
+        ['День 6', 'Запиши одну ціль на наступний місяць', '10 хв'],
+        ['День 7', 'Повтори тест — побач перший прогрес', '5 хв'],
+      ].map(([day, task, time]) => `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid #f0f0f0">
+          <div style="display:flex;align-items:center">
+            <span style="font-size:12px;font-weight:bold;color:#20d8a0;min-width:60px">${day}</span>
+            <span style="font-size:13px;color:#333;flex:1;padding:0 10px">${task}</span>
+            <span style="font-size:11px;color:#999">${time}</span>
+          </div>
+        </td>
+      </tr>`).join('')}
+    </table>
+    <p style="font-size:14px;color:#333;line-height:1.7;margin-top:20px">Хочеш персональний план саме для твоїх слабких сфер? Він вже є у твоєму звіті:</p>
+    <table cellpadding="0" cellspacing="0" style="margin:20px 0">
+      <tr><td style="background:#20d8a0;border-radius:8px;padding:13px 26px">
+        <a href="${resultUrl || 'https://koleso.live'}" style="color:#0f1a10;font-size:14px;font-weight:bold;text-decoration:none">Мій персональний план →</a>
+      </td></tr>
+    </table>
+    <p style="font-size:15px;color:#333">З повагою,<br><strong>Володимир</strong></p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+    <p style="font-size:12px;color:#999"><a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a></p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  },
+  5: {
+    subject: 'Чи є в тебе 15 хвилин цього тижня?',
+    html: (email, resultUrl) => `
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:28px 40px">
+    <h1 style="margin:0;font-size:22px;color:#20d8a0">Колесо Життя</h1>
+  </td></tr>
+  <tr><td style="padding:32px 40px">
+    <p style="font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="font-size:15px;color:#333;line-height:1.7">Тиждень минув після твого тесту. Як справи?</p>
+    <p style="font-size:15px;color:#333;line-height:1.7">Якщо хочеш піти глибше — PRO дає тобі:</p>
+    <div style="background:#f8f8f8;border-radius:10px;padding:20px;margin:20px 0">
+      <p style="margin:0 0 8px;font-size:13px;color:#333;line-height:1.7">✦ <strong>Повний аналіз всіх 12 сфер</strong> з AI-рекомендаціями</p>
+      <p style="margin:0 0 8px;font-size:13px;color:#333;line-height:1.7">✦ <strong>Трекінг прогресу</strong> — бач як змінюється баланс</p>
+      <p style="margin:0 0 8px;font-size:13px;color:#333;line-height:1.7">✦ <strong>PDF-звіти</strong> для кожного тесту</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.7">✦ <strong>Психологічні техніки</strong> з посиланнями на книги</p>
+    </div>
+    <p style="font-size:14px;color:#333;line-height:1.7">Починається від <strong>99 ₴</strong> — менше ніж чашка кави в день:</p>
+    <table cellpadding="0" cellspacing="0" style="margin:20px 0">
+      <tr><td style="background:#e8c060;border-radius:8px;padding:13px 26px">
+        <a href="https://koleso.live/pricing" style="color:#1a1a00;font-size:14px;font-weight:bold;text-decoration:none">Спробувати PRO →</a>
+      </td></tr>
+    </table>
+    <p style="font-size:13px;color:#999;line-height:1.6">14 днів гарантія повернення. Без ризику.</p>
+    <p style="font-size:15px;color:#333">З повагою,<br><strong>Володимир</strong></p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+    <p style="font-size:12px;color:#999"><a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a></p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  },
+  6: {
+    subject: 'Хтось схожий на тебе підвищив бал на 2.3 за місяць',
+    html: (email, resultUrl) => `
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:28px 40px">
+    <h1 style="margin:0;font-size:22px;color:#20d8a0">Колесо Життя</h1>
+  </td></tr>
+  <tr><td style="padding:32px 40px">
+    <p style="font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <div style="background:#f0fff8;border-radius:10px;padding:20px;margin:0 0 20px">
+      <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0f6a40">💬 Олена, 34 роки, Київ</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.7;font-style:italic">«Прийшла з балом 4.8. Через місяць — 7.1. Найбільше зросла сфера Здоров'я — з 3 до 7. Просто почала ходити пішки на роботу і лягати раніше спати. Колесо показало що саме заважало всьому іншому.»</p>
+    </div>
+    <div style="background:#f0fff8;border-radius:10px;padding:20px;margin:0 0 20px">
+      <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0f6a40">💬 Максим, 28 років, Львів</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.7;font-style:italic">«Думав що в мене проблема з кар'єрою. AI-аналіз показав що коренева причина — у сфері Відпочинку. Виправив це — і кар'єра сама пішла вгору.»</p>
+    </div>
+    <p style="font-size:14px;color:#333;line-height:1.7">Хочеш побачити що заважає саме тобі? PRO відкриє повний AI-аналіз:</p>
+    <table cellpadding="0" cellspacing="0" style="margin:20px 0">
+      <tr><td style="background:#e8c060;border-radius:8px;padding:13px 26px">
+        <a href="https://koleso.live/pricing" style="color:#1a1a00;font-size:14px;font-weight:bold;text-decoration:none">Отримати PRO аналіз →</a>
+      </td></tr>
+    </table>
+    <p style="font-size:15px;color:#333">З повагою,<br><strong>Володимир</strong></p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+    <p style="font-size:12px;color:#999"><a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a></p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  },
+  7: {
+    subject: '30 днів минуло. Що змінилось? + знижка 20%',
+    html: (email, resultUrl) => `
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px">
+<tr><td><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+  <tr><td style="background:#0f1a10;padding:28px 40px">
+    <h1 style="margin:0;font-size:22px;color:#20d8a0">Колесо Життя</h1>
+  </td></tr>
+  <tr><td style="padding:32px 40px">
+    <p style="font-size:15px;color:#333;line-height:1.7">Привіт!</p>
+    <p style="font-size:15px;color:#333;line-height:1.7">Місяць тому ти пройшов Колесо Життя. Саме час перевірити — що змінилось?</p>
+    <div style="background:#f8f8f8;border-radius:10px;padding:20px;margin:20px 0;text-align:center">
+      <p style="margin:0 0 12px;font-size:14px;color:#333">Пройди тест повторно — побач реальний прогрес</p>
+      <table cellpadding="0" cellspacing="0" style="margin:0 auto">
+        <tr><td style="background:#20d8a0;border-radius:8px;padding:13px 26px">
+          <a href="https://koleso.live" style="color:#0f1a10;font-size:14px;font-weight:bold;text-decoration:none">Пройти повторний тест →</a>
+        </td></tr>
+      </table>
+    </div>
+    <div style="background:#fff8e7;border:2px solid #e8c060;border-radius:10px;padding:20px;margin:20px 0">
+      <p style="margin:0 0 8px;font-size:15px;font-weight:bold;color:#b8860b">🎁 Спеціальна пропозиція</p>
+      <p style="margin:0 0 12px;font-size:13px;color:#333;line-height:1.7">Тільки для тебе — <strong>знижка 20%</strong> на PRO підписку. Дійсна 48 годин.</p>
+      <table cellpadding="0" cellspacing="0">
+        <tr><td style="background:#e8c060;border-radius:8px;padding:13px 26px">
+          <a href="https://koleso.live/pricing" style="color:#1a1a00;font-size:14px;font-weight:bold;text-decoration:none">Активувати зі знижкою 20% →</a>
+        </td></tr>
+      </table>
+    </div>
+    <p style="font-size:15px;color:#333">З повагою,<br><strong>Володимир</strong></p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+    <p style="font-size:12px;color:#999"><a href="https://koleso.live/unsubscribe?email=${email}" style="color:#999">Відписатись</a></p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  }
+};
+
+// Дні відправки після реєстрації
+const LETTER_SCHEDULE = { 2: 1, 3: 3, 4: 5, 5: 7, 6: 14, 7: 30 };
+
+// Додати підписника в чергу листів
+async function addToEmailQueue(email) {
+  const now = new Date();
+  const rows = Object.entries(LETTER_SCHEDULE).map(([letterNum, days]) => ({
+    email,
+    letter_number: parseInt(letterNum),
+    send_at: new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString(),
+    sent: false
+  }));
+
+  const { error } = await supabase.from('email_queue').insert(rows);
+  if (error) console.error('Email queue error:', error);
+}
+
+// Endpoint: обробка черги листів (викликається cron-job.org)
+app.post('/api/email-sequence/process', async (req, res) => {
+  // Простий захист від випадкових викликів
+  const secret = req.headers['x-cron-secret'] || req.body?.secret;
+  if (secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Отримуємо всі листи які потрібно відправити зараз
+    const { data: pending, error } = await supabase
+      .from('email_queue')
+      .select('*')
+      .eq('sent', false)
+      .lte('send_at', new Date().toISOString())
+      .limit(50);
+
+    if (error) throw error;
+    if (!pending || pending.length === 0) {
+      return res.json({ ok: true, sent: 0, message: 'Немає листів для відправки' });
+    }
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const item of pending) {
+      const letter = EMAIL_LETTERS[item.letter_number];
+      if (!letter || letter.skip) {
+        // Помічаємо як відправлено (пропускаємо)
+        await supabase.from('email_queue').update({ sent: true, sent_at: new Date().toISOString() }).eq('id', item.id);
+        continue;
+      }
+
+      // Отримуємо останній slug результату для цього email
+      let resultUrl = 'https://koleso.live';
+      try {
+        const { data: latestResult } = await supabase
+          .from('results')
+          .select('slug')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (latestResult && latestResult[0]) {
+          resultUrl = 'https://koleso.live/result/' + latestResult[0].slug;
+        }
+      } catch(e) {}
+
+      try {
+        await resend.emails.send({
+          from: 'Володимир з Колеса Життя <noreply@koleso.live>',
+          to: item.email,
+          subject: letter.subject,
+          html: letter.html(item.email, resultUrl)
+        });
+
+        // Помічаємо як відправлено
+        await supabase.from('email_queue')
+          .update({ sent: true, sent_at: new Date().toISOString() })
+          .eq('id', item.id);
+
+        sent++;
+      } catch (emailErr) {
+        console.error('Email send error:', emailErr);
+        failed++;
+      }
+    }
+
+    res.json({ ok: true, sent, failed });
+  } catch (e) {
+    console.error('Process error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET endpoint для cron-job.org (підтримує GET запити)
+app.get('/api/email-sequence/process', async (req, res) => {
+  const secret = req.query.secret;
+  if (secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  // Перенаправляємо на POST логіку
+  req.body = { secret };
+  req.headers['x-cron-secret'] = secret;
+
+  try {
+    const { data: pending, error } = await supabase
+      .from('email_queue')
+      .select('*')
+      .eq('sent', false)
+      .lte('send_at', new Date().toISOString())
+      .limit(50);
+
+    if (error) throw error;
+    if (!pending || pending.length === 0) {
+      return res.json({ ok: true, sent: 0 });
+    }
+
+    let sent = 0;
+    for (const item of pending) {
+      const letter = EMAIL_LETTERS[item.letter_number];
+      if (!letter || letter.skip) {
+        await supabase.from('email_queue').update({ sent: true, sent_at: new Date().toISOString() }).eq('id', item.id);
+        continue;
+      }
+      try {
+        await resend.emails.send({
+          from: 'Володимир з Колеса Життя <noreply@koleso.live>',
+          to: item.email,
+          subject: letter.subject,
+          html: letter.html(item.email, 'https://koleso.live')
+        });
+        await supabase.from('email_queue').update({ sent: true, sent_at: new Date().toISOString() }).eq('id', item.id);
+        sent++;
+      } catch(e) { console.error('Email error:', e); }
+    }
+
+    res.json({ ok: true, sent });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.get('/result/:slug', function(req, res) {
