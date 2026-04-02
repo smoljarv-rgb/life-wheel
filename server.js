@@ -1151,6 +1151,11 @@ app.get('/thank-you', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'thank-you.html'));
 });
 
+// WayForPay робить POST redirect на /thank-you після оплати
+app.post('/thank-you', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'thank-you.html'));
+});
+
 
 // ── Lemon Squeezy: створення checkout сесії ──
 app.post('/api/lemonsqueezy/checkout', async (req, res) => {

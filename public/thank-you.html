@@ -3,39 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Дякуємо! — Koleso.live</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Дякуємо! — Колесо Життя</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
+:root{
+  --paper:#fdf6e3;--paper2:#f5ead0;--paper3:#ede0c4;
+  --ink:#2c1810;--ink2:#4a3728;--ink3:#7a6050;
+  --green:#27ae60;--blue:#2471a3;--yellow:#f39c12;--teal:#20d8a0;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:#09090f;color:#f0f0f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(32,216,160,.07) 0%,transparent 70%);pointer-events:none}
-.card{max-width:480px;width:100%;text-align:center;position:relative;z-index:1;animation:fadeUp .6s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-.icon{font-size:72px;margin-bottom:24px;animation:bounce .6s .3s ease both}
-@keyframes bounce{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
-h1{font-family:'Fraunces',serif;font-size:clamp(32px,6vw,52px);font-weight:600;line-height:1.1;margin-bottom:14px}
-h1 em{font-style:italic;color:#20d8a0}
-p{font-size:16px;color:#8888a8;line-height:1.7;margin-bottom:32px}
-.actions{display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto 40px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
-.btn-primary{background:linear-gradient(135deg,#20d8a0,#18b088);color:#071a12;box-shadow:0 8px 24px rgba(32,216,160,.25)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(32,216,160,.35)}
-.btn-secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8888a8}
-.btn-secondary:hover{color:#f0f0f8;border-color:rgba(255,255,255,.2)}
-.note{font-size:13px;color:#44445a;line-height:1.6}
-.note a{color:#20d8a0;text-decoration:none}
+body{
+  font-family:'Patrick Hand',cursive;
+  background:var(--paper);color:var(--ink);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(180,160,120,.12) 28px),
+    repeating-linear-gradient(90deg,transparent,transparent 99%,rgba(180,160,120,.06) 100%);
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;top:0;left:0;right:0;height:6px;
+  background:var(--paper3);
+  clip-path:polygon(0 0,2% 100%,4% 20%,6% 80%,8% 10%,10% 90%,12% 30%,14% 70%,16% 15%,18% 85%,20% 40%,22% 60%,24% 20%,26% 80%,28% 10%,30% 90%,32% 35%,34% 65%,36% 15%,38% 85%,40% 45%,42% 55%,44% 25%,46% 75%,48% 10%,50% 90%,52% 30%,54% 70%,56% 20%,58% 80%,60% 40%,62% 60%,64% 15%,66% 85%,68% 35%,70% 65%,72% 10%,74% 90%,76% 45%,78% 55%,80% 20%,82% 80%,84% 30%,86% 70%,88% 15%,90% 85%,92% 40%,94% 60%,96% 25%,98% 75%,100% 0);
+  pointer-events:none;z-index:1;
+}
+.card{
+  position:relative;z-index:1;
+  background:var(--paper);
+  border:2px solid var(--paper3);
+  border-radius:3px 20px 16px 12px;
+  padding:48px 40px;
+  max-width:520px;width:100%;
+  margin:24px;
+  text-align:center;
+  box-shadow:6px 8px 0 rgba(44,24,16,.08);
+}
+.emoji{font-size:64px;margin-bottom:20px;display:block;animation:bounce .8s ease infinite alternate}
+@keyframes bounce{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}
+.title{
+  font-family:'Caveat Brush',cursive;
+  font-size:42px;color:var(--ink);
+  margin-bottom:12px;
+  position:relative;display:inline-block;
+}
+.title::after{
+  content:'';position:absolute;
+  bottom:2px;left:-4px;right:-4px;height:7px;
+  background:var(--yellow);opacity:.5;z-index:-1;
+  transform:rotate(-0.5deg);border-radius:2px;
+}
+.subtitle{
+  font-size:18px;color:var(--ink2);
+  line-height:1.7;margin-bottom:32px;
+}
+.steps{
+  background:var(--paper2);
+  border:1.5px dashed var(--paper3);
+  border-radius:3px 12px 10px 8px;
+  padding:20px;margin-bottom:32px;
+  text-align:left;
+}
+.step{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 0;
+  border-bottom:1px dashed var(--paper3);
+  font-size:15px;color:var(--ink2);
+  line-height:1.5;
+}
+.step:last-child{border-bottom:none}
+.step-num{
+  font-family:'Caveat Brush',cursive;
+  font-size:20px;color:var(--green);
+  flex-shrink:0;line-height:1.2;
+}
+.btn{
+  display:inline-block;
+  background:var(--ink);color:var(--paper);
+  font-family:'Patrick Hand',cursive;
+  font-size:16px;font-weight:600;
+  padding:14px 32px;
+  border-radius:3px 12px 10px 8px;
+  text-decoration:none;
+  transition:all .2s;
+  border:2px solid var(--ink);
+  box-shadow:3px 4px 0 rgba(44,24,16,.15);
+}
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:5px 6px 0 rgba(44,24,16,.2);
+}
+.note{
+  margin-top:20px;
+  font-size:13px;color:var(--ink3);
+  line-height:1.6;
+}
+.note a{color:var(--blue);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="icon">🎉</div>
-  <h1>Оплату<br><em>підтверджено!</em></h1>
-  <p>Твій PRO доступ активовано. Лист з підтвердженням надісланий на email. Починай свій повний аналіз прямо зараз!</p>
-  <div class="actions">
-    <a href="https://koleso.live" class="btn btn-primary">🌀 Відкрити Колесо Життя →</a>
-    <a href="https://koleso.live/pricing" class="btn btn-secondary">← Повернутись до тарифів</a>
+  <span class="emoji">🎉</span>
+  <h1 class="title">Оплата успішна!</h1>
+  <p class="subtitle">Дякуємо! Твій PRO доступ активовано. Перевір пошту — там деталі.</p>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">1</span>
+      <span>Перевір email — надіслали лист з деталями доступу</span>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <span>Увійди в особистий кабінет через кнопку нижче</span>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <span>Пройди повний тест всіх 12 сфер і отримай AI-план</span>
+    </div>
   </div>
-  <div class="note">Питання? Напиши нам: <a href="mailto:support@koleso.live">support@koleso.live</a></div>
+
+  <a href="/" class="btn">Перейти до тесту →</a>
+
+  <p class="note">
+    Якщо лист не прийшов — перевір спам або напиши на
+    <a href="mailto:support@koleso.live">support@koleso.live</a>
+  </p>
 </div>
 </body>
 </html>
