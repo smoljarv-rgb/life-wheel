@@ -1926,28 +1926,13 @@ async function runAnalysis(){
       return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
     }).join('\n');
 
-    const batchPrompt = `Ты сертифицированный ICF-коуч и психолог. Отвечай ТОЛЬКО валидным JSON без markdown.
-Язык ответа: УКРАИНСКИЙ (все поля на украинском, кроме имён авторов).
-Контекст: ${context}
-
-Проаналізуй ${chosen.length} сферу(и):
+    const batchPrompt = `ICF coach. Respond ONLY with valid JSON, no markdown.
+Context: ${context}
+Analyze these ${chosen.length} sphere(s):
 ${spheresList}
 
-Для кожного дня плану вказуй:
-- technique: конкретна психологічна техніка з назвою і автором
-- psychologist: психолог або коуч який розробив підхід
-- book: конкретна книга з повною назвою та автором
-- method_description: 2-3 речення як методика працює психологічно
-- how_to: покрокова інструкція (кроки 1, 2, 3)
-
-Використовуй різні підходи:
-День 1-2: КПТ, АСТ, DBT техніки
-День 3-4: позитивна психологія (Селігман, Чіксентміхайі)
-День 5-6: нейронаука звичок (Джеймс Клір, BJ Fogg)
-День 7: рефлексія та огляд (Девід Аллен)
-
-Поверни JSON:
-{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","root_cause":"головна причина низького балу","days":[{"day":"День 1","title":"фокус дня","task":"дія до 8 слів","how_to":"1) крок перший 2) крок другий 3) крок третій","technique":"Назва техніки — Автор: як застосувати","psychologist":"Ім'я психолога або коуча","book":"Назва книги — Автор","method_description":"Як методика працює психологічно і чому ефективна","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"кроки","technique":"техніка — автор","psychologist":"психолог","book":"книга — автор","method_description":"опис методики","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"кроки","technique":"техніка","psychologist":"психолог","book":"книга","method_description":"опис","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"кроки","technique":"техніка","psychologist":"психолог","book":"книга","method_description":"опис","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"кроки","technique":"техніка","psychologist":"психолог","book":"книга","method_description":"опис","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"кроки","technique":"техніка","psychologist":"психолог","book":"книга","method_description":"опис","duration":"хв"},{"day":"День 7","title":"Підсумок тижня","task":"рефлексія і запис результатів","how_to":"1) запиши що вдалось 2) що повторити 3) ціль на наступний тиждень","technique":"Weekly Review — Девід Аллен: огляд всіх сфер раз на тиждень","psychologist":"Девід Аллен","book":"Як привести справи до порядку — Девід Аллен","method_description":"Регулярний тижневий огляд знижує тривожність і підвищує контроль над життям за даними GTD-досліджень","duration":"20 хв"}],"week2_habit":"мікрозвичка у форматі: після X я роблю Y (BJ Fogg метод)","month_goal":"SMART-ціль на 30 днів з вимірюваним результатом","to_10":"3 конкретні кроки від поточного балу до 10/10","goal":"ключова трансформація до 10 слів","quick_win":"одна мікродія яку можна зробити прямо зараз до 5 хвилин"}]}`;
+Return JSON object with array:
+{"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]}`;
 
     // Update progress to show "processing"
     const progInterval = setInterval(()=>{
@@ -2254,20 +2239,8 @@ function renderAdvice(parsed){
               <div style="font-size:.69rem;color:var(--tm);line-height:1.65;transition:color 3s">${d.technique}</div>
             </div>`:''}
 
-            <!-- Method description -->
-            ${d.method_description?`
-            <div style="margin-bottom:7px;padding:8px 11px;background:rgba(32,200,140,.06);border:1px solid rgba(32,200,140,.2);border-radius:9px;transition:all 3s">
-              <div style="font-size:.54rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#20c88c;margin-bottom:4px">🔬 Як це працює</div>
-              <div style="font-size:.68rem;color:var(--tm);line-height:1.65;transition:color 3s">${d.method_description}</div>
-            </div>`:''}
-            <!-- Psychologist + Book -->
-            ${(d.psychologist||d.book)?`
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">
-              ${d.psychologist?`<div style="font-size:.62rem;color:#9b72e8;display:flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(155,114,232,.08);border-radius:20px;transition:all 3s">👤 <strong>${d.psychologist}</strong></div>`:''}
-              ${d.book?`<div style="font-size:.62rem;color:var(--ac);display:flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(32,216,160,.08);border-radius:20px;transition:all 3s">📖 <em>${d.book}</em></div>`:''}
-            </div>`:''}
-            <!-- Resource (legacy) -->
-            ${d.resource&&!d.book?`<div style="font-size:.63rem;color:var(--ac);display:flex;align-items:center;gap:5px;padding:3px 0;transition:color 3s">📖 <em>${d.resource}</em></div>`:''}
+            <!-- Resource -->
+            ${d.resource?`<div style="font-size:.63rem;color:var(--ac);display:flex;align-items:center;gap:5px;padding:3px 0;transition:color 3s">📖 <em>${d.resource}</em></div>`:''}
           </div>`).join('')}
         </div>
 
@@ -2354,9 +2327,6 @@ function renderAdvice(parsed){
   }catch(e){ console.error('Snapshot error:', e); }
 
   // Зберігаємо результат в Supabase
-	// Зберігаємо advice з AI аналізу
-	const adviceData = (typeof parsed !== 'undefined' && parsed && parsed.advice) ? parsed.advice : [];
-
 	fetch('/api/results/save', {
 	  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },
@@ -2365,7 +2335,6 @@ function renderAdvice(parsed){
 			analysis: {
 			  analysedKeys: analysedKeys,
 			  isFree: isFreeResult,
-			  advice: adviceData,
 			  weekPlan: [],
 			  spheres: {}
 			}
@@ -2375,7 +2344,7 @@ function renderAdvice(parsed){
 			localStorage.setItem('lw_last_result', saved.slug);
 			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
 			  scores: allScoresSnapshot,
-			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult, advice: adviceData }
+			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult }
 			}));
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
@@ -3073,10 +3042,11 @@ function triggerPayment(plan, currency) {
   var origText = btn.textContent || '';
   if(btn.tagName === 'BUTTON') { btn.textContent = '⏳...'; btn.disabled = true; }
 
+  var lastSlug = localStorage.getItem('lw_last_result') || '';
   fetch('/api/liqpay/checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ plan: plan, currency: currency || 'uah', email: '' })
+    body: JSON.stringify({ plan: plan, currency: currency || 'uah', email: '', slug: lastSlug })
   })
   .then(function(res){ return res.json(); })
   .then(function(result){
@@ -3179,7 +3149,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
         <div style="font-size:.68rem;color:var(--tl);line-height:1.65;margin-bottom:14px;transition:color 3s">
           AI-коуч для оцінки балансу 12 сфер життя. Безкоштовний перший аналіз — без реєстрації.
         </div>
-        <a href="/cdn-cgi/l/email-protection#87f4f2f7f7e8f5f3c7ece8ebe2f4e8a9ebeef1e2" style="display:flex;align-items:center;gap:5px;font-size:.65rem;color:var(--ac);text-decoration:none;margin-bottom:6px;transition:color .2s" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">📧 <span class="__cf_email__" data-cfemail="5625232626392422163d393a332539783a3f2033">[email&#160;protected]</span></a>
+        <a href="/cdn-cgi/l/email-protection#74070104041b0600341f1b1811071b5a181d0211" style="display:flex;align-items:center;gap:5px;font-size:.65rem;color:var(--ac);text-decoration:none;margin-bottom:6px;transition:color .2s" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">📧 <span class="__cf_email__" data-cfemail="8dfef8fdfde2fff9cde6e2e1e8fee2a3e1e4fbe8">[email&#160;protected]</span></a>
         <a href="tel:+380678366608" style="display:flex;align-items:center;gap:5px;font-size:.65rem;color:var(--tm);text-decoration:none;transition:color .2s" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">📞 +38 067 836 66 08</a>
       </div>
 
@@ -3194,7 +3164,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
       <!-- Колонка 3: Підтримка -->
       <div>
         <div style="font-size:.62rem;font-weight:700;color:var(--td);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;transition:color 3s">Підтримка</div>
-        <a href="/cdn-cgi/l/email-protection#86f5f3f6f6e9f4f2c6ede9eae3f5e9a8eaeff0e3" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">✉️ Написати нам</a>
+        <a href="/cdn-cgi/l/email-protection#51222421213e2325113a3e3d34223e7f3d382734" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">✉️ Написати нам</a>
         <a href="tel:+380678366608" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">📞 Зателефонувати</a>
         <a href="javascript:void(0)" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">↑ Нагору</a>
       </div>

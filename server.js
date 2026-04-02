@@ -884,7 +884,7 @@ const PLANS = {
 };
 
 app.post('/api/liqpay/checkout', (req, res) => {
-  const { plan, currency, email } = req.body;
+  const { plan, currency, email, slug } = req.body;
   const planData = PLANS[plan];
   if(!planData) return res.status(400).json({ error: 'Invalid plan' });
 
@@ -921,7 +921,7 @@ app.post('/api/liqpay/checkout', (req, res) => {
     productPrice:           [amount],
     clientEmail:            email || '',
     language:               'UA',
-    returnUrl:              'https://koleso.live/thank-you',
+    returnUrl:              slug ? `https://koleso.live/result/${slug}?paid=1` : 'https://koleso.live/thank-you',
     serviceUrl:             'https://koleso.live/api/liqpay/callback',
     merchantSignature:      merchantSignature,
   };
