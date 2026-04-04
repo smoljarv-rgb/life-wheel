@@ -1242,7 +1242,17 @@ function showAd(slot, elId){
 }
 
 // ── Check if already paid (session) ──
-try{ if(sessionStorage.getItem('premium_unlocked')==='1') isPremiumUnlocked=true; }catch(e){}
+try{
+  if(sessionStorage.getItem('premium_unlocked')==='1') isPremiumUnlocked=true;
+  if(localStorage.getItem('lw_premium')==='1') isPremiumUnlocked=true;
+  // Якщо повернулись з оплати — активуємо PRO
+  if(new URLSearchParams(window.location.search).get('paid')==='1'){
+    isPremiumUnlocked=true;
+    localStorage.setItem('lw_premium','1');
+    sessionStorage.setItem('premium_unlocked','1');
+    history.replaceState({}, '', window.location.pathname);
+  }
+}catch(e){}
 
 // ── Owner unlock via URL: ?owner=ТВІЙ_СЕКРЕТ або localStorage ──
 (function checkOwner(){
@@ -1447,6 +1457,7 @@ function paywallPay(plan){
   if(paywallActivePromo && paywallActivePromo.free){
     fetch('/api/promo/use',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:paywallActivePromo.code})}).catch(function(){});
     isPremiumUnlocked=true;
+    try{ localStorage.setItem('lw_premium','1'); sessionStorage.setItem('premium_unlocked','1'); }catch(e){}
     var overlay=document.getElementById('paywallOverlay');
     if(overlay) overlay.remove();
     runAnalysis();
