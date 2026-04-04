@@ -1121,6 +1121,7 @@ cv.addEventListener('click',e=>{
 let lastParsed=null;
 let selectedSpheres=new Set();
 let isPremiumUnlocked=false; // true after payment or promo
+let paywallActivePromo = null; // { code, discount, free }
 let freeAnalysisUsed=false; // 1 free sphere analysis per session
 try{ freeAnalysisUsed=localStorage.getItem('lw_free_used')==='1'; }catch(e){}
 
@@ -1393,35 +1394,48 @@ function closePaywall(){
 }
 
 function applyPromo(){
-  const code=document.getElementById('promoInput').value.trim();
+  var code = document.getElementById('promoInput').value.trim().toUpperCase();
   if(!code) return;
+  var btn = document.querySelector('[onclick="applyPromo()"]');
+  if(btn){ btn.textContent='⏳'; btn.disabled=true; }
   fetch('/api/promo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})})
     .then(function(r){return r.json();})
     .then(function(d){
-      const msg=document.getElementById('promoMsg');
+      if(btn){ btn.textContent='Застосувати'; btn.disabled=false; }
+      var msg=document.getElementById('promoMsg');
       msg.style.display='block';
       if(d.valid){
+        paywallActivePromo = { code: code, discount: d.discount, free: d.free };
         if(d.free){
           msg.style.color='#4ade80';
-          msg.textContent='✅ Промокод '+code.toUpperCase()+' — безкоштовний доступ!';
-          document.getElementById('payBtn').textContent='✅ Активувати безкоштовно';
-          document.getElementById('payBtn').onclick=function(){
-            fetch('/api/promo/use',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})}).catch(function(){});
-            isPremiumUnlocked=true;
-            document.getElementById('paywallOverlay').style.display='none';
-            runAnalysis();
-          };
+          msg.textContent='✅ Промокод '+code+' — 100% знижка! Обери тариф нижче.';
+          // Показуємо 0 грн на всіх тарифах
+          updatePaywallPricesWithPromo(100);
         } else {
-          const newPrice=(siteConfig.price*(1-d.discount/100)).toFixed(2);
           msg.style.color='#fbbf24';
-          msg.textContent='🎁 Знижка '+d.discount+'%! Ціна: $'+newPrice;
-          document.getElementById('payPrice').textContent=newPrice;
+          msg.textContent='🎁 Знижка '+d.discount+'%! Оновлені ціни нижче.';
+          updatePaywallPricesWithPromo(d.discount);
         }
       } else {
+        paywallActivePromo = null;
         msg.style.color='#f87171';
-        msg.textContent='❌ Невірний або недійсний промокод';
+        msg.textContent='❌ ' + (d.reason === 'expired' ? 'Промокод вичерпано' : 'Невірний промокод');
       }
-    }).catch(function(){});
+    }).catch(function(){
+      if(btn){ btn.textContent='Застосувати'; btn.disabled=false; }
+    });
+}
+
+function updatePaywallPricesWithPromo(discountPct){
+  var prices = { report: 99, monthly: 249, yearly: 1990 };
+  ['report','monthly','yearly'].forEach(function(plan){
+    var orig = prices[plan];
+    var discounted = discountPct >= 100 ? 0 : Math.round(orig * (1 - discountPct/100));
+    var els = document.querySelectorAll('[data-plan-price="'+plan+'"]');
+    els.forEach(function(el){
+      el.textContent = discounted === 0 ? 'Безкоштовно' : discounted + ' ₴';
+    });
+  });
 }
 
 function paywallPay(plan){
@@ -1429,10 +1443,23 @@ function paywallPay(plan){
   var btn = event && event.currentTarget ? event.currentTarget : null;
   if(btn){ btn.style.opacity='.6'; }
 
+  // Якщо є активний промокод 100% — активуємо безкоштовно без оплати
+  if(paywallActivePromo && paywallActivePromo.free){
+    fetch('/api/promo/use',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:paywallActivePromo.code})}).catch(function(){});
+    isPremiumUnlocked=true;
+    var overlay=document.getElementById('paywallOverlay');
+    if(overlay) overlay.remove();
+    runAnalysis();
+    return;
+  }
+
+  var lastSlug = localStorage.getItem('lw_last_result') || '';
+  var promoCode = paywallActivePromo ? paywallActivePromo.code : '';
+
   fetch('/api/liqpay/checkout',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({plan:plan, currency:'uah', email:''})
+    body:JSON.stringify({plan:plan, currency:'uah', email:'', slug:lastSlug, promo:promoCode})
   })
   .then(function(res){ return res.json(); })
   .then(function(result){
@@ -3069,8 +3096,10 @@ function triggerPayment(plan, currency) {
       }
     });
     document.body.appendChild(form);
+    if(promoCode){
+      fetch('/api/promo/use',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:promoCode})}).catch(function(){});
+    }
     form.submit();
-    document.body.removeChild(form);
   })
   .catch(function(e){
     console.error('Payment error:', e);

@@ -884,12 +884,27 @@ const PLANS = {
 };
 
 app.post('/api/liqpay/checkout', (req, res) => {
-  const { plan, currency, email, slug } = req.body;
+  const { plan, currency, email, slug, promo } = req.body;
   const planData = PLANS[plan];
   if(!planData) return res.status(400).json({ error: 'Invalid plan' });
 
   const cur = (currency === 'usd') ? 'USD' : 'UAH';
-  const amount = (currency === 'usd') ? planData.amount_usd : planData.amount_uah;
+  let amount = (currency === 'usd') ? planData.amount_usd : planData.amount_uah;
+
+  // Застосовуємо знижку промокоду
+  if(promo) {
+    const db = loadDB();
+    const promoData = (db.settings.promo_codes || []).find(function(p){
+      return p.code && p.code.toLowerCase() === promo.toLowerCase() && p.enabled !== false;
+    });
+    if(promoData && !(promoData.max_uses && promoData.uses >= promoData.max_uses)){
+      if(promoData.discount >= 100){
+        amount = 0.01; // WayForPay мінімум — реально безкоштовно через promo/use
+      } else {
+        amount = Math.round(amount * (1 - promoData.discount / 100) * 100) / 100;
+      }
+    }
+  }
   const orderId = `kl_${plan}_${Date.now()}`;
   const orderDate = Math.floor(Date.now() / 1000);
 
