@@ -2380,6 +2380,7 @@ function renderAdvice(parsed){
 			analysis: {
 			  analysedKeys: analysedKeys,
 			  isFree: isFreeResult,
+			  advice: (typeof parsed !== 'undefined' && parsed && parsed.advice) ? parsed.advice : [],
 			  weekPlan: [],
 			  spheres: {}
 			}
@@ -2389,7 +2390,7 @@ function renderAdvice(parsed){
 			localStorage.setItem('lw_last_result', saved.slug);
 			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
 			  scores: allScoresSnapshot,
-			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult }
+			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult, advice: (typeof parsed !== 'undefined' && parsed && parsed.advice) ? parsed.advice : [] }
 			}));
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
