@@ -918,6 +918,77 @@ const PLANS = {
   yearly:  { name: 'PRO Річний Koleso.live',         amount_uah: 1990, amount_usd: 49.99 },
 };
 
+
+// ── Безкоштовна активація через 100% промокод ──
+app.post('/api/promo/activate', async (req, res) => {
+  const { code, email, plan } = req.body;
+  if (!code || !email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Потрібен код і email' });
+  }
+  try {
+    // Перевіряємо промокод в Supabase
+    const { data } = await supabase.from('settings').select('value').eq('key','site_config').single();
+    const codes = (data && data.value && data.value.promo_codes) || [];
+    const promo = codes.find(p => p.code && p.code.toLowerCase() === code.toLowerCase() && p.enabled !== false);
+
+    if (!promo) return res.json({ ok: false, error: 'Невірний промокод' });
+    if (promo.max_uses && promo.uses >= promo.max_uses) return res.json({ ok: false, error: 'Промокод вичерпано' });
+    if (promo.discount < 100) return res.json({ ok: false, error: 'Промокод не дає 100% знижки' });
+
+    // Визначаємо термін підписки
+    const planDurations = { report: 365, monthly: 30, yearly: 365 };
+    const days = planDurations[plan] || 30;
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    // Створюємо підписку
+    await supabase.from('subscriptions').insert({
+      email,
+      plan: plan || 'monthly',
+      status: 'active',
+      amount: 0,
+      currency: 'UAH',
+      order_id: 'promo_' + code + '_' + Date.now(),
+      expires_at: expiresAt,
+    });
+
+    // Збільшуємо лічильник використань
+    promo.uses = (promo.uses || 0) + 1;
+    await supabase.from('settings').upsert({ key: 'site_config', value: data.value, updated_at: new Date().toISOString() });
+
+    // Додаємо в email чергу
+    try { await addToEmailQueue(email); } catch(e) {}
+
+    res.json({ ok: true, expires_at: expiresAt, days });
+  } catch(e) {
+    console.error('Promo activate error:', e);
+    res.status(500).json({ error: 'Помилка сервера' });
+  }
+});
+
+// ── Перевірка активної підписки по email ──
+app.post('/api/subscription/check', async (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes('@')) return res.json({ active: false });
+  try {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('email', email)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .order('expires_at', { ascending: false })
+      .limit(1)
+      .single();
+    if (data) {
+      res.json({ active: true, plan: data.plan, expires_at: data.expires_at });
+    } else {
+      res.json({ active: false });
+    }
+  } catch(e) {
+    res.json({ active: false });
+  }
+});
+
 app.post('/api/liqpay/checkout', async (req, res) => {
   const { plan, currency, email, slug, promo } = req.body;
   const planData = PLANS[plan];
