@@ -532,24 +532,52 @@ app.post('/api/payment', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/promo', (req, res) => {
+app.post('/api/promo', async (req, res) => {
   const { code } = req.body;
-  const db = loadDB();
-  const promo = (db.settings.promo_codes || []).find(function(p){
-    return p.code && p.code.toLowerCase() === (code || '').toLowerCase() && p.enabled !== false;
-  });
-  if (!promo) return res.json({ valid: false });
-  if (promo.max_uses && promo.uses >= promo.max_uses) return res.json({ valid: false, reason: 'expired' });
-  res.json({ valid: true, discount: promo.discount, free: promo.discount >= 100 });
+  try {
+    // Читаємо промокоди з Supabase
+    const { data } = await supabase.from('settings').select('value').eq('key','site_config').single();
+    const promoCodes = (data && data.value && data.value.promo_codes) || [];
+    const promo = promoCodes.find(function(p){
+      return p.code && p.code.toLowerCase() === (code || '').toLowerCase() && p.enabled !== false;
+    });
+    if (!promo) return res.json({ valid: false });
+    if (promo.max_uses && promo.uses >= promo.max_uses) return res.json({ valid: false, reason: 'expired' });
+    res.json({ valid: true, discount: promo.discount, free: promo.discount >= 100 });
+  } catch(e) {
+    // Fallback до локальної БД
+    const db = loadDB();
+    const promo = (db.settings.promo_codes || []).find(function(p){
+      return p.code && p.code.toLowerCase() === (code || '').toLowerCase() && p.enabled !== false;
+    });
+    if (!promo) return res.json({ valid: false });
+    if (promo.max_uses && promo.uses >= promo.max_uses) return res.json({ valid: false, reason: 'expired' });
+    res.json({ valid: true, discount: promo.discount, free: promo.discount >= 100 });
+  }
 });
 
-app.post('/api/promo/use', (req, res) => {
+app.post('/api/promo/use', async (req, res) => {
   const { code } = req.body;
-  const db = loadDB();
-  const promo = (db.settings.promo_codes || []).find(function(p){
-    return p.code && p.code.toLowerCase() === (code || '').toLowerCase();
-  });
-  if (promo) { promo.uses = (promo.uses || 0) + 1; saveDB(db); }
+  try {
+    // Читаємо і оновлюємо в Supabase
+    const { data } = await supabase.from('settings').select('value').eq('key','site_config').single();
+    const config = (data && data.value) || {};
+    const codes = config.promo_codes || [];
+    const promo = codes.find(function(p){
+      return p.code && p.code.toLowerCase() === (code || '').toLowerCase();
+    });
+    if (promo) {
+      promo.uses = (promo.uses || 0) + 1;
+      await supabase.from('settings').upsert({ key: 'site_config', value: config, updated_at: new Date().toISOString() });
+    }
+  } catch(e) {
+    // Fallback до локальної БД
+    const db = loadDB();
+    const promo = (db.settings.promo_codes || []).find(function(p){
+      return p.code && p.code.toLowerCase() === (code || '').toLowerCase();
+    });
+    if (promo) { promo.uses = (promo.uses || 0) + 1; saveDB(db); }
+  }
   res.json({ ok: true });
 });
 
@@ -883,7 +911,7 @@ const PLANS = {
   yearly:  { name: 'PRO Річний Koleso.live',         amount_uah: 1990, amount_usd: 49.99 },
 };
 
-app.post('/api/liqpay/checkout', (req, res) => {
+app.post('/api/liqpay/checkout', async (req, res) => {
   const { plan, currency, email, slug, promo } = req.body;
   const planData = PLANS[plan];
   if(!planData) return res.status(400).json({ error: 'Invalid plan' });
@@ -891,19 +919,22 @@ app.post('/api/liqpay/checkout', (req, res) => {
   const cur = (currency === 'usd') ? 'USD' : 'UAH';
   let amount = (currency === 'usd') ? planData.amount_usd : planData.amount_uah;
 
-  // Застосовуємо знижку промокоду
+  // Застосовуємо знижку промокоду (читаємо з Supabase)
   if(promo) {
-    const db = loadDB();
-    const promoData = (db.settings.promo_codes || []).find(function(p){
-      return p.code && p.code.toLowerCase() === promo.toLowerCase() && p.enabled !== false;
-    });
-    if(promoData && !(promoData.max_uses && promoData.uses >= promoData.max_uses)){
-      if(promoData.discount >= 100){
-        amount = 0.01; // WayForPay мінімум — реально безкоштовно через promo/use
-      } else {
-        amount = Math.round(amount * (1 - promoData.discount / 100) * 100) / 100;
+    try {
+      const { data: cfgData } = await supabase.from('settings').select('value').eq('key','site_config').single();
+      const promoCodes = (cfgData && cfgData.value && cfgData.value.promo_codes) || [];
+      const promoData = promoCodes.find(function(p){
+        return p.code && p.code.toLowerCase() === promo.toLowerCase() && p.enabled !== false;
+      });
+      if(promoData && !(promoData.max_uses && promoData.uses >= promoData.max_uses)){
+        if(promoData.discount >= 100){
+          amount = 0.01;
+        } else {
+          amount = Math.round(amount * (1 - promoData.discount / 100) * 100) / 100;
+        }
       }
-    }
+    } catch(e) { console.error('Promo lookup error:', e); }
   }
   const orderId = `kl_${plan}_${Date.now()}`;
   const orderDate = Math.floor(Date.now() / 1000);
