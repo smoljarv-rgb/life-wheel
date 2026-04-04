@@ -2046,6 +2046,7 @@ Return JSON object with array:
 }
 
 function renderAdvice(parsed){
+  window._lastParsed = parsed; // зберігаємо глобально для збереження advice
   const colorMap={};SPHERES.forEach(s=>colorMap[s.name]=s.color);
   const getPrio=sc=>sc<4?{cls:'bc',lbl:'🔴 КРИТИЧНО',bg:'#fff0f0'}:sc<6?{cls:'bw',lbl:'🟡 ВАЖЛИВО',bg:'#fff8e8'}:sc<8?{cls:'bg',lbl:'🔵 РЕКОМЕНДОВАНО',bg:'#f0fff4'}:{cls:'bb',lbl:'🟢 ПІДТРИМКА',bg:'#f0f8ff'};
 
@@ -2380,7 +2381,7 @@ function renderAdvice(parsed){
 			analysis: {
 			  analysedKeys: analysedKeys,
 			  isFree: isFreeResult,
-			  advice: (typeof parsed !== 'undefined' && parsed && parsed.advice) ? parsed.advice : [],
+			  advice: (window._lastParsed && window._lastParsed.advice) ? window._lastParsed.advice : [],
 			  weekPlan: [],
 			  spheres: {}
 			}
@@ -2390,7 +2391,7 @@ function renderAdvice(parsed){
 			localStorage.setItem('lw_last_result', saved.slug);
 			localStorage.setItem('lw_result_' + saved.slug, JSON.stringify({
 			  scores: allScoresSnapshot,
-			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult, advice: (typeof parsed !== 'undefined' && parsed && parsed.advice) ? parsed.advice : [] }
+			  analysis: { analysedKeys: analysedKeys, isFree: isFreeResult, advice: (window._lastParsed && window._lastParsed.advice) ? window._lastParsed.advice : [] }
 			}));
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
