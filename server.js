@@ -701,7 +701,7 @@ app.post('/api/analyze', async function(req, res) {
 // ══════════════════════════════════════════
 //  ADMIN API
 // ══════════════════════════════════════════
-app.get('/api/admin/stats', adminAuth, function(req, res) {
+app.get('/api/admin/stats', adminAuth, async function(req, res) {
   const db = loadDB();
   const now = Date.now();
   const day = 86400000;
@@ -730,6 +730,13 @@ app.get('/api/admin/stats', adminAuth, function(req, res) {
     });
   }
 
+  // Читаємо settings з Supabase (там зберігаються промокоди)
+  let settings = db.settings;
+  try {
+    const { data } = await supabase.from('settings').select('value').eq('key','site_config').single();
+    if (data && data.value) settings = Object.assign({}, db.settings, data.value);
+  } catch(e) {}
+
   const totalAssessments = countEvents('analysis_completed', 0);
   res.json({
     visitors: { today: uniqueIPs(now-day), week: uniqueIPs(now-7*day), total: uniqueIPs(0) },
@@ -739,7 +746,7 @@ app.get('/api/admin/stats', adminAuth, function(req, res) {
     emails: db.emails.length,
     totalAssessments,
     chart,
-    settings: db.settings,
+    settings: settings,
     ads: db.ads,
   });
 });
