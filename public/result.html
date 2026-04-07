@@ -990,6 +990,7 @@ function renderSpheres(data){
   }).sort((a,b)=>a.score-b.score);
   const botS=sorted[sorted.length-1]||{name:'',score:0,key:''};
   const topS=sorted[0]||{name:'',score:10,key:''};
+  const potS=sorted.find(function(s){return s.score>=4&&s.score<7;})||sorted[Math.floor(sorted.length/2)]||{name:'',score:5,key:''};
   document.getElementById('sphList').innerHTML=sorted.map(s=>{
     const isAnalysed=analysedKeys.includes(s.key);
     const showFull=!isFree||isAnalysed;
@@ -1047,97 +1048,8 @@ function renderSpheres(data){
       })()}
     </div>`;
   }).join('');
-
-  // PLAN
-  const now=new Date();
-  const days=['неділя','понеділок','вівторок','середа','четвер',"п'ятниця","субота"];
-  const months=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
-  document.getElementById('planDate').textContent=`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
-
-  const weak3=sorted.slice(-3).reverse();
-  const mClrs=['var(--blue)','var(--red)','var(--orange)'];
-  const mTimes=['5 хвилин','10 хвилин','15 хвилин'];
-  document.getElementById('microList').innerHTML=weak3.map((s,i)=>{
-    const act=ACTIONS[s.key];
-    const id='micro_'+s.key;
-    const done=checkedTasks[id];
-    return `<div class="micro ${done?'done':''}" id="${id}" onclick="toggleMicro('${id}','${i+1}')">
-      <div class="micro-circle" style="${done?'':'border-color:'+mClrs[i]+';color:'+mClrs[i]}">${done?'✓':i+1}</div>
-      <div><div class="micro-txt">${act?act.action:'Приділи увагу цій сфері'}</div><div class="micro-meta"><span class="micro-tag">${s.icon} ${s.name}</span><span class="micro-time">⏱ ${mTimes[i]}</span></div></div>
-    </div>`;
-  }).join('');
-
-  const wDays=[{k:'Пн',l:'Понеділок'},{k:'Вт',l:'Вівторок'},{k:'Ср',l:'Середа'},{k:'Чт',l:'Четвер'},{k:'Пт',l:"П'ятниця"},{k:'Сб',l:'Субота'},{k:'Нд',l:'Неділя'}];
-  // Тільки проаналізовані сфери для плану — завжди фільтруємо
-  const analysedSpheres=sorted.filter(s=>analysedKeys.includes(s.key));
-  document.getElementById('weekGrid').innerHTML=wDays.map((day,di)=>{
-    const dayTasks=analysedSpheres.map(s=>{
-      const acts=DAILY[s.key]||WEEK_ACTIONS[s.key]||[];
-      const txt=acts[di]||acts[di%acts.length]||'Приділи увагу цій сфері';
-      const id=`week_${di}_${s.key}`;
-      const done=checkedTasks[id];
-      const clr=s.score>=7?'var(--green)':s.score>=4?'var(--orange)':'var(--red)';
-      return {txt,id,done,s,clr};
-    });
-    const doneCnt=dayTasks.filter(t=>t.done).length;
-    const total=dayTasks.length;
-    const isToday=di===(new Date().getDay()+6)%7;
-    const accId=`acc_${di}`;
-    return `<div class="week-day"><div class="week-day-card">
-      <div class="week-day-hdr ${isToday?'open':''}" onclick="toggleDay('${accId}')" id="${accId}_hdr">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="wday-lbl">${day.k}</div>
-          <div class="wday-name">${day.l}</div>
-          ${isToday?'<span class="wday-today">сьогодні</span>':''}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="wday-cnt">${doneCnt}/${total}</div>
-          <div id="${accId}_arrow" style="font-size:14px;color:var(--ink3);transition:transform .2s">${isToday?'▼':'▶'}</div>
-        </div>
-      </div>
-      <div class="week-tasks" id="${accId}" style="display:${isToday?'flex':'none'}">
-        ${dayTasks.map(t=>`<div class="week-task ${t.done?'done':''}" id="${t.id}" onclick="event.stopPropagation();toggleCheck('${t.id}')">
-          <div class="wcb">${t.done?'✓':''}</div>
-          <div><div class="week-task-txt">${t.txt}</div><div class="week-task-sph" style="color:${t.clr}">${t.s.icon} ${t.s.name}</div></div>
-        </div>`).join('')}
-      </div>
-    </div></div>`;
-  }).join('');
-
-  const goalSphs=sorted.slice(-3).reverse();
-  document.getElementById('goalList').innerHTML=goalSphs.map((s,i)=>{
-    const dl=new Date(now.getTime()+(i+1)*10*24*60*60*1000);
-    const dlStr=`${dl.getDate()} ${months[dl.getMonth()]}`;
-    const goals=[`Підняти "${s.name}" з ${s.score} до ${Math.min(10,s.score+2)} балів`,`Виробити щоденну звичку у "${s.name}"`,`Зробити 10 конкретних кроків у "${s.name}"`];
-    return `<div class="goal"><div class="goal-n">0${i+1}</div><div><div class="goal-txt">${goals[i]}</div><div class="goal-meta"><div class="goal-dead">📅 до ${dlStr}</div><div class="goal-sph">${s.icon} ${s.name}</div></div></div></div>`;
-  }).join('');
-
-  const rdClrs=['var(--red)','var(--orange)','var(--blue)','var(--green)'];
-  const rdItems=[
-    {w:'Тиждень 1',title:'Діагностика і перші кроки',text:'Виконуй мікродії щодня. Мета — зрозуміти ритм і де течуть ресурси.',color:rdClrs[0],tag:'Старт'},
-    {w:'Тиждень 2',title:`Фокус на "${botS.name}"`,text:`Ця сфера тягне баланс вниз. 15 хв уваги на день = +1 бал за місяць.`,color:rdClrs[1],tag:botS.name},
-    {w:'Тиждень 3',title:`Крок у "${potS.name}"`,text:`Один конкретний крок — реальний і зроблений до п'ятниці.`,color:rdClrs[2],tag:potS.name},
-    {w:'Тиждень 4',title:'Нове колесо + порівняння',text:'Пройди колесо знову. Навіть +0.5 балів — це перемога.',color:rdClrs[3],tag:'Ревізія'},
-  ];
-  document.getElementById('roadmap').innerHTML=rdItems.map(r=>`
-    <div class="rl">
-      <div class="rl-dot" style="background:var(--paper);border-color:${r.color}"></div>
-      <div class="rl-week" style="color:${r.color}">${r.w}</div>
-      <div class="rl-title">${r.title}</div>
-      <div class="rl-text">${r.text}</div>
-      <span class="rl-tag" style="color:${r.color};border-color:${r.color}">${r.tag}</span>
-    </div>`).join('');
-
-  document.getElementById('loader').classList.add('hide');
-  document.getElementById('mainWrap').style.display='block';
-
-  setTimeout(()=>{
-    document.querySelectorAll('.cmp-fill,.sph-fill,.prog-curr,.prog-prev').forEach(el=>{
-      const w=el.style.width;el.style.width='0';
-      requestAnimationFrame(()=>{el.style.width=w;});
-    });
-  },100);
 }
+
 
 function renderWheel(scores){
   const seg=document.getElementById('wheelSegs');
