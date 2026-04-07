@@ -1966,7 +1966,7 @@ async function runAnalysis(){
     // ── Batch requests by chunks of 5 spheres ──
     showProgress(0, chosen.length, chosen.map(s=>s.name).join(', '));
 
-    const CHUNK_SIZE = 5;
+    const CHUNK_SIZE = 4;
     let allResults = [];
 
     for(let ci = 0; ci < chosen.length; ci += CHUNK_SIZE){
@@ -1993,7 +1993,7 @@ Return JSON object with array:
           raw = await callAI(batchPrompt);
           if(raw) break;
         }catch(e){
-          if(attempt < 2) await new Promise(r=>setTimeout(r, 3000 * (attempt+1)));
+          if(attempt < 2) await new Promise(r=>setTimeout(r, 5000 * (attempt+1)));
         }
       }
       if(raw){
@@ -2005,7 +2005,7 @@ Return JSON object with array:
 
       // Затримка між батчами щоб не перевищити rate limit
       if(ci + CHUNK_SIZE < chosen.length){
-        await new Promise(r=>setTimeout(r, 2000));
+        await new Promise(r=>setTimeout(r, 5000));
       }
     }
 
