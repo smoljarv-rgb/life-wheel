@@ -1875,193 +1875,58 @@ function _parseAIText(text){
 
 async function runAnalysis(){
   // If paywall disabled in admin — always allow
-  if(siteConfig.paywall_enabled===false){
-    isPremiumUnlocked=true;
-  }
-  // Check premium — limit to 1 analysis per payment
-  if(!isPremiumUnlocked){
-    showPaywall();
-    return;
-  }
-  // Lock after use (re-lock for next analysis)
+  if(siteConfig.paywall_enabled===false) isPremiumUnlocked=true;
+  if(!isPremiumUnlocked){ showPaywall(); return; }
   isPremiumUnlocked=false;
   try{ sessionStorage.removeItem('premium_unlocked'); }catch(e){}
+
   const picker=document.getElementById('spherePicker');
   const area=document.getElementById('adviceArea');
   const btn=document.getElementById('btnAdv');
-  picker.style.display='none';
-  btn.style.display='none';
+  if(picker) picker.style.display='none';
+  if(btn) btn.style.display='none';
 
-  const allData=SPHERES.map(s=>({id:s.id,name:s.name,avg:avg(s.id).toFixed(1),subs:s.sub.map(sub=>sub.n+':'+state[s.id][sub.k]).join('; ')}));
+  // Показуємо індикатор завантаження
+  if(area) area.innerHTML='<div style="padding:20px;text-align:center;font-family:Nunito,sans-serif;color:var(--t2)"><div style="font-size:1.5rem;margin-bottom:10px">⏳</div><div>Зберігаємо результат...</div></div>';
 
-  const chosen=allData.filter(s=>selectedSpheres.has(s.id));
-  const context=allData.map(s=>s.name+':'+s.avg).join(', ');
+  // Збираємо бали
+  const allScoresSnapshot={};
+  SPHERES.forEach(s=>{
+    const key=s.id==='money'?'finance':s.id==='self'?'selfdev':s.id==='look'?'appear':s.id;
+    allScoresSnapshot[key]=parseFloat(avg(s.id).toFixed(1));
+  });
 
-  // Show progress
-  const showProgress=(done,total,sphereName)=>{
-    const pct=Math.round(done/total*100);
-    const ar=document.getElementById('analysisRow');
-    const ac=document.getElementById('analysisContent');
-    if(ar&&ac){
-      ar.style.display='block';
-      if(done===0) setTimeout(()=>ar.scrollIntoView({behavior:'smooth',block:'start'}),100);
-    }
-    const target=ac||document.getElementById('adviceArea');
-    // Also show in adviceArea so user sees something immediately
-    if(ac && ac!==document.getElementById('adviceArea')){
-      document.getElementById('adviceArea').innerHTML='';
-    }
-    target.innerHTML=`
-    <div style="padding:32px 20px;text-align:center;max-width:520px;margin:0 auto">
-      <!-- Spinner + Icon -->
-      <div style="position:relative;width:80px;height:80px;margin:0 auto 20px">
-        <svg viewBox="0 0 80 80" style="position:absolute;inset:0;animation:spinRing 1.4s linear infinite">
-          <circle cx="40" cy="40" r="34" fill="none" stroke="var(--sb)" stroke-width="5"/>
-          <circle cx="40" cy="40" r="34" fill="none" stroke="var(--ac)" stroke-width="5"
-            stroke-dasharray="60 154" stroke-linecap="round" style="transition:stroke 3s"/>
-        </svg>
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🧠</div>
-      </div>
+  const isFreeResult=window._isFreeThisAnalysis||false;
+  const analysedKeys=[...selectedSpheres].map(id=>id==='money'?'finance':id==='self'?'selfdev':id==='look'?'appear':id);
 
-      <!-- Title -->
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--td);margin-bottom:6px;transition:color 3s">
-        AI-аналіз у процесі
-      </div>
-      <div style="font-size:.75rem;color:var(--tm);margin-bottom:20px;transition:color 3s">
-        Аналізую сферу: <strong style="color:var(--ac)">${sphereName}</strong>
-      </div>
-
-      <!-- Big progress bar -->
-      <div style="background:var(--sb);border-radius:20px;height:14px;overflow:hidden;margin-bottom:8px;transition:background 3s">
-        <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--ac),#5090e0);border-radius:20px;transition:width .6s ease,background 3s;position:relative">
-          <div style="position:absolute;right:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35));border-radius:20px"></div>
-        </div>
-      </div>
-
-      <!-- Percent + counter -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <span style="font-size:.68rem;color:var(--tl);transition:color 3s">${done} з ${total} сфер</span>
-        <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--ac);transition:color 3s">${pct}%</span>
-      </div>
-
-      <!-- Steps indicators -->
-      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-        ${Array.from({length:total},(_,i)=>`
-          <div style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.62rem;font-weight:600;
-            background:${i<done?'rgba(40,120,200,.15)':i===done?'rgba(40,120,200,.08)':'var(--sb)'};
-            color:${i<done?'var(--ac)':i===done?'var(--tm)':'var(--tl)'};
-            border:1px solid ${i<done?'var(--ac)':i===done?'var(--sb)':'transparent'};
-            transition:all .3s,color 3s,background 3s">
-            ${i<done?'✓':i===done?'⟳':'○'}
-          </div>`).join('')}
-      </div>
-
-      <div style="margin-top:16px;font-size:.62rem;color:var(--tl);font-style:italic;transition:color 3s">
-        Зачекайте, це займає 15–30 секунд…
-      </div>
-    </div>`;
-  };
-
+  // Зберігаємо результат і одразу переходимо на result.html
   try{
-    // ── Batch requests by chunks of 5 spheres ──
-    showProgress(0, chosen.length, chosen.map(s=>s.name).join(', '));
-
-    let allResults = [];
-
-    // Аналізуємо по 1 сфері послідовно з паузою між запитами
-    for(let ci = 0; ci < chosen.length; ci++){
-      const s = chosen[ci];
-      showProgress(ci, chosen.length, s.name);
-
-      const spherePrompt = `ICF coach. JSON only, no markdown.
-Context scores: ${context}
-Analyze sphere: ${s.name}:${parseFloat(s.avg)}/10
-Subcategories: ${s.subs}
-
-Return JSON: {"sphere":"${s.name}","score":${parseFloat(s.avg)},"gap":${10-parseFloat(s.avg)},"priority_reason":"why this sphere matters","root_cause":"root psychological cause","quick_win":"one action today","month_goal":"SMART 30-day goal","days":[{"day":"День 1","task":"specific action","technique":"technique name","psychologist":"Psychologist Name","book":"Book Title — Author"},{"day":"День 2","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 3","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 4","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 5","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 6","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 7","task":"weekly reflection","technique":"Weekly Review","psychologist":"David Allen","book":"Getting Things Done"}]}`;
-
-      let raw = null;
-      for(let attempt = 0; attempt < 3; attempt++){
-        try{
-          raw = await callAI(spherePrompt);
-          if(raw) break;
-        }catch(e){
-          if(attempt < 2) await new Promise(r=>setTimeout(r, 5000 * (attempt+1)));
-        }
-      }
-
-      if(raw){
-        // Може повернути масив або об'єкт
-        const parsed = Array.isArray(raw) ? raw[0] : (raw.advice ? raw.advice[0] : raw);
-        if(parsed && parsed.sphere) allResults.push(parsed);
-        else if(parsed) allResults.push(Object.assign({sphere: s.name, score: parseFloat(s.avg)}, parsed));
-      }
-
-      showProgress(ci + 1, chosen.length, s.name);
-
-      // Пауза між запитами
-      if(ci < chosen.length - 1){
-        await new Promise(r=>setTimeout(r, 3000));
-      }
+    const saveRes=await fetch('/api/results/save',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        scores:allScoresSnapshot,
+        analysis:{analysedKeys,isFree:isFreeResult,advice:[],weekPlan:[],spheres:{}}
+      })
+    });
+    const saved=await saveRes.json();
+    if(saved.slug){
+      localStorage.setItem('lw_last_result',saved.slug);
+      localStorage.setItem('lw_result_'+saved.slug,JSON.stringify({
+        scores:allScoresSnapshot,
+        analysis:{analysedKeys,isFree:isFreeResult,advice:[]}
+      }));
+      window._lastResultSlug=saved.slug;
+      // Переходимо на result з параметром analyzing=1
+      window.location.href='/result/'+saved.slug+'?analyzing=1';
     }
-
-    let results = allResults;
-
-    // Sort by score ascending (worst first)
-    results.sort((a,b) => parseFloat(a.score||5) - parseFloat(b.score||5));
-
-    // Update progress dots
-    showProgress(chosen.length, chosen.length, 'Готово');
-    await new Promise(r=>setTimeout(r,300));
-
-    // Hide loader
-    area.innerHTML='';
-    const arEl=document.getElementById('analysisRow');
-    if(arEl) arEl.style.display='none';
-
-    // Generate overview locally — no extra AI call needed
-    const avgAll=(results.reduce((s,r)=>s+parseFloat(r.score||5),0)/results.length).toFixed(1);
-    const worst=results[0];
-    const best=results[results.length-1];
-    const critCount=results.filter(r=>parseFloat(r.score)<4).length;
-    const localOverview=`Загальний бал: ${avgAll}/10. ${critCount>0?`Критичних сфер: ${critCount}.`:''} Найбільша увага потрібна сфері «${worst.sphere}» (${worst.score}/10) — ${worst.priority_reason||'потребує роботи'}.`;
-    const localRoadmap=results[0]?.to_10||`Почни з «${worst.sphere}», це дасть найбільший приріст якості життя. Через 30 днів переоціни всі сфери.`;
-
-    lastParsed={overview:localOverview,advice:results,balance_roadmap:localRoadmap};
-    window._lastParsed = lastParsed;
-    window._analysisComplete = true;
-    renderAdvice(lastParsed);
-    btn.style.display='';
-    // Update top CTA button
-    if(freeAnalysisUsed && siteConfig.paywall_enabled!==false){
-      btn.innerHTML='✦ Отримати план до балансу';
-      btn.style.background='linear-gradient(135deg,#2878c8,#1a58a8)';
-      btn.style.boxShadow='0 6px 20px rgba(40,120,200,.4)';
-      btn.onclick=showPicker;
-    }
-    // Force rebuild detail panel so dup button also updates
-    buildDetail();
-
-
-
-  }catch(err){
-    const msg=err.message||String(err);
-    const isTimeout=msg.includes('AbortError')||msg.includes('timeout')||msg.includes('Перевищено');
-    // Hide loader in all containers
-    const arEl2=document.getElementById('analysisRow');
-    if(arEl2) arEl2.style.display='none';
-    area.innerHTML=`<div style="padding:14px;background:#fff5f5;border:1px solid #ffcccc;border-radius:10px;margin:8px 0">
-      <div style="font-size:.8rem;font-weight:800;color:#c03030;margin-bottom:8px">${isTimeout?'⏱ Час вийшов':'⚠️ Помилка: '+msg.slice(0,120)}</div>
-      <div style="font-size:.7rem;color:#804040;line-height:1.6;margin-bottom:10px">${isTimeout?'Groq AI відповідав надто довго. Спробуй ще раз — зазвичай другий раз працює.':'Перевір консоль браузера (F12) для деталей.'}</div>
-      <button onclick="showPicker()" style="padding:8px 18px;background:#c03030;color:white;border:none;border-radius:8px;font-size:.7rem;cursor:pointer;font-weight:700">↩ Спробувати знову</button>
-    </div>`;
-    console.error('runAnalysis error:', msg, err);
-    btn.style.display='';
-    btn.innerHTML='↩ Спробувати знову';
-    btn.style.background='';
-    btn.onclick=showPicker;
+  }catch(e){
+    console.error('Save error:',e);
+    if(area) area.innerHTML='<div style="padding:14px;background:#fff5f5;border-radius:10px;font-family:Nunito,sans-serif;color:#c03030">Помилка збереження. Спробуй ще раз.</div>';
+    if(btn){ btn.style.display=''; btn.innerHTML='↩ Спробувати знову'; btn.onclick=showPicker; }
   }
 }
+
 
 function renderAdvice(parsed){
   window._lastParsed = parsed; // зберігаємо глобально для збереження advice

@@ -1497,54 +1497,83 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ── SSE Streaming Analysis ──
-function startStreamingAnalysis(slug) {
-  var analyzingBanner = document.getElementById('analyzingBanner');
-  if(analyzingBanner) analyzingBanner.style.display = 'block';
+// ── Progressive Analysis — по одній сфері ──
+async function startStreamingAnalysis(slug) {
+  var banner = document.getElementById('analyzingBanner');
 
-  var es = new EventSource('/api/analyze/stream/' + slug);
+  // Отримуємо бали зі збереженого результату
+  var scoresData = resultData && resultData.scores ? resultData.scores : {};
+  var sphereNames = {
+    love:'Любов', family:"Сім'я", friends:'Друзі',
+    career:"Кар'єра", finance:'Фінанси', health:"Здоров'я",
+    selfdev:'Саморозвиток', spirit:'Духовність', rest:'Відпочинок',
+    env:'Середовище', comm:'Комунікація', appear:'Зовнішність'
+  };
+
+  var spheres = Object.entries(scoresData).map(function(e){
+    return {key:e[0], name:sphereNames[e[0]]||e[0], score:parseFloat(e[1])||5};
+  });
+
+  if(!spheres.length){ if(banner) banner.style.display='none'; return; }
+
+  var context = spheres.map(function(s){ return s.name+':'+s.score; }).join(', ');
   var receivedAdvice = [];
 
-  es.onmessage = function(e) {
-    try {
-      var msg = JSON.parse(e.data);
+  for(var i=0; i<spheres.length; i++){
+    var s = spheres[i];
 
-      if(msg.type === 'progress') {
-        var banner = document.getElementById('analyzingBanner');
-        if(banner) banner.innerHTML = '<div style="text-align:center;padding:12px 16px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue)">&#9881;&#xFE0F; Аналізую сфери: <strong>' + msg.current + ' / ' + msg.total + '</strong> &mdash; ' + msg.sphere + '</div>';
-      }
+    // Оновлюємо банер
+    if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">&#9881;&#xFE0F; Аналізую: <strong>' + (i+1) + ' / ' + spheres.length + '</strong> &mdash; ' + s.name + '</div>';
 
-      if(msg.type === 'sphere' && msg.advice) {
-        receivedAdvice.push(msg.advice);
-        // Оновлюємо resultData з новим advice і перерендеруємо сфери
-        if(resultData && resultData.analysis) {
-          resultData.analysis.advice = receivedAdvice.slice();
-          // Оновлюємо тільки блок сфер
-          var sphList = document.getElementById('sphList');
-          if(sphList) renderSpheres(resultData);
+    var prompt = 'ICF coach. JSON only. Context: ' + context + '. Analyze: ' + s.name + ':' + s.score + '/10. Return JSON: {"sphere":"' + s.name + '","score":' + s.score + ',"gap":' + (10-s.score) + ',"priority_reason":"why important","root_cause":"root cause","quick_win":"action today","month_goal":"30 day SMART goal","days":[{"day":"День 1","task":"action","technique":"technique","psychologist":"Name","book":"Book - Author"},{"day":"День 2","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 3","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 4","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 5","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 6","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 7","task":"reflection","technique":"Weekly Review","psychologist":"David Allen","book":"GTD"}]}';
+
+    var sphereAdvice = null;
+    for(var attempt=0; attempt<3; attempt++){
+      try{
+        var res = await fetch('/api/analyze',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({prompt:prompt})
+        });
+        var data = await res.json();
+        if(data.text){
+          var parsed = JSON.parse(data.text);
+          if(!parsed.sphere) parsed.sphere = s.name;
+          sphereAdvice = parsed;
+          break;
         }
+      }catch(e){
+        if(attempt<2) await new Promise(function(r){setTimeout(r,3000);});
       }
+    }
 
-      if(msg.type === 'done') {
-        es.close();
-        var banner = document.getElementById('analyzingBanner');
-        if(banner) banner.style.display = 'none';
-        // Прибираємо ?analyzing з URL
-        history.replaceState({}, '', window.location.pathname);
-        // Фінальне оновлення
-        if(resultData && resultData.analysis) {
-          resultData.analysis.advice = msg.advice || receivedAdvice;
-          renderSpheres(resultData);
-        }
+    if(sphereAdvice){
+      receivedAdvice.push(sphereAdvice);
+      if(resultData && resultData.analysis){
+        resultData.analysis.advice = receivedAdvice.slice();
+        renderSpheres(resultData);
       }
-    } catch(err) { console.error('SSE parse error:', err); }
-  };
+    }
 
-  es.onerror = function() {
-    es.close();
-    var banner = document.getElementById('analyzingBanner');
-    if(banner) banner.style.display = 'none';
-  };
+    // Пауза між запитами
+    if(i < spheres.length-1){
+      await new Promise(function(r){setTimeout(r,2000);});
+    }
+  }
+
+  // Зберігаємо фінальний advice в Supabase
+  if(receivedAdvice.length > 0){
+    try{
+      await fetch('/api/results/update-advice',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({slug:slug, advice:receivedAdvice})
+      });
+    }catch(e){}
+  }
+
+  if(banner) banner.style.display='none';
+  history.replaceState({}, '', window.location.pathname);
 }
 
 loadResult().then(function(){

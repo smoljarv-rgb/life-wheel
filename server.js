@@ -919,6 +919,23 @@ const PLANS = {
 };
 
 
+
+// ── Оновлення advice після аналізу ──
+app.post('/api/results/update-advice', async (req, res) => {
+  const { slug, advice } = req.body;
+  if(!slug || !advice) return res.status(400).json({ error: 'Missing data' });
+  try{
+    const { data } = await supabase.from('results').select('analysis').eq('slug',slug).single();
+    const current = (data && data.analysis) || {};
+    await supabase.from('results').update({
+      analysis: Object.assign({}, current, { advice })
+    }).eq('slug', slug);
+    res.json({ ok: true });
+  }catch(e){
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Безкоштовна активація через 100% промокод ──
 app.post('/api/promo/activate', async (req, res) => {
   const { code, email, plan } = req.body;
