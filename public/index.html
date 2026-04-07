@@ -1966,45 +1966,42 @@ async function runAnalysis(){
     // ── Batch requests by chunks of 5 spheres ──
     showProgress(0, chosen.length, chosen.map(s=>s.name).join(', '));
 
-    const CHUNK_SIZE = 4;
     let allResults = [];
 
-    for(let ci = 0; ci < chosen.length; ci += CHUNK_SIZE){
-      const chunk = chosen.slice(ci, ci + CHUNK_SIZE);
-      showProgress(ci, chosen.length, chunk.map(s=>s.name).join(', '));
+    // Аналізуємо по 1 сфері послідовно з паузою між запитами
+    for(let ci = 0; ci < chosen.length; ci++){
+      const s = chosen[ci];
+      showProgress(ci, chosen.length, s.name);
 
-      const spheresList = chunk.map(s => {
-        const sc = parseFloat(s.avg);
-        return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
-      }).join('\n');
+      const spherePrompt = `ICF coach. JSON only, no markdown.
+Context scores: ${context}
+Analyze sphere: ${s.name}:${parseFloat(s.avg)}/10
+Subcategories: ${s.subs}
 
-      const batchPrompt = `ICF coach. JSON only, no markdown.
-Scores: ${context}
-Spheres to analyze:
-${spheresList}
+Return JSON: {"sphere":"${s.name}","score":${parseFloat(s.avg)},"gap":${10-parseFloat(s.avg)},"priority_reason":"why this sphere matters","root_cause":"root psychological cause","quick_win":"one action today","month_goal":"SMART 30-day goal","days":[{"day":"День 1","task":"specific action","technique":"technique name","psychologist":"Psychologist Name","book":"Book Title — Author"},{"day":"День 2","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 3","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 4","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 5","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 6","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 7","task":"weekly reflection","technique":"Weekly Review","psychologist":"David Allen","book":"Getting Things Done"}]}`;
 
-Return: {"advice":[{"sphere":"name","score":N,"gap":N,"priority_reason":"why important","root_cause":"root cause","quick_win":"action today","month_goal":"30 day goal","days":[{"day":"День 1","task":"action","technique":"technique name","psychologist":"Author Name","book":"Book Title"},{"day":"День 2","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 3","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 4","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 5","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 6","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 7","task":"reflection","technique":"Weekly Review","psychologist":"David Allen","book":"GTD"}]}]}`;
-
-      // Retry логіка при помилці rate limit
       let raw = null;
       for(let attempt = 0; attempt < 3; attempt++){
         try{
-          raw = await callAI(batchPrompt);
+          raw = await callAI(spherePrompt);
           if(raw) break;
         }catch(e){
-          if(attempt < 2) await new Promise(r=>setTimeout(r, 8000 * (attempt+1)));
+          if(attempt < 2) await new Promise(r=>setTimeout(r, 5000 * (attempt+1)));
         }
       }
+
       if(raw){
-        const chunkResults = Array.isArray(raw) ? raw : (raw.advice || raw.spheres || [raw]);
-        allResults = allResults.concat(chunkResults);
+        // Може повернути масив або об'єкт
+        const parsed = Array.isArray(raw) ? raw[0] : (raw.advice ? raw.advice[0] : raw);
+        if(parsed && parsed.sphere) allResults.push(parsed);
+        else if(parsed) allResults.push(Object.assign({sphere: s.name, score: parseFloat(s.avg)}, parsed));
       }
 
-      showProgress(ci + chunk.length, chosen.length, chunk.map(s=>s.name).join(', '));
+      showProgress(ci + 1, chosen.length, s.name);
 
-      // Затримка між батчами щоб не перевищити rate limit
-      if(ci + CHUNK_SIZE < chosen.length){
-        await new Promise(r=>setTimeout(r, 8000));
+      // Пауза між запитами
+      if(ci < chosen.length - 1){
+        await new Promise(r=>setTimeout(r, 3000));
       }
     }
 
@@ -2031,6 +2028,8 @@ Return: {"advice":[{"sphere":"name","score":N,"gap":N,"priority_reason":"why imp
     const localRoadmap=results[0]?.to_10||`Почни з «${worst.sphere}», це дасть найбільший приріст якості життя. Через 30 днів переоціни всі сфери.`;
 
     lastParsed={overview:localOverview,advice:results,balance_roadmap:localRoadmap};
+    window._lastParsed = lastParsed;
+    window._analysisComplete = true;
     renderAdvice(lastParsed);
     btn.style.display='';
     // Update top CTA button
@@ -2415,6 +2414,11 @@ function renderAdvice(parsed){
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
 			window._lastResultUrl = '/result/' + saved.slug;
+			// Якщо аналіз ще не завершений — переходимо на result з analyzing=1
+			if(!window._analysisComplete) {
+			  window.location.href = '/result/' + saved.slug + '?analyzing=1';
+			  return;
+			}
 			// Показуємо блок під колесом і після плану зростання
 			const _blockHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Nunito,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
 			const resultBlock = document.getElementById('fullResultBlock');

@@ -1422,6 +1422,128 @@ app.post('/api/lemonsqueezy/webhook', express.raw({ type: 'application/json' }),
 });
 
 
+
+// ══════════════════════════════════════════
+// STREAMING ANALYSIS via SSE
+// ══════════════════════════════════════════
+app.get('/api/analyze/stream/:slug', async function(req, res) {
+  const { slug } = req.params;
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) { res.status(500).json({ error: 'No API key' }); return; }
+
+  // Читаємо бали з Supabase
+  const { data: result, error } = await supabase
+    .from('results')
+    .select('scores, analysis')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !result) { res.status(404).json({ error: 'Result not found' }); return; }
+
+  // Якщо advice вже є — повертаємо одразу
+  if (result.analysis && result.analysis.advice && result.analysis.advice.length > 0) {
+    res.json({ done: true, advice: result.analysis.advice });
+    return;
+  }
+
+  const scores = result.scores || {};
+
+  // SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.flushHeaders();
+
+  const send = (data) => {
+    res.write('data: ' + JSON.stringify(data) + '\n\n');
+  };
+
+  // Список сфер з балами
+  const sphereNames = {
+    love: 'Любов', family: "Сім'я", friends: 'Друзі',
+    career: "Кар'єра", finance: 'Фінанси', health: "Здоров'я",
+    selfdev: 'Саморозвиток', spirit: 'Духовність', rest: 'Відпочинок',
+    env: 'Середовище', comm: 'Комунікація', appear: 'Зовнішність'
+  };
+
+  const context = Object.entries(scores)
+    .map(([k, v]) => `${sphereNames[k]||k}:${v}`)
+    .join(', ');
+
+  const spheres = Object.entries(scores).map(([k, v]) => ({
+    key: k,
+    name: sphereNames[k] || k,
+    score: parseFloat(v) || 5
+  }));
+
+  const allAdvice = [];
+
+  for (let i = 0; i < spheres.length; i++) {
+    const s = spheres[i];
+    send({ type: 'progress', current: i + 1, total: spheres.length, sphere: s.name });
+
+    const prompt = `ICF coach. JSON only, no markdown.
+Context: ${context}
+Analyze: ${s.name}:${s.score}/10
+
+Return JSON: {"sphere":"${s.name}","score":${s.score},"gap":${10-s.score},"priority_reason":"why important 2 sentences","root_cause":"root psychological cause","quick_win":"one action today","month_goal":"SMART 30-day goal","days":[{"day":"День 1","task":"specific action","technique":"technique name","psychologist":"Psychologist Name","book":"Book — Author"},{"day":"День 2","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 3","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 4","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 5","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 6","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 7","task":"weekly reflection","technique":"Weekly Review","psychologist":"David Allen","book":"Getting Things Done"}]}`;
+
+    let sphereAdvice = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 30000);
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              { role: 'system', content: 'You are a JSON API. Respond ONLY with valid JSON object. Never truncate.' },
+              { role: 'user', content: prompt }
+            ],
+            max_tokens: 1500,
+            temperature: 0.3,
+            response_format: { type: 'json_object' },
+          }),
+        });
+        clearTimeout(tid);
+        const groqData = await groqRes.json();
+        if (!groqRes.ok) throw new Error(groqData.error?.message || 'Groq error');
+        const text = groqData.choices?.[0]?.message?.content || '';
+        sphereAdvice = JSON.parse(text);
+        if (!sphereAdvice.sphere) sphereAdvice.sphere = s.name;
+        break;
+      } catch(e) {
+        if (attempt < 2) await new Promise(r => setTimeout(r, 4000 * (attempt + 1)));
+      }
+    }
+
+    if (sphereAdvice) {
+      allAdvice.push(sphereAdvice);
+      send({ type: 'sphere', advice: sphereAdvice });
+    }
+
+    // Пауза між запитами
+    if (i < spheres.length - 1) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+
+  // Зберігаємо в Supabase
+  try {
+    const current = result.analysis || {};
+    await supabase.from('results').update({
+      analysis: Object.assign({}, current, { advice: allAdvice })
+    }).eq('slug', slug);
+  } catch(e) { console.error('Save advice error:', e); }
+
+  send({ type: 'done', advice: allAdvice });
+  res.end();
+});
+
 // ══════════════════════════════════════════
 //  EMAIL SEQUENCE — 7 листів
 // ══════════════════════════════════════════

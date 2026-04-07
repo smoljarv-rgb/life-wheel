@@ -691,6 +691,7 @@ body::after{
 </div>
 
 <div class="main" id="mainWrap">
+  <div id="analyzingBanner" style="display:none;margin-bottom:16px"></div>
 <div class="wrap">
 
   <!-- HEADER -->
@@ -821,6 +822,7 @@ const SPHERES=[
   {key:'rest',name:'Відпочинок',icon:'😴'},{key:'env',name:'Середовище',icon:'🌍'},
   {key:'comm',name:'Комунікація',icon:'💬'},{key:'appear',name:'Зовнішність',icon:'✨'}
 ];
+const SPHERES_MAP = Object.fromEntries(SPHERES.map(s => [s.key, s]));
 const SKETCH_COLORS=['#c0392b','#2471a3','#27ae60','#d35400','#7d3c98','#1a5276','#117a65','#784212','#922b21','#1f618d','#1d8348','#6e2f1a'];
 const ACTIONS={
   love:{problem:'Мало якісного часу разом',strength:"Є емоційний зв'язок",why:'Пари що проводять хоча б 7 год якісного часу разом на тиждень почуваються набагато щасливішими.',action:'Вимкни телефон на 30 хв і поговори без відволікань',how:'1. Вибери конкретний час сьогодні. 2. Поклади телефони в іншу кімнату. 3. Запитай: "Що тебе зараз найбільше хвилює?" і просто слухай. 4. Поділись одним своїм відчуттям.',steps:['Вибери конкретний час і скажи партнеру','Поклади телефони фізично в інше місце','Запитай і слухай без порад','Поділись чимось своїм у відповідь']},
@@ -973,6 +975,19 @@ function renderResult(data){
   }
 
   // SPHERES
+  // Рендер сфер — окрема функція для оновлення при SSE
+  renderSpheres(data);
+}
+
+function renderSpheres(data){
+  const scores=data.scores||{};
+  const analysis=data.analysis||{};
+  const isFree=analysis.isFree||false;
+  const analysedKeys=(analysis.analysedKeys&&analysis.analysedKeys.length>0)?analysis.analysedKeys:Object.keys(scores);
+  const sorted=Object.entries(scores).map(([key,score])=>{
+    const s=SPHERES_MAP[key]||{icon:'○',name:key};
+    return {key,score:parseFloat(score)||0,icon:s.icon,name:s.name};
+  }).sort((a,b)=>a.score-b.score);
   document.getElementById('sphList').innerHTML=sorted.map(s=>{
     const isAnalysed=analysedKeys.includes(s.key);
     const showFull=!isFree||isAnalysed;
@@ -1480,6 +1495,56 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+// ── SSE Streaming Analysis ──
+function startStreamingAnalysis(slug) {
+  var analyzingBanner = document.getElementById('analyzingBanner');
+  if(analyzingBanner) analyzingBanner.style.display = 'block';
+
+  var es = new EventSource('/api/analyze/stream/' + slug);
+  var receivedAdvice = [];
+
+  es.onmessage = function(e) {
+    try {
+      var msg = JSON.parse(e.data);
+
+      if(msg.type === 'progress') {
+        var banner = document.getElementById('analyzingBanner');
+        if(banner) banner.innerHTML = '<div style="text-align:center;padding:12px 16px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue)">&#9881;&#xFE0F; Аналізую сфери: <strong>' + msg.current + ' / ' + msg.total + '</strong> &mdash; ' + msg.sphere + '</div>';
+      }
+
+      if(msg.type === 'sphere' && msg.advice) {
+        receivedAdvice.push(msg.advice);
+        // Оновлюємо resultData з новим advice і перерендеруємо сфери
+        if(resultData && resultData.analysis) {
+          resultData.analysis.advice = receivedAdvice.slice();
+          // Оновлюємо тільки блок сфер
+          var sphList = document.getElementById('sphList');
+          if(sphList) renderSpheres(resultData);
+        }
+      }
+
+      if(msg.type === 'done') {
+        es.close();
+        var banner = document.getElementById('analyzingBanner');
+        if(banner) banner.style.display = 'none';
+        // Прибираємо ?analyzing з URL
+        history.replaceState({}, '', window.location.pathname);
+        // Фінальне оновлення
+        if(resultData && resultData.analysis) {
+          resultData.analysis.advice = msg.advice || receivedAdvice;
+          renderSpheres(resultData);
+        }
+      }
+    } catch(err) { console.error('SSE parse error:', err); }
+  };
+
+  es.onerror = function() {
+    es.close();
+    var banner = document.getElementById('analyzingBanner');
+    if(banner) banner.style.display = 'none';
+  };
+}
+
 loadResult().then(function(){
   // Банер успішної оплати якщо ?paid=1
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
@@ -1490,6 +1555,12 @@ loadResult().then(function(){
     setTimeout(function(){ b.style.transition='opacity .5s'; b.style.opacity='0'; setTimeout(function(){ b.remove(); },500); },5000);
     history.replaceState({}, '', window.location.pathname);
   }
+  // Запускаємо SSE якщо ?analyzing=1
+  if(new URLSearchParams(window.location.search).get('analyzing') === '1') {
+    var slug = window.location.pathname.split('/').pop();
+    if(slug) setTimeout(function(){ startStreamingAnalysis(slug); }, 500);
+  }
+
   // Показуємо email capture через 3 сек після завантаження
   setTimeout(function(){
     if(!localStorage.getItem('lw_email_captured')){
