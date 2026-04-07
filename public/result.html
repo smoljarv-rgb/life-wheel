@@ -988,6 +988,8 @@ function renderSpheres(data){
     const s=SPHERES_MAP[key]||{icon:'○',name:key};
     return {key,score:parseFloat(score)||0,icon:s.icon,name:s.name};
   }).sort((a,b)=>a.score-b.score);
+  const botS=sorted[sorted.length-1]||{name:'',score:0,key:''};
+  const topS=sorted[0]||{name:'',score:10,key:''};
   document.getElementById('sphList').innerHTML=sorted.map(s=>{
     const isAnalysed=analysedKeys.includes(s.key);
     const showFull=!isFree||isAnalysed;
