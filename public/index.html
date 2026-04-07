@@ -1986,11 +1986,27 @@ ${spheresList}
 Return JSON object with array:
 {"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]}`;
 
-      const raw = await callAI(batchPrompt);
-      const chunkResults = Array.isArray(raw) ? raw : (raw.advice || raw.spheres || [raw]);
-      allResults = allResults.concat(chunkResults);
+      // Retry логіка при помилці rate limit
+      let raw = null;
+      for(let attempt = 0; attempt < 3; attempt++){
+        try{
+          raw = await callAI(batchPrompt);
+          if(raw) break;
+        }catch(e){
+          if(attempt < 2) await new Promise(r=>setTimeout(r, 3000 * (attempt+1)));
+        }
+      }
+      if(raw){
+        const chunkResults = Array.isArray(raw) ? raw : (raw.advice || raw.spheres || [raw]);
+        allResults = allResults.concat(chunkResults);
+      }
 
       showProgress(ci + chunk.length, chosen.length, chunk.map(s=>s.name).join(', '));
+
+      // Затримка між батчами щоб не перевищити rate limit
+      if(ci + CHUNK_SIZE < chosen.length){
+        await new Promise(r=>setTimeout(r, 2000));
+      }
     }
 
     let results = allResults;
