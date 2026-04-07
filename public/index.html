@@ -1963,33 +1963,37 @@ async function runAnalysis(){
   };
 
   try{
-    // ── Single batch request for all spheres ──
+    // ── Batch requests by chunks of 5 spheres ──
     showProgress(0, chosen.length, chosen.map(s=>s.name).join(', '));
 
-    const spheresList = chosen.map(s => {
-      const sc = parseFloat(s.avg);
-      return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
-    }).join('\n');
+    const CHUNK_SIZE = 5;
+    let allResults = [];
 
-    const batchPrompt = `ICF coach. Respond ONLY with valid JSON, no markdown.
+    for(let ci = 0; ci < chosen.length; ci += CHUNK_SIZE){
+      const chunk = chosen.slice(ci, ci + CHUNK_SIZE);
+      showProgress(ci, chosen.length, chunk.map(s=>s.name).join(', '));
+
+      const spheresList = chunk.map(s => {
+        const sc = parseFloat(s.avg);
+        return `${s.name}:${sc}/10 (підкатегорії: ${s.subs})`;
+      }).join('\n');
+
+      const batchPrompt = `ICF coach. Respond ONLY with valid JSON, no markdown.
 Context: ${context}
-Analyze these ${chosen.length} sphere(s):
+Analyze these ${chunk.length} sphere(s):
 ${spheresList}
 
 Return JSON object with array:
 {"advice":[{"sphere":"назва","score":N,"gap":N,"priority_reason":"2 речення чому важливо","days":[{"day":"День 1","title":"фокус","task":"дія до 8 слів","how_to":"2-3 речення як виконувати","technique":"Назва техніки: як застосувати","resource":"Книга — Автор","duration":"хв"},{"day":"День 2","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 3","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 4","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 5","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 6","title":"фокус","task":"дія","how_to":"як виконувати","technique":"техніка","resource":"ресурс","duration":"хв"},{"day":"День 7","title":"Підсумок","task":"рефлексія тижня","how_to":"запиши результати","technique":"Weekly Review","resource":"Девід Аллен","duration":"20 хв"}],"week2_habit":"мікрозвичка","month_goal":"SMART-ціль 30 днів","to_10":"3 кроки до ідеалу","goal":"ключова зміна до 10 слів","quick_win":"мікродія сьогодні"}]}`;
 
-    // Update progress to show "processing"
-    const progInterval = setInterval(()=>{
-      const el = document.querySelector('#adviceArea strong[style*="color:var(--ac)"]');
-      // pulse animation — just keep loader visible
-    }, 1000);
+      const raw = await callAI(batchPrompt);
+      const chunkResults = Array.isArray(raw) ? raw : (raw.advice || raw.spheres || [raw]);
+      allResults = allResults.concat(chunkResults);
 
-    const raw = await callAI(batchPrompt);
-    clearInterval(progInterval);
+      showProgress(ci + chunk.length, chosen.length, chunk.map(s=>s.name).join(', '));
+    }
 
-    // Handle {advice:[...]} wrapper, plain array, or single object
-    let results = Array.isArray(raw) ? raw : (raw.advice || raw.spheres || [raw]);
+    let results = allResults;
 
     // Sort by score ascending (worst first)
     results.sort((a,b) => parseFloat(a.score||5) - parseFloat(b.score||5));
