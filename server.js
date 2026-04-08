@@ -720,6 +720,13 @@ app.post('/api/analyze', async function(req, res) {
   }
 });
 
+// Публічний лічильник аналізів
+app.get('/api/stats', function(req, res) {
+  const db = loadDB();
+  const total = db.events.filter(function(e){ return e.type === 'analysis_completed'; }).length;
+  res.json({ totalAssessments: total });
+});
+
 // ══════════════════════════════════════════
 //  ADMIN API
 // ══════════════════════════════════════════
