@@ -1063,15 +1063,17 @@ app.post('/api/liqpay/checkout', async (req, res) => {
   const orderId = `kl_${plan}_${Date.now()}`;
   const orderDate = Math.floor(Date.now() / 1000);
 
-  // Зберігаємо email для callback (бо Pay може не повернути email)
+  // Зберігаємо email в Supabase для callback (бо Pay може не повернути email)
   if (email && email.includes('@')) {
-    const db = loadDB();
-    if (!db.pendingOrders) db.pendingOrders = {};
-    db.pendingOrders[orderId] = { email, plan, ts: Date.now() };
-    // Чистимо старі (>24 год)
-    const cutoff = Date.now() - 86400000;
-    Object.keys(db.pendingOrders).forEach(k => { if (db.pendingOrders[k].ts < cutoff) delete db.pendingOrders[k]; });
-    saveDB(db);
+    try {
+      const { data: poData } = await supabase.from('settings').select('value').eq('key','pending_orders').single();
+      const orders = (poData && poData.value) || {};
+      orders[orderId] = { email, plan, ts: Date.now() };
+      // Чистимо старі (>24 год)
+      const cutoff = Date.now() - 86400000;
+      Object.keys(orders).forEach(k => { if (orders[k].ts < cutoff) delete orders[k]; });
+      await supabase.from('settings').upsert({ key: 'pending_orders', value: orders, updated_at: new Date().toISOString() });
+    } catch(e) { console.error('pendingOrders save error:', e); }
   }
 
   // WayForPay підпис: merchantAccount;merchantDomainName;orderReference;orderDate;amount;currency;productName;productCount;productPrice
@@ -1163,8 +1165,11 @@ app.post('/api/liqpay/callback', express.json(), async (req, res) => {
     saveDB(db);
 
     // Зберігаємо підписку в Supabase
-    const db2 = loadDB();
-    const pendingEmail = db2.pendingOrders && db2.pendingOrders[body.orderReference] && db2.pendingOrders[body.orderReference].email;
+    let pendingEmail = '';
+    try {
+      const { data: poData } = await supabase.from('settings').select('value').eq('key','pending_orders').single();
+      pendingEmail = (poData && poData.value && poData.value[body.orderReference] && poData.value[body.orderReference].email) || '';
+    } catch(e) {}
     const payEmail = body.email || body.clientEmail || pendingEmail || '';
     if(payEmail && payEmail.includes('@')){
       const planDurations = { report: 365, monthly: 30, yearly: 365 };
