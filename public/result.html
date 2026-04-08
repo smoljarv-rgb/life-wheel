@@ -1506,9 +1506,15 @@ async function startStreamingAnalysis(slug) {
     env:'Середовище', comm:'Комунікація', appear:'Зовнішність'
   };
 
-  var spheres = Object.entries(scoresData).map(function(e){
-    return {key:e[0], name:sphereNames[e[0]]||e[0], score:parseFloat(e[1])||5};
-  });
+  // Аналізуємо тільки дозволені сфери (analysedKeys)
+  var analysedKeys = resultData && resultData.analysis && resultData.analysis.analysedKeys
+    ? resultData.analysis.analysedKeys : [];
+
+  var spheres = Object.entries(scoresData)
+    .filter(function(e){ return !analysedKeys.length || analysedKeys.includes(e[0]); })
+    .map(function(e){
+      return {key:e[0], name:sphereNames[e[0]]||e[0], score:parseFloat(e[1])||5};
+    });
 
   if(!spheres.length){ if(banner) banner.style.display='none'; return; }
 
