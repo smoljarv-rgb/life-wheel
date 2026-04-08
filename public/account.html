@@ -314,18 +314,32 @@ async function loadSubscription(){
 }
 
 async function loadReports(){
-  // Get reports from localStorage (linked by email)
-  var email = currentUser.email;
   var reports = [];
 
-  // Check Supabase results table
-  var result = await sb.from('results')
-    .select('slug, scores, created_at')
-    .order('created_at', { ascending: false })
-    .limit(10);
+  // Беремо результати з localStorage (збережені при проходженні тесту)
+  try {
+    for(var i = 0; i < localStorage.length; i++){
+      var key = localStorage.key(i);
+      if(key && key.startsWith('lw_result_')){
+        var slug = key.replace('lw_result_', '');
+        var raw = localStorage.getItem(key);
+        if(raw){
+          var d = JSON.parse(raw);
+          reports.push({ slug: slug, scores: d.scores || {}, created_at: d.created_at || new Date().toISOString() });
+        }
+      }
+    }
+    reports.sort(function(a,b){ return new Date(b.created_at) - new Date(a.created_at); });
+    reports = reports.slice(0, 10);
+  } catch(e) {}
 
-  if(result.data && result.data.length > 0){
-    reports = result.data;
+  // Якщо localStorage порожній — спробуємо Supabase (може RLS дозволяє)
+  if(!reports.length){
+    var result = await sb.from('results')
+      .select('slug, scores, created_at')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if(result.data && result.data.length > 0) reports = result.data;
   }
 
   var statTests = document.getElementById('statTests');
