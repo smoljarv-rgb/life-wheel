@@ -264,15 +264,14 @@ body::after{
 .cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .cmp-lbl{font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink3);width:64px;flex-shrink:0}
 .cmp-track{
-  flex:1;height:14px;
-  background:var(--paper3);
-  border:1.5px solid var(--ink3);
-  border-radius:1px 4px 3px 2px;
+  flex:1;height:10px;
+  background:rgba(128,128,128,.15);
+  border-radius:6px;
   overflow:hidden;position:relative;
 }
 .cmp-fill{
   height:100%;
-  background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);
+  border-radius:6px;
   transition:width 1s cubic-bezier(.4,0,.2,1);
 }
 .cmp-val{font-family:'Caveat Brush',cursive;font-size:16px;width:28px;text-align:right;flex-shrink:0}
@@ -316,14 +315,12 @@ body::after{
 .prog-sph-name{font-family:'Patrick Hand',cursive;font-size:16px;width:96px;color:var(--ink2);flex-shrink:0}
 .prog-track{
   flex:1;height:10px;
-  background:var(--paper3);
-  border:1.5px solid var(--ink3);
-  border-radius:1px 3px 2px 1px;
+  background:rgba(128,128,128,.15);
+  border-radius:6px;
   position:relative;overflow:hidden;
 }
-.prog-prev{height:100%;position:absolute;top:0;left:0;background:rgba(0,0,0,.1)}
-.prog-curr{height:100%;position:absolute;top:0;left:0;transition:width 1s cubic-bezier(.4,0,.2,1);
-  background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.2) 3px,rgba(0,0,0,.2) 4px)}
+.prog-prev{height:100%;position:absolute;top:0;left:0;background:rgba(0,0,0,.2);border-radius:6px}
+.prog-curr{height:100%;position:absolute;top:0;left:0;transition:width 1s cubic-bezier(.4,0,.2,1);border-radius:6px}
 .prog-diff{font-family:'Caveat Brush',cursive;font-size:15px;width:36px;text-align:right;flex-shrink:0}
 .no-prev{
   border:2px dashed var(--ink3);
@@ -940,8 +937,8 @@ function renderResult(data){
     const clr=diff>0?'var(--green)':diff<0?'var(--red)':'var(--ink3)';
     return `<div class="cmp">
       <div class="cmp-name">${c.label}</div>
-      <div class="cmp-row"><div class="cmp-lbl">Твій бал</div><div class="cmp-track"><div class="cmp-fill" style="width:${c.your*10}%;background:${clr}30"></div></div><div class="cmp-val" style="color:${clr}">${c.your}</div></div>
-      <div class="cmp-row"><div class="cmp-lbl">Середнє</div><div class="cmp-track"><div class="cmp-fill" style="width:${c.others*10}%;background:var(--ink3)20"></div></div><div class="cmp-val" style="color:var(--ink3)">${c.others}</div></div>
+      <div class="cmp-row"><div class="cmp-lbl">Твій бал</div><div class="cmp-track"><div class="cmp-fill" style="width:${c.your*10}%;background:${clr}"></div></div><div class="cmp-val" style="color:${clr}">${c.your}</div></div>
+      <div class="cmp-row"><div class="cmp-lbl">Середнє</div><div class="cmp-track"><div class="cmp-fill" style="width:${c.others*10}%;background:var(--ink3)"></div></div><div class="cmp-val" style="color:var(--ink3)">${c.others}</div></div>
       <div style="display:flex;justify-content:flex-end;margin-top:4px"><div class="cmp-diff ${cls}">${lbl}</div></div>
     </div>`;
   }).join('');
@@ -966,7 +963,7 @@ function renderResult(data){
       <div>${sphProg.slice(0,6).map(s=>{
         const c=s.diff>0?'var(--green)':s.diff<0?'var(--red)':'var(--ink3)';
         const sign=s.diff>0?'+':'';
-        return `<div class="prog-sph"><div class="prog-sph-ico">${s.icon}</div><div class="prog-sph-name">${s.name}</div><div class="prog-track"><div class="prog-prev" style="width:${s.prev*10}%"></div><div class="prog-curr" style="width:${s.curr*10}%;background:${c}40"></div></div><div class="prog-diff" style="color:${c}">${sign}${s.diff}</div></div>`;
+        return `<div class="prog-sph"><div class="prog-sph-ico">${s.icon}</div><div class="prog-sph-name">${s.name}</div><div class="prog-track"><div class="prog-prev" style="width:${s.prev*10}%"></div><div class="prog-curr" style="width:${s.curr*10}%;background:${c}"></div></div><div class="prog-diff" style="color:${c}">${sign}${s.diff}</div></div>`;
       }).join('')}</div>
     </div>`;
   } else {
