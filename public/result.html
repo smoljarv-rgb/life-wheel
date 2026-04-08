@@ -362,15 +362,14 @@ body::after{
 .sph-status{font-family:'Patrick Hand',cursive;font-size:13px;color:var(--ink3);margin-top:1px}
 .sph-score{font-family:'Caveat Brush',cursive;font-size:36px;line-height:1}
 .sph-bar{
-  height:12px;
-  background:var(--paper3);
-  border:1.5px solid var(--ink3);
-  border-radius:1px 4px 3px 2px;
+  height:10px;
+  background:rgba(128,128,128,.15);
+  border-radius:6px;
   overflow:hidden;margin-bottom:14px;
 }
 .sph-fill{
   height:100%;
-  background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.18) 3px,rgba(0,0,0,.18) 4px);
+  border-radius:6px;
   transition:width 1s cubic-bezier(.4,0,.2,1);
 }
 .sph-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
@@ -1005,12 +1004,12 @@ function renderSpheres(data){
     const status=s.score>=7?'Сильна зона ✦':s.score>=4?'Є потенціал':'⚠ Критична';
     if(!showFull){return `<div class="sph" style="opacity:.7">
       <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">Недоступно у безкоштовній версії</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
-      <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}40"></div></div>
+      <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
       <div class="sph-locked"><div style="font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2);margin-bottom:6px">Детальний аналіз і план — у повній версії</div><a href="https://koleso.live" style="font-family:'Patrick Hand',cursive;font-size:16px;color:var(--blue);font-weight:600">Отримати повний аналіз →</a></div>
     </div>`;}
     return `<div class="sph">
       <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">${status}</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
-      <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}50"></div></div>
+      <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
       <div class="sph-cols">
         <div class="sph-col"><div class="sph-col-t">Сильні сторони</div><div class="sph-item"><span class="sph-mk" style="color:var(--green)">✦</span>${act.strength}</div><div class="sph-item"><span class="sph-mk" style="color:var(--green)">✦</span>Є усвідомленість</div></div>
         <div class="sph-col"><div class="sph-col-t">Проблема</div><div class="sph-item"><span class="sph-mk" style="color:var(--red)">—</span>${act.problem}</div></div>
