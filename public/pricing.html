@@ -688,8 +688,42 @@ function startPayment(plan, btn) {
   btn.textContent = '⏳ Завантаження...';
   btn.disabled = true;
 
-  var email = prompt('Введи email для отримання доступу (необов\'язково):') || '';
+  var email = prompt('Введи email для отримання доступу:') || '';
   var promoCode = activePromo ? activePromo.code : '';
+
+  // 100% знижка — обходимо оплату, активуємо одразу
+  if (activePromo && activePromo.discount >= 100) {
+    if (!email || !email.includes('@')) {
+      alert('Введи email для активації безкоштовного доступу.');
+      btn.textContent = origText;
+      btn.disabled = false;
+      return;
+    }
+    fetch('/api/promo/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: promoCode, email: email, plan: plan })
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(result){
+      if (result.ok) {
+        localStorage.setItem('lw_premium', '1');
+        localStorage.setItem('lw_premium_email', email);
+        localStorage.setItem('lw_premium_expires', result.expires_at || '');
+        window.location.href = '/result/' + (localStorage.getItem('lw_last_result') || '') + '?paid=1';
+      } else {
+        alert('❌ ' + (result.error || 'Помилка активації'));
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    })
+    .catch(function(){
+      alert('Помилка з\'єднання. Спробуй ще раз.');
+      btn.textContent = origText;
+      btn.disabled = false;
+    });
+    return;
+  }
 
   if (currentCurrency === 'usd') {
     fetch('/api/lemonsqueezy/checkout', {
