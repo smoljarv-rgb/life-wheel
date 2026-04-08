@@ -1440,6 +1440,7 @@ async function startStreamingAnalysis(slug) {
     var prompt = 'ICF coach. JSON only. Context: ' + context + '. Analyze: ' + s.name + ':' + s.score + '/10. Return JSON: {"sphere":"' + s.name + '","score":' + s.score + ',"gap":' + (10-s.score) + ',"priority_reason":"why important","root_cause":"root cause","quick_win":"action today","month_goal":"30 day SMART goal","days":[{"day":"День 1","task":"action","technique":"technique","psychologist":"Name","book":"Book - Author"},{"day":"День 2","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 3","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 4","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 5","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 6","task":"action","technique":"technique","psychologist":"name","book":"title"},{"day":"День 7","task":"reflection","technique":"Weekly Review","psychologist":"David Allen","book":"GTD"}]}';
 
     var sphereAdvice = null;
+    var lastError = null;
     for(var attempt=0; attempt<3; attempt++){
       try{
         var res = await fetch('/api/analyze',{
@@ -1448,14 +1449,28 @@ async function startStreamingAnalysis(slug) {
           body:JSON.stringify({prompt:prompt})
         });
         var data = await res.json();
+        
+        if(!res.ok){
+          lastError = (data.error || 'HTTP ' + res.status);
+          console.warn('API error attempt ' + (attempt+1) + ': ' + lastError);
+          if(attempt < 2) await new Promise(function(r){setTimeout(r, 2000 + attempt*1000);});
+          continue;
+        }
+        
         if(data.text){
           var parsed = JSON.parse(data.text);
           if(!parsed.sphere) parsed.sphere = s.name;
           sphereAdvice = parsed;
           break;
+        }else{
+          lastError = 'Порожня відповідь';
+          console.warn('Empty response attempt ' + (attempt+1));
+          if(attempt < 2) await new Promise(function(r){setTimeout(r, 2000 + attempt*1000);});
         }
       }catch(e){
-        if(attempt<2) await new Promise(function(r){setTimeout(r,3000);});
+        lastError = e.message;
+        console.error('Network/parse error attempt ' + (attempt+1) + ':', e);
+        if(attempt < 2) await new Promise(function(r){setTimeout(r, 2000 + attempt*1000);});
       }
     }
 
@@ -1465,6 +1480,9 @@ async function startStreamingAnalysis(slug) {
         resultData.analysis.advice = receivedAdvice.slice();
         renderSpheres(resultData);
       }
+    }else if(lastError){
+      console.error('Не вдалося отримати рекомендації для ' + s.name + ': ' + lastError);
+      if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(192,57,43,.08);border:1.5px dashed var(--red);border-radius:10px;font-size:14px;color:var(--red);text-align:center">❌ Помилка при аналізі <strong>' + s.name + '</strong>: ' + lastError + '</div>';
     }
 
     // Пауза між запитами

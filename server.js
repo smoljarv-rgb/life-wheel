@@ -213,6 +213,22 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin2025';
 const DB_FILE = process.env.DB_FILE || path.join('/tmp', 'lifewheel_db.json');
 
 app.use(express.json({ limit: '1mb' }));
+
+// Content Security Policy middleware
+app.use(function(req, res, next) {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self'; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: https:; " +
+    "connect-src 'self' https://api.groq.com https://supabase.* https://fonts.googleapis.com; " +
+    "frame-ancestors 'none';"
+  );
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/favicon.svg', function(req, res) {
@@ -660,7 +676,8 @@ app.post('/api/analyze', async function(req, res) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 55000);
+    // Vercel Hobby ліміт — 10 сек. Встановлюємо 8 сек, щоб встигнути відповісти
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -694,6 +711,10 @@ app.post('/api/analyze', async function(req, res) {
 
     res.json({ text });
   } catch (err) {
+    // Vercel тайм-аут (AbortError) — повертаємо статус 408 замість 500
+    if (err.name === 'AbortError') {
+      return res.status(408).json({ error: 'Запит до AI занадто довгий. Спробуйте ще раз.' });
+    }
     res.status(500).json({ error: 'Помилка: ' + (err.message || String(err)) });
   }
 });
