@@ -1966,6 +1966,11 @@ app.get('/result/:slug', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'result.html'));
 });
 
+// WayForPay робить POST redirect на /result/:slug?paid=1 після оплати
+app.post('/result/:slug', function(req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'result.html'));
+});
+
 app.get('*', function(req, res) {
   res.send(fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8'));
 });
