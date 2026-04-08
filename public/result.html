@@ -978,6 +978,8 @@ function renderResult(data){
   // Рендер сфер — окрема функція для оновлення при SSE
   renderSpheres(data);
 
+  renderPlan(data);
+
   // Ховаємо лоадер і показуємо контент
   document.getElementById('loader').classList.add('hide');
   document.getElementById('mainWrap').style.display = 'block';
@@ -1054,6 +1056,84 @@ function renderSpheres(data){
   }).join('');
 }
 
+
+function renderPlan(data){
+  const advice=(data.analysis&&data.analysis.advice)||[];
+  const scores=data.scores||{};
+
+  // Дата
+  const now=new Date();
+  const days=['неділя','понеділок','вівторок','середа','четвер','п\'ятниця','субота'];
+  const months=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+  document.getElementById('planDate').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+
+  if(!advice.length){
+    const empty='<div style="text-align:center;padding:28px 16px;color:var(--ink3);font-size:16px;line-height:1.7">✏️ AI-план з\'явиться після аналізу сфер.<br><a href="https://koleso.live" style="color:var(--blue)">← Пройти тест і отримати план</a></div>';
+    document.getElementById('microList').innerHTML=empty;
+    document.getElementById('weekGrid').innerHTML='';
+    document.getElementById('goalList').innerHTML='';
+    document.getElementById('roadmap').innerHTML='';
+    return;
+  }
+
+  // Мікродії — quick_win кожної сфери
+  var mi=0;
+  document.getElementById('microList').innerHTML=advice.map(function(a){
+    mi++;
+    var key=mi;
+    var isDone=checkedTasks['micro_'+key]?true:false;
+    return '<div class="micro'+(isDone?' done':'')+'" id="micro_'+key+'" onclick="toggleCheck(\'micro_'+key+'\','+key+')">'
+      +'<div class="micro-circle">'+(isDone?'✓':key)+'</div>'
+      +'<div><div class="micro-txt">'+a.quick_win+'</div>'
+      +'<div class="micro-meta"><span class="micro-tag">'+a.sphere+'</span><span class="micro-time">Сьогодні</span></div></div>'
+      +'</div>';
+  }).join('');
+
+  // Тижневий план — по днях
+  var dayMap={};
+  advice.forEach(function(a){
+    if(!a.days) return;
+    a.days.forEach(function(d,i){
+      var dn='День '+(i+1);
+      if(!dayMap[dn]) dayMap[dn]=[];
+      dayMap[dn].push({sphere:a.sphere,task:d.task,technique:d.technique,book:d.book});
+    });
+  });
+  var wh='<div style="display:flex;flex-direction:column;gap:12px">';
+  Object.entries(dayMap).forEach(function(e){
+    var dn=e[0],tasks=e[1];
+    wh+='<div style="background:var(--paper2);border:1.5px solid var(--ink3);border-radius:10px;padding:12px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.06)">';
+    wh+='<div style="font-family:\'Caveat Brush\',cursive;font-size:17px;color:var(--ink);margin-bottom:8px">'+dn+'</div>';
+    wh+=tasks.map(function(t){
+      return '<div style="margin-bottom:6px;padding:7px 10px;background:var(--paper);border-radius:7px;border-left:3px solid var(--orange)">'
+        +'<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px">'+t.task+'</div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px">'
+        +'<span style="font-size:12px;color:var(--ink3)">📌 '+t.sphere+'</span>'
+        +(t.technique?'<span style="font-size:12px;color:var(--purple)">🧠 '+t.technique+'</span>':'')
+        +(t.book?'<span style="font-size:12px;color:var(--blue)">📖 '+t.book+'</span>':'')
+        +'</div>'
+        +'</div>';
+    }).join('');
+    wh+='</div>';
+  });
+  wh+='</div>';
+  document.getElementById('weekGrid').innerHTML=wh;
+
+  // Цілі 30 днів
+  document.getElementById('goalList').innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+advice.filter(function(a){return a.month_goal;}).map(function(a,i){
+    return '<div style="background:var(--paper2);border:1.5px solid var(--ink3);border-radius:10px;padding:12px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.06)">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:4px">'+a.sphere+'</div>'
+      +'<div style="font-size:15px;color:var(--ink);line-height:1.5">🎯 '+a.month_goal+'</div>'
+      +'</div>';
+  }).join('')+'</div>';
+
+  // Roadmap — 4 тижні
+  var rm=['Тиждень 1: Запуск звичок і перші кроки','Тиждень 2: Закріплення та відстеження','Тиждень 3: Поглиблення і корекція','Тиждень 4: Оцінка прогресу і нові цілі'];
+  document.getElementById('roadmap').innerHTML=rm.map(function(r,i){
+    var sphere=advice[i%advice.length];
+    return '<div class="rl"><div class="rl-dot"></div><div class="rl-week">Тиждень '+(i+1)+'</div><div class="rl-title">'+['Запуск звичок','Закріплення','Поглиблення','Оцінка прогресу'][i]+'</div>'+(sphere?'<div class="rl-text">Фокус: <strong>'+sphere.sphere+'</strong>'+(sphere.quick_win?' — '+sphere.quick_win:'')+'</div>':'')+'</div>';
+  }).join('');
+}
 
 function renderWheel(scores){
   const seg=document.getElementById('wheelSegs');
@@ -1483,6 +1563,7 @@ async function startStreamingAnalysis(slug) {
       if(resultData && resultData.analysis){
         resultData.analysis.advice = receivedAdvice.slice();
         renderSpheres(resultData);
+        renderPlan(resultData);
       }
     }else if(lastError){
       console.error('Не вдалося отримати рекомендації для ' + s.name + ': ' + lastError);
