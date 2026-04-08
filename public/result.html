@@ -978,8 +978,9 @@ function renderResult(data){
   // Рендер сфер — окрема функція для оновлення при SSE
   renderSpheres(data);
 
-  // Ховаємо лоадер
+  // Ховаємо лоадер і показуємо контент
   document.getElementById('loader').classList.add('hide');
+  document.getElementById('mainWrap').style.display = 'block';
 }
 
 function renderSpheres(data){
