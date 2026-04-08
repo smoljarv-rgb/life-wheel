@@ -515,6 +515,13 @@ footer{
     </div>
   </div>
 
+  <!-- EMAIL -->
+  <div style="margin:16px 0 8px;display:flex;flex-direction:column;gap:6px">
+    <label style="font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2)">📧 Email для отримання доступу</label>
+    <input type="email" id="paymentEmail" placeholder="твій@email.com"
+      style="width:100%;padding:12px 14px;border:2px solid var(--ink3);border-radius:8px;font-family:'Patrick Hand',cursive;font-size:16px;background:var(--paper);color:var(--ink);box-sizing:border-box">
+  </div>
+
   <!-- ГАРАНТІЯ -->
   <div class="guarantee">
     <div class="guarantee-item">🛡 <div><strong>14 днів</strong> гарантія повернення</div></div>
@@ -688,7 +695,15 @@ function startPayment(plan, btn) {
   btn.textContent = '⏳ Завантаження...';
   btn.disabled = true;
 
-  var email = prompt('Введи email для отримання доступу:') || '';
+  var emailEl = document.getElementById('paymentEmail');
+  var email = emailEl ? emailEl.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    if (emailEl) { emailEl.focus(); emailEl.style.borderColor = 'var(--red)'; }
+    btn.textContent = origText;
+    btn.disabled = false;
+    return;
+  }
+  if (emailEl) emailEl.style.borderColor = '';
   var promoCode = activePromo ? activePromo.code : '';
 
   // 100% знижка — обходимо оплату, активуємо одразу
