@@ -313,14 +313,15 @@ function adminAuth(req, res, next) {
 // ══════════════════════════════════════════
 //  PUBLIC API
 // ══════════════════════════════════════════
-app.post('/api/track', (req, res) => {
+app.post('/api/track', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
   const { type, data } = req.body;
   if (!type) return res.json({ ok: true });
-  const db = loadDB();
-  db.events.push({ ts: Date.now(), type, ip, data: data || {} });
-  if (db.events.length > 10000) db.events = db.events.slice(-5000);
-  saveDB(db);
+  try {
+    await supabase.from('pageviews').insert({ ts: Date.now(), type, ip, data: data || {} });
+  } catch(e) {
+    console.error('Track error:', e);
+  }
   res.json({ ok: true });
 });
 
@@ -731,51 +732,85 @@ app.get('/api/stats', function(req, res) {
 //  ADMIN API
 // ══════════════════════════════════════════
 app.get('/api/admin/stats', adminAuth, async function(req, res) {
-  const db = loadDB();
   const now = Date.now();
   const day = 86400000;
 
-  function countEvents(type, since) {
-    return db.events.filter(function(e){ return e.type === type && e.ts >= since; }).length;
-  }
-  function uniqueIPs(since) {
-    return new Set(db.events.filter(function(e){ return e.ts >= since; }).map(function(e){ return e.ip; })).size;
-  }
+  // Отримуємо дані з Supabase паралельно
+  const [
+    { data: recentViews = [] },
+    { data: allViews = [] },
+    { data: recentResults = [] },
+    { count: totalResultsCount },
+    { data: recentSubs = [] },
+    { data: allSubs = [] },
+    { count: emailCount },
+  ] = await Promise.all([
+    supabase.from('pageviews').select('ts,ip').gte('ts', now - 14*day),
+    supabase.from('pageviews').select('ip').gte('ts', now - 90*day),
+    supabase.from('results').select('created_at').gte('created_at', new Date(now - 14*day).toISOString()),
+    supabase.from('results').select('*', { count: 'exact', head: true }),
+    supabase.from('subscriptions').select('created_at,amount').gt('amount', 0).gte('created_at', new Date(now - 30*day).toISOString()),
+    supabase.from('subscriptions').select('amount').gt('amount', 0),
+    supabase.from('subscribers').select('*', { count: 'exact', head: true }),
+  ]);
 
-  const revenueTotal = db.payments.reduce(function(s,p){ return s + (p.amount||0); }, 0);
-  const revenueMonth = db.payments.filter(function(p){ return p.ts >= now - 30*day; }).reduce(function(s,p){ return s+(p.amount||0); }, 0);
-  const revenueToday = db.payments.filter(function(p){ return p.ts >= now - day; }).reduce(function(s,p){ return s+(p.amount||0); }, 0);
+  // Відвідувачі
+  const visitors = {
+    today: new Set((recentViews||[]).filter(function(e){ return e.ts >= now-day; }).map(function(e){ return e.ip; })).size,
+    week:  new Set((recentViews||[]).filter(function(e){ return e.ts >= now-7*day; }).map(function(e){ return e.ip; })).size,
+    total: new Set((allViews||[]).map(function(e){ return e.ip; })).size,
+  };
 
+  // Аналізи
+  const todayIso = new Date(now-day).toISOString();
+  const analyses = {
+    today: (recentResults||[]).filter(function(r){ return r.created_at >= todayIso; }).length,
+    total: totalResultsCount || 0,
+  };
+
+  // Оплати та дохід
+  const todaySubs = (recentSubs||[]).filter(function(p){ return new Date(p.created_at).getTime() >= now-day; });
+  const monthSubs = recentSubs||[];
+  const payments = { today: todaySubs.length, total: (allSubs||[]).length };
+  const revenue = {
+    today: todaySubs.reduce(function(s,p){ return s+(p.amount||0); }, 0),
+    month: monthSubs.reduce(function(s,p){ return s+(p.amount||0); }, 0),
+    total: (allSubs||[]).reduce(function(s,p){ return s+(p.amount||0); }, 0),
+  };
+
+  // Графік за 14 днів
   const chart = [];
-  for (let i = 13; i >= 0; i--) {
-    const from = now - (i+1)*day;
-    const to = now - i*day;
-    const date = new Date(to).toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit' });
+  for (var i = 13; i >= 0; i--) {
+    var from = now - (i+1)*day;
+    var to = now - i*day;
+    var fromIso = new Date(from).toISOString();
+    var toIso = new Date(to).toISOString();
+    var date = new Date(to).toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit' });
     chart.push({
       date,
-      visitors: new Set(db.events.filter(function(e){ return e.ts>=from && e.ts<to; }).map(function(e){ return e.ip; })).size,
-      analyses: db.events.filter(function(e){ return e.ts>=from && e.ts<to && e.type==='analysis_completed'; }).length,
-      payments: db.payments.filter(function(p){ return p.ts>=from && p.ts<to; }).length,
+      visitors: new Set((recentViews||[]).filter(function(e){ return e.ts>=from && e.ts<to; }).map(function(e){ return e.ip; })).size,
+      analyses: (recentResults||[]).filter(function(r){ return r.created_at>=fromIso && r.created_at<toIso; }).length,
+      payments: (recentSubs||[]).filter(function(p){ return p.created_at>=fromIso && p.created_at<toIso; }).length,
     });
   }
 
-  // Читаємо settings з Supabase (там зберігаються промокоди)
-  let settings = db.settings;
+  // Settings з Supabase
+  let settings = {};
   try {
     const { data } = await supabase.from('settings').select('value').eq('key','site_config').single();
-    if (data && data.value) settings = Object.assign({}, db.settings, data.value);
+    if (data && data.value) settings = data.value;
   } catch(e) {}
 
-  const totalAssessments = countEvents('analysis_completed', 0);
+  const db = loadDB();
   res.json({
-    visitors: { today: uniqueIPs(now-day), week: uniqueIPs(now-7*day), total: uniqueIPs(0) },
-    analyses: { today: countEvents('analysis_completed', now-day), total: totalAssessments },
-    payments: { today: db.payments.filter(function(p){ return p.ts>=now-day; }).length, total: db.payments.length },
-    revenue:  { today: revenueToday, month: revenueMonth, total: revenueTotal },
-    emails: db.emails.length,
-    totalAssessments,
+    visitors,
+    analyses,
+    payments,
+    revenue,
+    emails: emailCount || 0,
+    totalAssessments: analyses.total,
     chart,
-    settings: settings,
+    settings,
     ads: db.ads,
   });
 });
