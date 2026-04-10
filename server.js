@@ -214,18 +214,8 @@ const DB_FILE = process.env.DB_FILE || path.join('/tmp', 'lifewheel_db.json');
 
 app.use(express.json({ limit: '1mb' }));
 
-// Content Security Policy middleware
+// Cache-Control middleware (CSP is set in vercel.json headers for reliability)
 app.use(function(req, res, next) {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdn.jsdelivr.net; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "img-src 'self' data: https:; " +
-    "connect-src 'self' https://api.groq.com https://*.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; " +
-    "frame-ancestors 'none';"
-  );
   res.setHeader('Cache-Control', 'no-store');
   next();
 });
