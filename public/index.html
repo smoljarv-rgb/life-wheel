@@ -731,7 +731,7 @@ const SC=[
   '#b09020','#789020','#449030','#2880a0','#2060b0','#1848c0'
 ];
 const sg=document.getElementById('modalScaleGrid');
-SCORE_DESCS.forEach(s=>{
+if(sg) SCORE_DESCS.forEach(s=>{
   sg.innerHTML+=`<div class="score-item"><div class="score-num" style="color:${SC[s.score-1]}">${s.score}</div><div class="score-txt"><strong>${s.label}</strong>${s.desc}</div></div>`;
 });
 
