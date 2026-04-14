@@ -184,6 +184,8 @@ body::after{
 .pg{display:none;animation:fadeIn .3s ease}
 .pg.on{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sph-loader{display:inline-block;width:12px;height:12px;border:2px solid var(--paper3);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-left:6px;vertical-align:middle;flex-shrink:0}
 
 /* SECTION TITLE */
 .sec-ttl{
@@ -696,7 +698,10 @@ body::after{
     <div class="hdr-grid">
       <div>
         <div class="score-big" id="scoreBig">—<span class="score-denom">/10</span></div>
-        <div class="hdr-msg" id="hdrMsg">Завантаження...</div>
+        <div class="hdr-msg" id="hdrMsg" style="text-align:center;padding:20px 0">
+          <div style="font-size:15px;color:var(--ink2);font-family:'Patrick Hand',cursive;margin-bottom:4px">🧠 AI аналізує твої результати...</div>
+          <div style="font-size:13px;color:var(--ink3);font-family:'Patrick Hand',cursive">Це займе 30–60 секунд</div>
+        </div>
         <div class="chips" id="hdrChips"></div>
       </div>
       <div class="hdr-wheel">
@@ -751,7 +756,15 @@ body::after{
 
   <!-- ══ ЕКРАН 2 ══ -->
   <div class="pg" id="sc-spheres">
-    <div id="analyzeProgress" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(36,113,163,.07);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center;font-family:'Patrick Hand',cursive"></div>
+    <div id="analysisProgress" style="display:none;padding:12px 16px;background:var(--paper2);border:1.5px solid var(--paper3);border-radius:12px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span id="progressText" style="font-size:14px;font-weight:700;color:var(--ink);font-family:'Patrick Hand',cursive">Аналізую 0 з 12 сфер...</span>
+        <span id="progressPercent" style="font-size:13px;color:var(--ink3);font-family:'Patrick Hand',cursive">0%</span>
+      </div>
+      <div style="height:4px;background:var(--paper3);border-radius:4px;overflow:hidden">
+        <div id="progressFill" style="height:100%;width:0%;background:var(--blue);border-radius:4px;transition:width .4s ease"></div>
+      </div>
+    </div>
     <div id="sphList"></div>
     <div class="btn-row">
       <button class="btn btn-acc" onclick="goScreen('plan')">✏️ До плану дій →</button>
@@ -1006,7 +1019,7 @@ function renderSpheres(data){
       <div class="sph-locked"><div style="font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2);margin-bottom:6px">Детальний аналіз і план — у повній версії</div><a href="https://koleso.live" style="font-family:'Patrick Hand',cursive;font-size:16px;color:var(--blue);font-weight:600">Отримати повний аналіз →</a></div>
     </div>`;}
     return `<div class="sph">
-      <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">${status}</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
+      <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}<span id="sph-status-${s.key}"></span></div><div class="sph-status">${status}</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
       <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
       <div class="sph-cols">
         <div class="sph-col"><div class="sph-col-t">Сильні сторони</div><div class="sph-item"><span class="sph-mk" style="color:var(--green)">✦</span>${act.strength}</div><div class="sph-item"><span class="sph-mk" style="color:var(--green)">✦</span>Є усвідомленість</div></div>
@@ -1517,15 +1530,39 @@ async function startStreamingAnalysis(slug) {
 
   var context = spheres.map(function(s){ return s.name+':'+s.score; }).join(', ');
   var receivedAdvice = [];
-  var analyzeProgress = document.getElementById('analyzeProgress');
-  if(analyzeProgress){ analyzeProgress.style.display='block'; analyzeProgress.textContent='⚙️ Аналізую 1 з ' + spheres.length + ' сфер...'; }
+  var total = spheres.length;
+
+  // Показуємо прогрес-бар
+  var apEl = document.getElementById('analysisProgress');
+  var ptEl = document.getElementById('progressText');
+  var ppEl = document.getElementById('progressPercent');
+  var pfEl = document.getElementById('progressFill');
+  function updateProgress(done){
+    var pct = Math.round(done/total*100);
+    if(apEl) apEl.style.display='block';
+    if(ptEl) ptEl.textContent = done < total ? ('Аналізую ' + done + ' з ' + total + ' сфер...') : '✓ Аналіз завершено';
+    if(ppEl) ppEl.textContent = pct + '%';
+    if(pfEl) pfEl.style.width = pct + '%';
+  }
+  updateProgress(0);
+
+  // Лоадери на кожній сфері що очікує
+  function setSpherePending(key){
+    var el = document.getElementById('sph-status-'+key);
+    if(el){ el.innerHTML = '<span class="sph-loader"></span>'; }
+  }
+  function setSphereReady(key){
+    var el = document.getElementById('sph-status-'+key);
+    if(el){ el.innerHTML = '<span style="color:var(--blue);font-family:Patrick Hand,cursive;font-size:13px;font-weight:700">✓</span>'; }
+  }
 
   for(var i=0; i<spheres.length; i++){
     var s = spheres[i];
+    setSpherePending(s.key);
 
-    // Оновлюємо банер
-    if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">&#9881;&#xFE0F; Аналізую: <strong>' + (i+1) + ' / ' + spheres.length + '</strong> &mdash; ' + s.name + '</div>';
-    if(analyzeProgress) analyzeProgress.textContent = '⚙️ Аналізую ' + (i+1) + ' з ' + spheres.length + ' сфер...';
+    // Оновлюємо банер і прогрес
+    if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">&#9881;&#xFE0F; Аналізую: <strong>' + (i+1) + ' / ' + total + '</strong> &mdash; ' + s.name + '</div>';
+    updateProgress(i);
 
     var prompt = 'You are an ICF certified life coach. Respond with ONLY a valid JSON object. Write ALL string values in Ukrainian language.\n\nClient life sphere analysis:\nSphere: ' + s.name + '\nScore: ' + s.score + '/10\nAll spheres: ' + context + '\n\nCreate a personalized 7-day action plan. Return a JSON object with these keys:\n- "sphere": "' + s.name + '"\n- "score": ' + s.score + '\n- "gap": ' + (10-s.score) + '\n- "priority_reason": Ukrainian string — why this sphere urgently needs attention based on the score\n- "root_cause": Ukrainian string — what typically causes low results in this sphere\n- "quick_win": Ukrainian string — one specific concrete action the client can do TODAY\n- "month_goal": Ukrainian string — a specific SMART goal for 30 days in this sphere\n- "days": array of exactly 7 objects, each with:\n  - "day": "День 1" through "День 7"\n  - "task": specific concrete Ukrainian action for that day (different each day, practical and detailed)\n  - "technique": real name of a psychological or coaching technique relevant to that day task\n  - "psychologist": name of a real psychologist or expert related to the technique\n  - "book": title and author of a real book relevant to this sphere\n\nRespond with ONLY the JSON object.';
 
@@ -1566,6 +1603,8 @@ async function startStreamingAnalysis(slug) {
 
     if(sphereAdvice){
       receivedAdvice.push(sphereAdvice);
+      setSphereReady(s.key);
+      updateProgress(i+1);
       if(resultData && resultData.analysis){
         resultData.analysis.advice = receivedAdvice.slice();
         renderSpheres(resultData);
@@ -1594,7 +1633,8 @@ async function startStreamingAnalysis(slug) {
   }
 
   if(banner) banner.style.display='none';
-  if(analyzeProgress) analyzeProgress.style.display='none';
+  updateProgress(total);
+  setTimeout(function(){ if(apEl) apEl.style.display='none'; }, 2000);
   history.replaceState({}, '', window.location.pathname);
 }
 
