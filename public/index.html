@@ -505,10 +505,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 /* ── STICKY MOBILE CTA ── */
 @media(max-width:600px){
   #mobileCta{
-    position:fixed;bottom:0;left:0;right:0;z-index:500;
-    padding:10px 14px 18px;
-    background:linear-gradient(to top,var(--sf) 80%,transparent);
-    backdrop-filter:blur(8px);
+    position:fixed;bottom:16px;left:16px;right:16px;z-index:100;
     display:none
   }
   #mobileCta.visible{display:block}
@@ -516,7 +513,8 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     width:100%;padding:15px;border:none;border-radius:14px;
     font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;
     letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
-    box-shadow:0 8px 24px rgba(40,120,200,.45);transition:all .3s
+    background:var(--ac);color:#fff;
+    box-shadow:0 8px 24px var(--sh);transition:all .3s
   }
 }
 </style>
@@ -542,6 +540,21 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <a href="/pricing" target="_blank" id="pricingBtn" style="display:flex;align-items:center;gap:5px;padding:7px 12px;background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(20px);border-radius:30px;font-family:'Nunito',sans-serif;font-size:.65rem;font-weight:700;color:var(--ac);text-decoration:none;box-shadow:0 4px 14px var(--sh);transition:all .2s;white-space:nowrap" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='var(--sf)'">
     💎 PRO
   </a>
+</div>
+
+<!-- HERO -->
+<div id="heroSection" style="position:relative;z-index:10;padding:72px 20px 56px;display:flex;justify-content:center;text-align:center">
+  <div style="background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:16px;box-shadow:0 8px 32px var(--sh),inset 0 1px 0 rgba(255,255,255,.5);padding:24px;max-width:600px;width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;transition:background 3s,border-color 3s,box-shadow 3s">
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,5vw,2.6rem);font-weight:300;color:var(--td);line-height:1.2;margin:0;transition:color 3s">
+      Дізнайся де ти&nbsp;<em style="font-style:italic;color:var(--ac);transition:color 3s">втрачаєш енергію</em>
+    </h1>
+    <p style="font-size:clamp(.8rem,2.2vw,.92rem);color:var(--tm);margin:0;line-height:1.6;transition:color 3s">
+      AI-аналіз 12 сфер за 5 хвилин · Безкоштовно · Без реєстрації
+    </p>
+    <button class="btn-start" onclick="document.getElementById('heroSection').style.display='none'" style="margin-top:4px;max-width:320px">
+      ✦ Почати безкоштовно
+    </button>
+  </div>
 </div>
 
 <!-- ONBOARDING -->
@@ -765,6 +778,9 @@ const state={};
 SPHERES.forEach(s=>{state[s.id]={};s.sub.forEach(sub=>state[s.id][sub.k]=5);});
 let active=SPHERES[0];
 
+/* ── SPHERE HINT ── */
+let sphereHintDismissed = false;
+
 /* ── HELPERS ── */
 function avg(id){const s=SPHERES.find(x=>x.id===id);return s.sub.map(sub=>state[id][sub.k]).reduce((a,b)=>a+b,0)/s.sub.length}
 function globalAvg(){return SPHERES.reduce((s,sp)=>s+avg(sp.id),0)/SPHERES.length}
@@ -927,8 +943,22 @@ function buildNav(){
         <span class="s-avg">${a.toFixed(1)} / 10 · ${sDesc(a).label}</span>
       </div>
       <div class="s-bar-wrap"><div class="s-bar-fill" style="width:${a*10}%;background:${s.color}"></div></div>`;
-    btn.onclick=()=>{active=s;buildNav();buildDetail();drawWheel();};
+    btn.onclick=()=>{
+      if(!sphereHintDismissed){
+        sphereHintDismissed=true;
+        const h=document.getElementById('sphereClickHint');
+        if(h)h.remove();
+      }
+      active=s;buildNav();buildDetail();drawWheel();
+    };
     nav.appendChild(btn);
+    if(s===SPHERES[0] && !sphereHintDismissed){
+      const hint=document.createElement('div');
+      hint.id='sphereClickHint';
+      hint.style.cssText='font-size:.68rem;color:var(--ac);padding:4px 10px 8px;text-align:center;animation:hintPulse 2.5s ease-in-out infinite;transition:color 3s';
+      hint.textContent='👆 Клікни на сферу щоб оцінити';
+      nav.appendChild(hint);
+    }
   });
 
   // Sidebar ad slot

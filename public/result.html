@@ -751,6 +751,7 @@ body::after{
 
   <!-- ══ ЕКРАН 2 ══ -->
   <div class="pg" id="sc-spheres">
+    <div id="analyzeProgress" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(36,113,163,.07);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center;font-family:'Patrick Hand',cursive"></div>
     <div id="sphList"></div>
     <div class="btn-row">
       <button class="btn btn-acc" onclick="goScreen('plan')">✏️ До плану дій →</button>
@@ -1516,12 +1517,15 @@ async function startStreamingAnalysis(slug) {
 
   var context = spheres.map(function(s){ return s.name+':'+s.score; }).join(', ');
   var receivedAdvice = [];
+  var analyzeProgress = document.getElementById('analyzeProgress');
+  if(analyzeProgress){ analyzeProgress.style.display='block'; analyzeProgress.textContent='⚙️ Аналізую 1 з ' + spheres.length + ' сфер...'; }
 
   for(var i=0; i<spheres.length; i++){
     var s = spheres[i];
 
     // Оновлюємо банер
     if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">&#9881;&#xFE0F; Аналізую: <strong>' + (i+1) + ' / ' + spheres.length + '</strong> &mdash; ' + s.name + '</div>';
+    if(analyzeProgress) analyzeProgress.textContent = '⚙️ Аналізую ' + (i+1) + ' з ' + spheres.length + ' сфер...';
 
     var prompt = 'You are an ICF certified life coach. Respond with ONLY a valid JSON object. Write ALL string values in Ukrainian language.\n\nClient life sphere analysis:\nSphere: ' + s.name + '\nScore: ' + s.score + '/10\nAll spheres: ' + context + '\n\nCreate a personalized 7-day action plan. Return a JSON object with these keys:\n- "sphere": "' + s.name + '"\n- "score": ' + s.score + '\n- "gap": ' + (10-s.score) + '\n- "priority_reason": Ukrainian string — why this sphere urgently needs attention based on the score\n- "root_cause": Ukrainian string — what typically causes low results in this sphere\n- "quick_win": Ukrainian string — one specific concrete action the client can do TODAY\n- "month_goal": Ukrainian string — a specific SMART goal for 30 days in this sphere\n- "days": array of exactly 7 objects, each with:\n  - "day": "День 1" through "День 7"\n  - "task": specific concrete Ukrainian action for that day (different each day, practical and detailed)\n  - "technique": real name of a psychological or coaching technique relevant to that day task\n  - "psychologist": name of a real psychologist or expert related to the technique\n  - "book": title and author of a real book relevant to this sphere\n\nRespond with ONLY the JSON object.';
 
@@ -1590,6 +1594,7 @@ async function startStreamingAnalysis(slug) {
   }
 
   if(banner) banner.style.display='none';
+  if(analyzeProgress) analyzeProgress.style.display='none';
   history.replaceState({}, '', window.location.pathname);
 }
 
