@@ -814,6 +814,9 @@ function closeModal(){
   m.style.pointerEvents='none';
   const hero=document.getElementById('heroSection');
   if(hero) hero.style.display='none';
+  sphereHintDismissed=true;
+  const h=document.getElementById('sphereClickHint');
+  if(h)h.remove();
 }
 
 // Закрити модалку по Escape або кліку поза нею — повернути hero
@@ -966,7 +969,7 @@ function buildNav(){
     if(s===SPHERES[0] && !sphereHintDismissed){
       const hint=document.createElement('div');
       hint.id='sphereClickHint';
-      hint.style.cssText='font-size:.68rem;color:var(--ac);padding:4px 10px 8px;text-align:center;animation:hintPulse 2.5s ease-in-out infinite;transition:color 3s';
+      hint.style.cssText='font-size:.72rem;font-weight:700;color:var(--ac);padding:6px 12px 10px;text-align:center;background:rgba(40,120,200,.08);border:1px solid rgba(40,120,200,.2);border-radius:10px;margin:4px 8px 0;animation:hintPulse 2.5s ease-in-out infinite;transition:all 3s';
       hint.textContent='👆 Клікни на сферу щоб оцінити';
       nav.appendChild(hint);
     }
