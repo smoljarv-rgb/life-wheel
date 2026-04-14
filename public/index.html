@@ -494,6 +494,8 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   .modal{padding:20px 16px;margin:10px}
   .modal h2{font-size:1.4rem}
   #analysisContent > div{padding:20px 14px!important}
+  #heroSection{padding:52px 16px 32px}
+  #heroSection h1{font-size:1.4rem}
 }
 
 /* ── VERY SMALL ── */
@@ -551,7 +553,10 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     <p style="font-size:clamp(.8rem,2.2vw,.92rem);color:var(--tm);margin:0;line-height:1.6;transition:color 3s">
       AI-аналіз 12 сфер за 5 хвилин · Безкоштовно · Без реєстрації
     </p>
-    <button class="btn-start" onclick="document.getElementById('heroSection').style.display='none'" style="margin-top:4px;max-width:320px">
+    <div style="font-size:.72rem;color:var(--tl);background:var(--sf2);border:1px solid var(--sb);border-radius:20px;padding:4px 14px;transition:all 3s">
+      ✦ Вже 1 200+ аналізів · Середній результат 5.4/10
+    </div>
+    <button class="btn-start" onclick="document.getElementById('modalOverlay').style.display='';document.getElementById('modalOverlay').style.pointerEvents=''" style="margin-top:4px;max-width:320px">
       ✦ Почати безкоштовно
     </button>
   </div>
@@ -824,7 +829,30 @@ function closeModal(){
   const m=document.getElementById('modalOverlay');
   m.style.display='none';
   m.style.pointerEvents='none';
+  const hero=document.getElementById('heroSection');
+  if(hero) hero.style.display='none';
 }
+
+// Закрити модалку по Escape або кліку поза нею — повернути hero
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    const m=document.getElementById('modalOverlay');
+    if(m && m.style.display!=='none'){
+      m.style.display='none';
+      m.style.pointerEvents='none';
+      const hero=document.getElementById('heroSection');
+      if(hero) hero.style.display='';
+    }
+  }
+});
+document.getElementById('modalOverlay').addEventListener('click',function(e){
+  if(e.target===this){
+    this.style.display='none';
+    this.style.pointerEvents='none';
+    const hero=document.getElementById('heroSection');
+    if(hero) hero.style.display='';
+  }
+});
 
 /* ── PAYWALL EMAIL ── */
 function submitPaywallEmail(){
