@@ -582,28 +582,24 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       </div>
       <h2 style="margin-bottom:6px">Колесо <em>Життя</em></h2>
       <p class="tagline">AI-коуч для особистісного зростання · 12 сфер · 5 хвилин</p>
-      <div id="userCounterBadge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:.62rem;color:var(--tl);margin-top:8px;transition:color 3s">
-        <span style="width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
-        <span id="userCounterText">Завантаження...</span>
-      </div>
     </div>
 
     <!-- How it works — 3 steps horizontal -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px">
       <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:all 3s">
         <div style="font-size:1.5rem;margin-bottom:8px">📊</div>
-        <div style="font-size:.72rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Оціни</div>
-        <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">Клікни на сферу і пересувай повзунок від 1 до 10</div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Оціни</div>
+        <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">Постав бал кожній сфері від 1 до 10</div>
       </div>
       <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:all 3s">
-        <div style="font-size:1.5rem;margin-bottom:8px">🤖</div>
-        <div style="font-size:.72rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Отримай план</div>
-        <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">AI-коуч створить персональний план дій з техніками та рекомендаціями</div>
+        <div style="font-size:1.5rem;margin-bottom:8px">🧠</div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">AI аналізує</div>
+        <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">AI знаходить де справжня проблема</div>
       </div>
       <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:all 3s">
         <div style="font-size:1.5rem;margin-bottom:8px">📈</div>
-        <div style="font-size:.72rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Зростай</div>
-        <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">Повертайся через 30 днів і відстежуй прогрес</div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Отримай план</div>
+        <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">Персональний план дій на 7 днів</div>
       </div>
     </div>
 
@@ -613,19 +609,6 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       <div>
         <div style="font-size:.75rem;font-weight:800;color:#207040;margin-bottom:2px">Перший аналіз безкоштовно</div>
         <div style="font-size:.65rem;color:var(--tm);transition:color 3s">AI проаналізує твою найкритичнішу сферу і дасть покроковий план — без реєстрації</div>
-      </div>
-    </div>
-
-    <!-- Scale compact — collapsed by default -->
-    <div style="margin-bottom:16px">
-      <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.scale-arrow').textContent=this.nextElementSibling.style.display==='none'?'▼':'▲'"
-        style="font-size:.62rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color 3s">
-        📊 Шкала оцінювання
-        <span class="scale-arrow" style="font-size:.55rem;opacity:.6">▼</span>
-        <span style="font-size:.55rem;font-weight:400;opacity:.5;text-transform:none;letter-spacing:0">натисни щоб розгорнути</span>
-      </div>
-      <div id="modalScaleWrapper" style="display:none">
-        <div class="score-scale" id="modalScaleGrid" style="margin-top:8px"></div>
       </div>
     </div>
 
