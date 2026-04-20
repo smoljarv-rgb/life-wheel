@@ -1177,7 +1177,22 @@ function renderPlan(data){
   document.getElementById('planDate').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
 
   if(!advice.length){
-    const empty='<div style="text-align:center;padding:28px 16px;color:var(--ink3);font-size:16px;line-height:1.7">✏️ AI-план з\'явиться після аналізу сфер.<br><a href="https://koleso.live" style="color:var(--blue)">← Пройти тест і отримати план</a></div>';
+    const isFreeResult=data&&data.analysis&&data.analysis.isFree;
+    const lockedCnt=isFreeResult?11:0;
+    const empty=isFreeResult
+      ?`<div class="upgrade-card" style="margin:0">
+          <div class="upgrade-card-tag">✦ PRO доступ</div>
+          <div class="upgrade-card-title">План дій — у повній версії</div>
+          <div class="upgrade-card-sub">Тут буде 7-денний AI-план для кожної з ${lockedCnt} заблокованих сфер: конкретні завдання, техніки і книги.</div>
+          <div class="upgrade-card-feats">
+            <div class="upgrade-card-feat"><span>✦</span>7-денний план для кожної сфери</div>
+            <div class="upgrade-card-feat"><span>✦</span>Мікро-дії на кожен день</div>
+            <div class="upgrade-card-feat"><span>✦</span>Техніки від психологів</div>
+          </div>
+          <a href="/pricing" class="btn-upgrade">Розблокувати план →</a>
+          <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія</div>
+        </div>`
+      :'<div style="text-align:center;padding:28px 16px;color:var(--ink3);font-size:16px;line-height:1.7">✏️ AI-план з\'явиться після завершення аналізу.</div>';
     document.getElementById('microList').innerHTML=empty;
     document.getElementById('weekGrid').innerHTML='';
     document.getElementById('goalList').innerHTML='';
