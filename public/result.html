@@ -448,6 +448,69 @@ body::after{
   border-radius:4px;padding:14px;
   text-align:center;opacity:.75;
 }
+.sph-blur-wrap{position:relative;overflow:hidden;border-radius:8px;margin-top:6px}
+.sph-blur-inner{filter:blur(4px);pointer-events:none;user-select:none;opacity:.5}
+.sph-lock-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,rgba(253,246,227,0) 0%,rgba(253,246,227,.92) 40%);
+}
+/* UPGRADE CARD між першою і заблокованими сферами */
+.upgrade-card{
+  background:linear-gradient(135deg,var(--paper2) 0%,#fff8ea 100%);
+  border:2px solid var(--gold-d);
+  border-radius:3px 16px 12px 10px;
+  padding:24px 22px;
+  margin:6px 0 4px;
+  text-align:center;
+  box-shadow:4px 6px 0 rgba(184,144,64,.15);
+  position:relative;overflow:hidden;
+}
+.upgrade-card::before{
+  content:'';position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,192,96,.2),transparent 70%);
+}
+.upgrade-card-tag{
+  font-family:'Caveat Brush',cursive;font-size:12px;
+  letter-spacing:.1em;color:var(--gold-d);
+  border:1.5px dashed var(--gold-d);
+  padding:3px 14px;border-radius:100px;
+  display:inline-block;margin-bottom:14px;
+}
+.upgrade-card-title{
+  font-family:'Caveat Brush',cursive;
+  font-size:clamp(20px,5vw,28px);
+  color:var(--ink);line-height:1.2;margin-bottom:10px;
+}
+.upgrade-card-sub{
+  font-size:15px;color:var(--ink2);
+  line-height:1.65;margin-bottom:18px;max-width:440px;margin-left:auto;margin-right:auto;
+}
+.upgrade-card-feats{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:20px;
+}
+.upgrade-card-feat{
+  font-size:13px;color:var(--ink2);
+  background:var(--paper);border:1.5px dashed var(--paper3);
+  border-radius:100px;padding:5px 14px;
+  display:flex;align-items:center;gap:6px;
+}
+.upgrade-card-feat span{color:var(--green)}
+.btn-upgrade{
+  display:inline-block;
+  background:var(--gold);border:2px solid var(--gold-d);
+  border-radius:3px 10px 8px 6px;
+  padding:14px 32px;
+  font-family:'Patrick Hand',cursive;font-size:17px;font-weight:600;
+  color:var(--ink);cursor:pointer;
+  box-shadow:3px 4px 0 rgba(184,144,64,.3);
+  transition:all .2s;text-decoration:none;
+}
+.btn-upgrade:hover{transform:translateY(-2px);box-shadow:4px 6px 0 rgba(184,144,64,.4)}
+.upgrade-count{
+  font-size:13px;color:var(--ink3);margin-top:12px;
+}
 
 /* PLAN */
 .plan-hero{
@@ -1015,18 +1078,46 @@ function renderSpheres(data){
   const botS=sorted[sorted.length-1]||{name:'',score:0,key:''};
   const topS=sorted[0]||{name:'',score:10,key:''};
   const potS=sorted.find(function(s){return s.score>=4&&s.score<7;})||sorted[Math.floor(sorted.length/2)]||{name:'',score:5,key:''};
-  document.getElementById('sphList').innerHTML=sorted.map(s=>{
+  const lockedCount=isFree?sorted.filter(s=>!analysedKeys.includes(s.key)).length:0;
+  const upgradeCard=isFree?`
+    <div class="upgrade-card">
+      <div class="upgrade-card-tag">✦ PRO доступ</div>
+      <div class="upgrade-card-title">Ти бачиш лише 1 із 12 сфер</div>
+      <div class="upgrade-card-sub">Ще ${lockedCount} сфер чекають на аналіз. Розблокуй повну картину — дізнайся де саме ти втрачаєш енергію і що з цим робити.</div>
+      <div class="upgrade-card-feats">
+        <div class="upgrade-card-feat"><span>✦</span>Всі 12 сфер з AI-планом</div>
+        <div class="upgrade-card-feat"><span>✦</span>PDF-звіт</div>
+        <div class="upgrade-card-feat"><span>✦</span>Порівняння з іншими</div>
+        <div class="upgrade-card-feat"><span>✦</span>Трекінг прогресу</div>
+      </div>
+      <a href="/pricing" class="btn-upgrade">Розблокувати всі ${lockedCount} сфер →</a>
+      <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія</div>
+    </div>`:'';
+
+  document.getElementById('sphList').innerHTML=sorted.map((s,idx)=>{
     const isAnalysed=analysedKeys.includes(s.key);
     const showFull=!isFree||isAnalysed;
     const act=ACTIONS[s.key]||{problem:'Потребує уваги',strength:'Є потенціал',why:'Ця сфера впливає на баланс.',action:'Приділи увагу сьогодні',how:'Почни з маленького кроку.',steps:['Визнач проблему','Зроби перший крок']};
     const clr=s.score>=7?'var(--green)':s.score>=4?'var(--orange)':'var(--red)';
     const status=s.score>=7?'Сильна зона ✦':s.score>=4?'Є потенціал':'⚠ Критична';
-    if(!showFull){return `<div class="sph" style="opacity:.7">
-      <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status">Недоступно у безкоштовній версії</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
+
+    // Вставляємо upgrade-card після першої (аналізованої) сфери
+    const insertUpgrade=isFree&&idx===1?upgradeCard:'';
+
+    if(!showFull){return insertUpgrade+`<div class="sph" style="opacity:.85">
+      <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status" style="color:var(--ink3)">🔒 Заблоковано</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
       <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
-      <div class="sph-locked"><div style="font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2);margin-bottom:6px">Детальний аналіз і план — у повній версії</div><a href="https://koleso.live" style="font-family:'Patrick Hand',cursive;font-size:16px;color:var(--blue);font-weight:600">Отримати повний аналіз →</a></div>
+      <div class="sph-blur-wrap">
+        <div class="sph-blur-inner">
+          <div class="sph-cols"><div class="sph-col"><div class="sph-col-t">Сильні сторони</div><div class="sph-item"><span class="sph-mk">✦</span>${act.strength}</div></div><div class="sph-col"><div class="sph-col-t">Проблема</div><div class="sph-item"><span class="sph-mk">—</span>${act.problem}</div></div></div>
+          <div class="sph-why"><strong>💡 Чому важливо:</strong> ${act.why}</div>
+        </div>
+        <div class="sph-lock-overlay">
+          <a href="/pricing" style="font-family:'Patrick Hand',cursive;font-size:14px;font-weight:600;color:var(--gold-d);background:var(--paper);border:1.5px solid var(--gold-d);border-radius:100px;padding:6px 18px;text-decoration:none;box-shadow:2px 3px 0 rgba(184,144,64,.2)">🔓 Розблокувати →</a>
+        </div>
+      </div>
     </div>`;}
-    return `<div class="sph">
+    return insertUpgrade+`<div class="sph">
       <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}<span id="sph-status-${s.key}"></span></div><div class="sph-status">${status}</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
       <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
       <div class="sph-cols">

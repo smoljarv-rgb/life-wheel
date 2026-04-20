@@ -1633,8 +1633,31 @@ function submitEmail(){
 
 
 function showPicker(){
-  // Show pre-analysis modal first (tips + sphere selection)
-  showPreAnalysisModal();
+  // Variant B: no modal — go straight to analysis
+  if(siteConfig.paywall_enabled===false){
+    isPremiumUnlocked=true;
+    SPHERES.forEach(s=>selectedSpheres.add(s.id));
+    runAnalysis();
+    return;
+  }
+  if(isPremiumUnlocked){
+    SPHERES.forEach(s=>selectedSpheres.add(s.id));
+    runAnalysis();
+    return;
+  }
+  if(!freeAnalysisUsed){
+    // Free: auto-pick 1 worst sphere, no modal
+    const allScores=SPHERES.map(s=>({id:s.id,score:parseFloat(avg(s.id).toFixed(1))}));
+    const worst=allScores.sort((a,b)=>a.score-b.score)[0];
+    selectedSpheres=new Set([worst.id]);
+    freeAnalysisUsed=true;
+    try{ localStorage.setItem('lw_free_used','1'); }catch(e){}
+    window._isFreeThisAnalysis=true;
+    isPremiumUnlocked=true;
+    runAnalysis();
+    return;
+  }
+  showPaywall();
 }
 
 function _doShowPicker(){
