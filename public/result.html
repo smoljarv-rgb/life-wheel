@@ -1543,10 +1543,32 @@ function roundRect(ctx, x, y, w, h, r){
 }
 
 function copyLink(){
-  navigator.clipboard.writeText(window.location.href)
-    .then(()=>showToast('✅ Посилання скопійовано!'))
-    .catch(()=>showToast('❌ Не вдалось скопіювати'));
-  // Показуємо email capture
+  var scores = resultData && resultData.scores ? resultData.scores : {};
+  var entries = Object.entries(scores);
+  var avg = entries.length
+    ? (entries.reduce(function(s,e){return s+parseFloat(e[1]);},0)/entries.length).toFixed(1)
+    : '—';
+  var sphereNames = {
+    love:'Любов', family:"Сім'я", friends:'Друзі', career:"Кар'єра",
+    finance:'Фінанси', health:"Здоров'я", selfdev:'Саморозвиток',
+    spirit:'Духовність', rest:'Відпочинок', env:'Середовище',
+    comm:'Комунікація', appear:'Зовнішність'
+  };
+  var worst = entries.sort(function(a,b){return parseFloat(a[1])-parseFloat(b[1]);})[0];
+  var worstName = worst ? (sphereNames[worst[0]]||worst[0]) : '—';
+  var worstScore = worst ? parseFloat(worst[1]).toFixed(1) : '—';
+
+  var text = 'Мій баланс життя: '+avg+'/10 🎡\nНайслабша сфера: '+worstName+' ('+worstScore+'/10)\nПеревір свій → koleso.live';
+  var url = window.location.href;
+
+  if(navigator.share){
+    navigator.share({title:'Моє Колесо Життя', text:text, url:url})
+      .catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text+'\n'+url)
+      .then(function(){showToast('✅ Текст і посилання скопійовано!');})
+      .catch(function(){showToast('❌ Не вдалось скопіювати');});
+  }
   maybeShowEmailCapture();
 }
 
