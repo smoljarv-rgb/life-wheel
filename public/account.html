@@ -3,8 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Мій кабінет — Koleso.live</title>
+<title>Особистий кабінет — Koleso.live</title>
 <meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
+<meta property="og:title" content="Koleso.live — AI-аналіз балансу життя">
+<meta property="og:description" content="AI-аналіз 12 сфер за 5 хвилин. Безкоштовно. Без реєстрації.">
+<meta property="og:image" content="https://koleso.live/og-image.png">
+<meta property="og:url" content="https://koleso.live">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -100,6 +108,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background
         Увійти через Google
       </button>
       <div class="login-divider">або через email</div>
+      <p style="font-size:.85rem;color:#5a7090;text-align:center;margin-bottom:16px;line-height:1.6">Увійди щоб зберегти всі свої результати і відстежувати прогрес балансу щомісяця</p>
       <div id="magicLinkForm">
         <input type="email" class="email-input" id="loginEmail" placeholder="email@example.com" onkeydown="if(event.key==='Enter')sendMagicLink()">
         <button class="btn-email-send" id="magicBtn" onclick="sendMagicLink()">Надіслати посилання для входу</button>
@@ -123,10 +132,11 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background
     </div>
 
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-num" id="statDays">—</div><div class="stat-lbl">днів з нами</div></div>
-      <div class="stat-item"><div class="stat-num" id="statTests">—</div><div class="stat-lbl">тестів</div></div>
-      <div class="stat-item"><div class="stat-num" id="statAvg">—</div><div class="stat-lbl">середній бал</div></div>
+      <div class="stat-item"><div class="stat-num" id="statDays">0</div><div class="stat-lbl">днів з нами</div></div>
+      <div class="stat-item"><div class="stat-num" id="statTests">0</div><div class="stat-lbl">тестів</div></div>
+      <div class="stat-item"><div class="stat-num" id="statAvg">0</div><div class="stat-lbl">середній бал</div></div>
     </div>
+    <div id="statsHint" style="font-size:.72rem;color:#8aabcc;text-align:center;margin-top:8px;display:none">Пройди перший тест щоб побачити статистику</div>
 
     <div class="section-label">Підписка</div>
     <div class="sub-card" id="subCard">
@@ -145,7 +155,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background
     <div class="section-label">Мої звіти</div>
     <div id="reportsList">
       <div class="no-reports">
-        Еще немає збережених звітів.<br>
+        Ще немає збережених звітів.<br>
         <a href="/">Пройди колесо →</a> і отримай перший звіт.
       </div>
     </div>
@@ -372,7 +382,15 @@ async function loadReports(){
 
     document.getElementById('reportsList').innerHTML = html;
   } else {
-    statAvg.textContent = '—';
+    statAvg.textContent = '0';
+  }
+  // Show hint when all three metrics are 0
+  var hint = document.getElementById('statsHint');
+  if (hint) {
+    var d = document.getElementById('statDays').textContent;
+    var t = statTests.textContent;
+    var a = statAvg.textContent;
+    hint.style.display = (d==='0' && t==='0' && a==='0') ? 'block' : 'none';
   }
 }
 
