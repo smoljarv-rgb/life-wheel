@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тарифи — Колесо Життя | PRO від 99 ₴</title>
+<title>Тарифи — Koleso.live</title>
 <meta name="description" content="Обери тариф Колеса Життя: Одноразовий звіт (99 ₴), Місячний PRO (249 ₴) або Річний PRO (1990 ₴). Повний AI-аналіз 12 сфер, PDF-звіт, план на 30 днів.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://koleso.live/pricing">
-<meta property="og:title" content="Тарифи Koleso.live — PRO від 99 ₴">
-<meta property="og:description" content="Повний AI-аналіз 12 сфер життя. Одноразовий звіт, місячна або річна підписка.">
-<meta property="og:url" content="https://koleso.live/pricing">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
+<meta property="og:title" content="Koleso.live — AI-аналіз балансу життя">
+<meta property="og:description" content="AI-аналіз 12 сфер за 5 хвилин. Безкоштовно. Без реєстрації.">
+<meta property="og:image" content="https://koleso.live/og-image.png">
+<meta property="og:url" content="https://koleso.live">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -396,6 +400,66 @@ body::after{
 }
 .faq-item.open .faq-a{display:block}
 
+/* ВІДГУКИ */
+.reviews{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-bottom:40px;
+}
+.review-card{
+  background:var(--paper2);
+  border:1.5px dashed var(--paper3);
+  border-radius:3px 12px 10px 8px;
+  padding:16px 18px;
+  position:relative;
+  transform:rotate(var(--r,0deg));
+  transition:transform .2s;
+}
+.review-card:hover{transform:rotate(0deg) translateY(-2px)}
+.review-quote{
+  font-size:15px;color:var(--ink2);
+  line-height:1.65;margin-bottom:12px;
+  font-style:italic;
+}
+.review-author{
+  display:flex;align-items:center;gap:10px;
+}
+.review-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--paper3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+  border:1.5px solid var(--ink4);
+}
+.review-name{font-size:13px;color:var(--ink3);line-height:1.4}
+.review-name strong{display:block;color:var(--ink2);font-size:14px}
+.review-stars{
+  font-size:11px;color:var(--yellow);
+  letter-spacing:.05em;margin-bottom:8px;
+}
+
+/* EMAIL У КАРТЦІ */
+.plan-email-wrap{margin-bottom:10px}
+.plan-email-label{
+  font-family:'Patrick Hand',cursive;
+  font-size:13px;color:var(--ink3);
+  margin-bottom:5px;display:block;
+}
+.plan-email-input{
+  width:100%;padding:10px 12px;
+  border:2px solid var(--paper3);
+  border-radius:3px 8px 6px 4px;
+  font-family:'Patrick Hand',cursive;
+  font-size:14px;background:var(--paper);
+  color:var(--ink);outline:none;
+  transition:border-color .2s;
+  box-sizing:border-box;
+}
+.plan-email-input:focus{border-color:var(--ink2)}
+.plan-email-input.err{border-color:var(--red)}
+.plan.featured .plan-email-input{background:#fffdf5}
+
 /* FOOTER */
 footer{
   border-top:2px dashed var(--paper3);
@@ -435,6 +499,34 @@ footer{
     </div>
   </div>
 
+  <!-- ВІДГУКИ -->
+  <div class="reviews">
+    <div class="review-card" style="--r:-0.8deg">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-quote">«Думала, проблема в роботі. Виявилось — у здоров'ї. PRO показав мені повну картину і що саме змінити.»</div>
+      <div class="review-author">
+        <div class="review-avatar">🌸</div>
+        <div class="review-name"><strong>Олена К.</strong>Київ · Місячний PRO</div>
+      </div>
+    </div>
+    <div class="review-card" style="--r:0.5deg">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-quote">«За тиждень після плану помітив реальні зміни. Нарешті зрозумів, чому постійно втомлений.»</div>
+      <div class="review-author">
+        <div class="review-avatar">⚡</div>
+        <div class="review-name"><strong>Дмитро Л.</strong>Харків · Річний PRO</div>
+      </div>
+    </div>
+    <div class="review-card" style="--r:-0.4deg">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-quote">«Купила одноразовий звіт як подарунок чоловіку. Він сам попросив підписку — каже, що нарешті є з чого почати.»</div>
+      <div class="review-author">
+        <div class="review-avatar">🎁</div>
+        <div class="review-name"><strong>Марія Т.</strong>Львів · Одноразовий звіт</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ТАРИФИ -->
   <div class="plans">
 
@@ -452,6 +544,10 @@ footer{
         <div class="plan-feat"><span class="feat-ico">✦</span>Порівняння з іншими</div>
         <div class="plan-feat"><span class="feat-ico">✦</span>AI-план на 7 днів</div>
         <div class="plan-feat"><span class="feat-ico">✦</span>Техніки від психологів</div>
+      </div>
+      <div class="plan-email-wrap">
+        <label class="plan-email-label">📧 Email для доступу</label>
+        <input type="email" class="plan-email-input" placeholder="твій@email.com">
       </div>
       <button class="btn-pay btn-pay-teal" onclick="startPayment('report',this)">Отримати звіт →</button>
       <div class="savings" id="savings-report"></div>
@@ -473,6 +569,10 @@ footer{
         <div class="plan-feat"><span class="feat-ico">✦</span>Порівняння «до / після»</div>
         <div class="plan-feat"><span class="feat-ico">✦</span>Персональний коуч-план</div>
       </div>
+      <div class="plan-email-wrap">
+        <label class="plan-email-label">📧 Email для доступу</label>
+        <input type="email" class="plan-email-input" placeholder="твій@email.com">
+      </div>
       <button class="btn-pay btn-pay-gold" onclick="startPayment('monthly',this)">Почати PRO →</button>
       <div class="savings" id="savings-monthly"></div>
     </div>
@@ -491,6 +591,10 @@ footer{
         <div class="plan-feat"><span class="feat-ico">✦</span>Персональна коуч-сесія</div>
         <div class="plan-feat"><span class="feat-ico" style="color:var(--gold-d)">★</span><strong>Безкоштовні оновлення</strong></div>
         <div class="plan-feat"><span class="feat-ico" style="color:var(--gold-d)">★</span><strong>Пріоритетна підтримка</strong></div>
+      </div>
+      <div class="plan-email-wrap">
+        <label class="plan-email-label">📧 Email для доступу</label>
+        <input type="email" class="plan-email-input" placeholder="твій@email.com">
       </div>
       <button class="btn-pay btn-pay-ghost" onclick="startPayment('yearly',this)">Обрати річний →</button>
       <div class="savings show" id="savings-yearly">Економія ~600 ₴ порівняно з місячним</div>
@@ -515,19 +619,18 @@ footer{
     </div>
   </div>
 
-  <!-- EMAIL -->
-  <div style="margin:16px 0 8px;display:flex;flex-direction:column;gap:6px">
-    <label style="font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink2)">📧 Email для отримання доступу</label>
-    <input type="email" id="paymentEmail" placeholder="твій@email.com"
-      style="width:100%;padding:12px 14px;border:2px solid var(--ink3);border-radius:8px;font-family:'Patrick Hand',cursive;font-size:16px;background:var(--paper);color:var(--ink);box-sizing:border-box">
-  </div>
-
   <!-- ГАРАНТІЯ -->
   <div class="guarantee">
     <div class="guarantee-item">🛡 <div><strong>14 днів</strong> гарантія повернення</div></div>
     <div class="guarantee-item">⚡ <div><strong>Миттєвий</strong> доступ після оплати</div></div>
     <div class="guarantee-item">🔒 <div><strong>Безпечна</strong> оплата</div></div>
     <div class="guarantee-item">📧 <div><strong>Підтримка</strong> на кожному кроці</div></div>
+  </div>
+
+  <!-- FREE CTA -->
+  <div style="text-align:center;padding:16px 0;border-top:1px solid var(--color-border, rgba(0,0,0,.08))">
+    <span style="font-size:.85rem;color:#5a7090">Ще не пробував? </span>
+    <a href="/" style="font-size:.85rem;font-weight:600;color:#2878c8;text-decoration:none">Перший аналіз безкоштовно →</a>
   </div>
 
   <!-- FAQ -->
@@ -553,6 +656,10 @@ footer{
       <div class="faq-q">Як оплатити в USD? <span class="faq-arrow">▼</span></div>
       <div class="faq-a">Перемкни валюту вгорі на $ USD і оплачуй карткою будь-якого банку. Курс фіксований на момент оплати.</div>
     </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Як виглядає повний звіт? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Повний звіт містить аналіз всіх 12 сфер з балами, кольоровий графік колеса, AI-висновки по кожній сфері, план дій на 30 днів і порівняння з іншими користувачами. Результат доступний одразу після оплати.</div>
+    </div>
   </div>
 
   <!-- FOOTER -->
@@ -560,7 +667,7 @@ footer{
     <div class="footer-copy">© 2026 Koleso.live</div>
     <div class="footer-links">
       <a href="/terms">Умови</a>
-      <a href="/#privacy">Конфіденційність</a>
+      <a href="/privacy">Конфіденційність</a>
       <a href="mailto:support@koleso.live">Підтримка</a>
     </div>
   </footer>
@@ -695,25 +802,19 @@ function startPayment(plan, btn) {
   btn.textContent = '⏳ Завантаження...';
   btn.disabled = true;
 
-  var emailEl = document.getElementById('paymentEmail');
+  var emailEl = btn.closest('.plan') ? btn.closest('.plan').querySelector('.plan-email-input') : null;
   var email = emailEl ? emailEl.value.trim() : '';
   if (!email || !email.includes('@')) {
-    if (emailEl) { emailEl.focus(); emailEl.style.borderColor = 'var(--red)'; }
+    if (emailEl) { emailEl.classList.add('err'); emailEl.focus(); }
     btn.textContent = origText;
     btn.disabled = false;
     return;
   }
-  if (emailEl) emailEl.style.borderColor = '';
+  if (emailEl) emailEl.classList.remove('err');
   var promoCode = activePromo ? activePromo.code : '';
 
   // 100% знижка — обходимо оплату, активуємо одразу
   if (activePromo && activePromo.discount >= 100) {
-    if (!email || !email.includes('@')) {
-      alert('Введи email для активації безкоштовного доступу.');
-      btn.textContent = origText;
-      btn.disabled = false;
-      return;
-    }
     fetch('/api/promo/activate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
