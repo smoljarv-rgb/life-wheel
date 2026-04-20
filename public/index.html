@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Колесо Життя — AI-коуч для особистісного зростання</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='18' fill='%230e0e1a'/%3E%3Cellipse cx='40' cy='14' rx='7' ry='12' fill='%23c4a882' opacity='.35' transform='rotate(0 40 40)'/%3E%3Cellipse cx='40' cy='14' rx='7' ry='12' fill='%23c4a882' opacity='.35' transform='rotate(30 40 40)'/%3E%3Cellipse cx='40' cy='14' rx='7' ry='12' fill='%23c4a882' opacity='.35' transform='rotate(60 40 40)'/%3E%3Cellipse cx='40' cy='14' rx='7' ry='12' fill='%23c4a882' opacity='.35' transform='rotate(90 40 40)'/%3E%3Cellipse cx='40' cy='14' rx='7' ry='12' fill='%23c4a882' opacity='.35' transform='rotate(120 40 40)'/%3E%3Cellipse cx='40' cy='14' rx='7' ry='12' fill='%23c4a882' opacity='.35' transform='rotate(150 40 40)'/%3E%3Ccircle cx='40' cy='40' r='5.5' fill='%23c4a882'/%3E%3Ccircle cx='40' cy='40' r='2.2' fill='%230e0e1a'/%3E%3C/svg%3E">
+<title>Koleso.live — AI-аналіз балансу 12 сфер за 5 хвилин</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
 <!-- SEO Primary -->
 <meta name="description" content="Безкоштовний AI-коуч для балансу 12 сфер життя. Оціни кар'єру, здоров'я, стосунки та інші сфери — отримай персональний план зростання за 5 хвилин. Без реєстрації.">
 <meta name="keywords" content="колесо життя, баланс життя, особистісне зростання, AI коуч, самооцінка, план розвитку, 12 сфер, психологія, коучинг онлайн">
@@ -15,8 +16,8 @@
 <!-- Open Graph (Facebook, Telegram, Viber) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Koleso.live">
-<meta property="og:title" content="Колесо Життя — AI-коуч для балансу 12 сфер">
-<meta property="og:description" content="Оціни 12 сфер свого життя і отримай персональний план зростання від AI. Безкоштовно, без реєстрації, за 5 хвилин.">
+<meta property="og:title" content="Koleso.live — AI-аналіз балансу життя">
+<meta property="og:description" content="Дізнайся де ти втрачаєш енергію. AI-аналіз 12 сфер за 5 хвилин. Безкоштовно. Без реєстрації.">
 <meta property="og:image" content="https://koleso.live/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -329,6 +330,7 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
 ══════════════════════════════════════ */
 .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(10,20,40,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .modal{background:rgba(240,250,255,.97);border:1.5px solid rgba(200,230,255,.9);border-radius:20px;box-shadow:0 20px 60px rgba(20,60,140,.25);max-width:620px;width:100%;max-height:90vh;overflow-y:auto;padding:36px 40px}
 body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);border-color:rgba(60,100,150,.5)}
 .modal h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--td);margin-bottom:4px;transition:color 3s}
@@ -496,6 +498,14 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   #analysisContent > div{padding:20px 14px!important}
   #heroSection{padding:52px 16px 32px}
   #heroSection h1{font-size:1.4rem}
+
+  /* ── Sliders mobile ── */
+  input[type=range].srange{height:10px}
+  input[type=range].srange::-webkit-slider-thumb{width:32px;height:32px;border-width:3px}
+  input[type=range].srange::-moz-range-thumb{width:32px;height:32px;border-width:3px;border-radius:50%;background:white;cursor:pointer}
+
+  /* ── Sub-item padding mobile ── */
+  .sub-item{padding:14px 12px}
 }
 
 /* ── VERY SMALL ── */
@@ -511,6 +521,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     display:none
   }
   #mobileCta.visible{display:block}
+  .right-col{padding-bottom:80px}
   #mobileCta button{
     width:100%;padding:15px;border:none;border-radius:14px;
     font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;
@@ -519,6 +530,10 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     box-shadow:0 8px 24px var(--sh);transition:all .3s
   }
 }
+
+/* ── SAVED TOAST ── */
+.sphere-saved-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ac);color:white;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;padding:8px 18px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:500;white-space:nowrap}
+.sphere-saved-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body class="mood-partly">
@@ -553,8 +568,14 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     <p style="font-size:clamp(.8rem,2.2vw,.92rem);color:var(--tm);margin:0;line-height:1.6;transition:color 3s">
       AI-аналіз 12 сфер за 5 хвилин · Безкоштовно · Без реєстрації
     </p>
-    <div style="font-size:.72rem;color:var(--td);background:var(--sf2);border:1.5px solid var(--sb);border-radius:20px;padding:5px 16px;font-weight:600;transition:all 3s">
-      ✦ Вже 1 200+ аналізів · Середній результат 5.4/10
+    <div id="heroSocialProof" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
+      <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--sb);border-radius:20px;padding:4px 12px;font-size:.68rem;color:var(--tl);transition:all 3s">
+        <span style="width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+        <span id="heroCounterText">1 200+ аналізів</span>
+      </span>
+      <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--sb);border-radius:20px;padding:4px 12px;font-size:.68rem;color:var(--tl);transition:all 3s">
+        ★ Середній результат 5.4/10
+      </span>
     </div>
     <button class="btn-start" onclick="document.getElementById('modalOverlay').style.display='';document.getElementById('modalOverlay').style.pointerEvents=''" style="margin-top:4px;max-width:320px">
       ✦ Почати безкоштовно
@@ -649,7 +670,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   <div class="center-col">
     <div class="wheel-card glass">
       <canvas id="wheel" width="480" height="480"></canvas>
-      <div style="text-align:center;margin-top:6px"><div class="wheel-hint">👆 Клікни на сферу · Пересув повзунок для оцінки</div></div>
+      <div style="text-align:center;margin-top:6px"><div class="wheel-hint">👆 Клікни на сферу · Пересувай повзунок для оцінки</div></div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
     <!-- Блок повного звіту — з'являється після аналізу -->
@@ -687,7 +708,7 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
     <div class="glass" style="padding:14px 16px;flex:1">
       <div class="panel-title">План зростання</div>
       <div class="btn-row no-print">
-        <button class="btn-advice" id="btnAdv" onclick="showPicker()">✦ Отримати план до балансу</button>
+        <button class="btn-advice" id="btnAdv" onclick="showPicker()">✦ Запустити AI-аналіз</button>
 
       </div>
       <div id="spherePicker" style="display:none"></div>
@@ -877,6 +898,8 @@ function loadUserCounter(){
       const count = data.totalAssessments || data.total || 0;
       if(count > 0){
         el.textContent = count + ' людей вже оцінили своє колесо';
+        const heroEl = document.getElementById('heroCounterText');
+        if(heroEl) heroEl.textContent = count + '+ аналізів';
       } else {
         el.textContent = 'Перший безкоштовно · Без реєстрації';
       }
@@ -954,7 +977,7 @@ function buildNav(){
     btn.innerHTML=`<div class="s-pip" style="background:${s.color};box-shadow:0 0 5px ${s.color}88"></div>
       <div class="s-info">
         <span class="s-name"><span>${s.name}</span><span class="badge ${bc}">${badge}</span></span>
-        <span class="s-avg">${a.toFixed(1)} / 10 · ${sDesc(a).label}</span>
+        <span class="s-avg">${a.toFixed(1)} / 10 · ${sDesc(a).label}${a!==5?'<span style="color:#20a060;font-size:.7rem;margin-left:4px">✓</span>':''}</span>
       </div>
       <div class="s-bar-wrap"><div class="s-bar-fill" style="width:${a*10}%;background:${s.color}"></div></div>`;
     btn.onclick=()=>{
@@ -986,6 +1009,19 @@ function buildNav(){
 
   // Оновлюємо мобільний дропдаун
   buildMobileDropdown();
+
+  // Показуємо sticky CTA коли >= 3 сфери оцінені
+  const rated = SPHERES.filter(s => s.sub.some(sub => state[s.id][sub.k] !== 5)).length;
+  const cta = document.getElementById('mobileCta');
+  if (cta && rated >= 3) cta.classList.add('visible');
+}
+
+function showSavedToast(){
+  const t=document.getElementById('sphereSavedToast');
+  if(!t)return;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'),1200);
 }
 
 /* ── DETAIL ── */
@@ -1006,7 +1042,7 @@ function buildDetail(){
   <div style="margin:6px 0 8px;padding:9px 13px;background:linear-gradient(135deg,rgba(40,120,200,.12),rgba(40,120,200,.06));border:1.5px solid rgba(40,120,200,.25);border-radius:10px;display:flex;align-items:center;gap:8px;transition:all 3s">
     <span style="font-size:1.2rem">👆</span>
     <div>
-      <div style="font-size:.78rem;font-weight:700;color:var(--ac);transition:color 3s">Пересув повзунок для оцінки</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--ac);transition:color 3s">Пересувай повзунок для оцінки</div>
       <div style="font-size:.65rem;color:var(--tm);margin-top:1px;transition:color 3s">1 = дуже погано · 5 = середньо · 10 = ідеально</div>
     </div>
   </div>
@@ -1038,6 +1074,7 @@ function buildDetail(){
       box.querySelector('.det-score').textContent=newA.toFixed(1);
       box.querySelector('.det-score').nextElementSibling&&(box.querySelector('.det-score').parentElement.previousElementSibling.lastElementChild.textContent=`${sDesc(newA).label} — ${sDesc(newA).desc.substring(0,62)}…`);
       buildNav();updateResults();drawWheel();
+      showSavedToast();
     });
   });
 
@@ -1049,7 +1086,7 @@ function buildDetail(){
   const _fa = !freeAnalysisUsed && (siteConfig.paywall_enabled!==false);
   const _b = document.createElement('button');
   _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:Nunito,sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
-  _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Отримати план до балансу';
+  _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Запустити AI-аналіз';
   _b.onclick = showPicker;
   _b.onmouseover = function(){this.style.transform='translateY(-2px)';};
   _b.onmouseout = function(){this.style.transform='';};
@@ -1606,14 +1643,20 @@ function _doShowPicker(){
   const btn=document.getElementById('btnAdv');
   const data=SPHERES.map(s=>({id:s.id,name:s.name,color:s.color,score:parseFloat(avg(s.id).toFixed(2))}));
   const sorted=[...data].sort((a,b)=>a.score-b.score);
-  if(selectedSpheres.size===0) sorted.slice(0,3).forEach(s=>selectedSpheres.add(s.id));
+  if(selectedSpheres.size===0){
+    if(isPremiumUnlocked) sorted.forEach(s=>selectedSpheres.add(s.id));
+    else sorted.slice(0,3).forEach(s=>selectedSpheres.add(s.id));
+  }
 
   function renderPicker(){
     const sel=selectedSpheres.size;
     picker.innerHTML=`<div class="picker-wrap">
       <div class="picker-title">🎯 Які сфери аналізувати?</div>
       <div class="picker-sub">
-        Автоматично обрано <strong>3 найкритичніші</strong> · або оберіть самостійно (обрано: <strong>${sel}</strong>)
+        ${isPremiumUnlocked
+          ? 'PRO: автоматично обрано <strong>всі 12 сфер</strong> · або оберіть вибірково (обрано: <strong>'+sel+'</strong>)'
+          : 'Автоматично обрано <strong>3 найкритичніші</strong> · або оберіть самостійно (обрано: <strong>'+sel+'</strong>)'
+        }
       </div>
       <div class="picker-chips">
         ${sorted.map(s=>{
@@ -1706,7 +1749,7 @@ function showPreAnalysisModal(){
       <!-- Sphere picker inside modal -->
       <div style="font-size:.72rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;transition:color 3s">🎯 Оберіть сфери для аналізу</div>
       <div id="modalPickerChips" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px"></div>
-      <div style="font-size:.63rem;color:var(--tl);margin-bottom:14px;transition:color 3s">💡 Рекомендуємо 1–3 сфери за раз для глибокого аналізу</div>
+      <div style="font-size:.63rem;color:var(--tl);margin-bottom:14px;transition:color 3s">${isPremiumUnlocked ? '✦ PRO: всі 12 сфер обрано автоматично — можна змінити вибір' : '💡 Рекомендуємо 1–3 сфери за раз для глибокого аналізу'}</div>
 
       <!-- Action buttons — injected by JS after modal appended -->
       <div id="modalActionArea" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -1784,8 +1827,11 @@ function _renderModalChips(){
   const data=SPHERES.map(s=>({id:s.id,name:s.name,color:s.color,score:parseFloat(avg(s.id).toFixed(1))}));
   const sorted=[...data].sort((a,b)=>a.score-b.score);
 
-  // Auto-select 3 worst if nothing selected
-  if(selectedSpheres.size===0) sorted.slice(0,3).forEach(s=>selectedSpheres.add(s.id));
+  // Auto-select all 12 for PRO, 3 worst for free
+  if(selectedSpheres.size===0){
+    if(isPremiumUnlocked) sorted.forEach(s=>selectedSpheres.add(s.id));
+    else sorted.slice(0,3).forEach(s=>selectedSpheres.add(s.id));
+  }
 
   container.innerHTML=sorted.map(s=>{
     const isSel=selectedSpheres.has(s.id);
@@ -2331,6 +2377,8 @@ function renderAdvice(parsed){
 			// Зберігаємо slug глобально
 			window._lastResultSlug = saved.slug;
 			window._lastResultUrl = '/result/' + saved.slug;
+			const _ec = document.getElementById('emailCapture');
+			if (_ec) _ec.style.display = 'block';
 			// Завжди переходимо на result сторінку
 			var analyzing = !window._analysisComplete ? '?analyzing=1' : '';
 			window.location.href = '/result/' + saved.slug + analyzing;
@@ -3150,14 +3198,14 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
   const cta = document.getElementById('mobileCta');
   const btn = document.getElementById('mobileCtaBtn');
   if(!cta || !btn) return;
-  cta.classList.add('visible');
+  // Visibility controlled by buildNav() based on rated spheres count
   // Update label and color
   function updateMobileBtn(){
     if(!freeAnalysisUsed && siteConfig.paywall_enabled!==false){
       btn.textContent = '🆓 Спробувати безкоштовно';
       btn.style.cssText = 'background:linear-gradient(135deg,#207040,#158030);color:#fff';
     } else {
-      btn.textContent = '✦ Отримати план до балансу';
+      btn.textContent = '✦ Запустити AI-аналіз';
       btn.style.cssText = 'background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff';
     }
   }
@@ -3218,7 +3266,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
       <div>
         <div style="font-size:.62rem;font-weight:700;color:var(--td);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;transition:color 3s">Сервіс</div>
         <a href="/pricing" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">💎 Тарифи PRO</a>
-        <a href="javascript:void(0)" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">🌀 Колесо Життя</a>
+        <a href="/" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">🌀 Колесо Життя</a>
         <a href="/result" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">📊 Мій звіт</a>
       </div>
 
@@ -3234,7 +3282,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
       <div>
         <div style="font-size:.62rem;font-weight:700;color:var(--td);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;transition:color 3s">Правові</div>
         <a href="/terms" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">📄 Публічна оферта</a>
-        <a href="javascript:void(0)" onclick="document.getElementById('privacyModal').style.display='flex'" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">🔒 Конфіденційність</a>
+        <a href="/privacy" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">🔒 Конфіденційність</a>
         <a href="/terms#returns" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">🛡 Повернення коштів</a>
       </div>
 
@@ -3290,3 +3338,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
     <div class="modal-section">
       <h3>🔒 Ваші права</h3>
       <p>Ви можете в будь-який момент: відмовитись від cookies, запросити видалення ваших даних, написавши нам на email. Ми дотримуємось вимог GDPR.</p>
+  </div>
+</div>
+
+<div class="sphere-saved-toast" id="sphereSavedToast">✓ Збережено</div>

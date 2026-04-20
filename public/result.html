@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Твій звіт — Колесо Життя</title>
+<title>Твій результат — Koleso.live</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
+<meta property="og:title" content="Мій результат — Koleso.live">
+<meta property="og:description" content="Переглянь мій AI-аналіз балансу 12 сфер. Дізнайся свій баланс безкоштовно.">
+<meta property="og:image" content="https://koleso.live/og-image.png">
+<meta property="og:url" content="https://koleso.live">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -888,7 +896,7 @@ async function loadResult(){
   if(!currentSlug||currentSlug==='result'){
     const last=localStorage.getItem('lw_last_result');
     if(last){const c=loadFromStorage(last);if(c){renderResult(c);return;}}
-    showErr();return;
+    window.location.href='/?msg=no_result';return;
   }
   const cached=loadFromStorage(currentSlug);
   if(cached){renderResult(cached);return;}
@@ -1643,10 +1651,19 @@ loadResult().then(function(){
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
     var b = document.createElement('div');
     b.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--green);color:#fff;font-family:Patrick Hand,cursive;font-size:17px;padding:14px 28px;border-radius:3px 12px 10px 8px;box-shadow:4px 4px 0 rgba(0,0,0,.15);text-align:center;max-width:90vw';
-    b.textContent = '🎉 Оплата успішна! PRO доступ активовано.';
+    b.textContent = '🎉 Оплата успішна! Запускаємо повний аналіз всіх 12 сфер...';
     document.body.appendChild(b);
-    setTimeout(function(){ b.style.transition='opacity .5s'; b.style.opacity='0'; setTimeout(function(){ b.remove(); },500); },5000);
+    setTimeout(function(){ b.style.transition='opacity .5s'; b.style.opacity='0'; setTimeout(function(){ b.remove(); },500); },6000);
     history.replaceState({}, '', window.location.pathname);
+
+    // Якщо результат був безкоштовним — розблокувати всі 12 і перезапустити аналіз
+    if(resultData && resultData.analysis && resultData.analysis.isFree){
+      resultData.analysis.isFree = false;
+      resultData.analysis.analysedKeys = [];
+      renderSpheres(resultData);
+      var slug = window.location.pathname.split('/').pop();
+      if(slug) setTimeout(function(){ startStreamingAnalysis(slug); }, 800);
+    }
   }
   // Запускаємо SSE якщо ?analyzing=1
   if(new URLSearchParams(window.location.search).get('analyzing') === '1') {
