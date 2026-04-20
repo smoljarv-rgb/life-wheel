@@ -222,6 +222,20 @@ app.use(function(req, res, next) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/blog', function(req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'blog.html'));
+});
+
+app.get('/blog/:slug', function(req, res) {
+  const slug = req.params.slug.replace(/[^a-z0-9-]/g, '');
+  const filePath = path.join(__dirname, 'public', 'blog', slug + '.html');
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.redirect('/blog');
+  }
+});
+
 app.get('/favicon.svg', function(req, res) {
   res.setHeader('Content-Type', 'image/svg+xml');
   res.send('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#0e0e1a"/><ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity=".4" transform="rotate(0 40 40)"/><ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity=".4" transform="rotate(60 40 40)"/><ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity=".4" transform="rotate(120 40 40)"/><circle cx="40" cy="40" r="6" fill="#c4a882"/><circle cx="40" cy="40" r="2.5" fill="#0e0e1a"/></svg>');

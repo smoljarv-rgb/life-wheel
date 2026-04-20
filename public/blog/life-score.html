@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Score: що означає твій бал і як його підняти — Koleso.live</title>
+<meta name="description" content="Середній Life Score 3400+ користувачів — 5.4/10. Що це означає, які сфери просідають найчастіше і як підняти свій бал.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://koleso.live/blog/life-score">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:title" content="Life Score: що означає твій бал і як його підняти">
+<meta property="og:description" content="Дані 3 400+ користувачів. Які сфери просідають найчастіше і що з цим робити.">
+<meta property="og:image" content="https://koleso.live/og-image.png">
+<meta property="og:url" content="https://koleso.live/blog/life-score">
+<meta property="og:type" content="article">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdf6e3;--paper2:#f5ead0;--paper3:#ede0c4;
+  --ink:#2c1810;--ink2:#4a3728;--ink3:#7a6050;--ink4:rgba(44,24,16,.08);
+  --yellow:#f39c12;--gold:#e8c060;--gold-d:#b89040;
+  --green:#27ae60;--red:#c0392b;--orange:#d35400;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Patrick Hand',cursive;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(180,160,120,.12) 28px),repeating-linear-gradient(90deg,transparent,transparent 99%,rgba(180,160,120,.06) 100%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background:var(--paper3);clip-path:polygon(0 0,2% 100%,4% 20%,6% 80%,8% 10%,10% 90%,12% 30%,14% 70%,16% 15%,18% 85%,20% 40%,22% 60%,24% 20%,26% 80%,28% 10%,30% 90%,32% 35%,34% 65%,36% 15%,38% 85%,40% 45%,42% 55%,44% 25%,46% 75%,48% 10%,50% 90%,52% 30%,54% 70%,56% 20%,58% 80%,60% 40%,62% 60%,64% 15%,66% 85%,68% 35%,70% 65%,72% 10%,74% 90%,76% 45%,78% 55%,80% 20%,82% 80%,84% 30%,86% 70%,88% 15%,90% 85%,92% 40%,94% 60%,96% 25%,98% 75%,100% 0);pointer-events:none;z-index:1}
+.wrap{max-width:720px;margin:0 auto;padding:40px 24px 80px;position:relative;z-index:1}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0 32px;border-bottom:2px dashed var(--paper3);margin-bottom:40px}
+.nav-logo{font-family:'Caveat Brush',cursive;font-size:22px;color:var(--ink);text-decoration:none}
+.nav-back{font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink3);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+.nav-back:hover{color:var(--ink)}
+.article-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.article-tag{font-family:'Caveat Brush',cursive;font-size:11px;letter-spacing:.08em;color:var(--ink3);border:1.5px dashed var(--paper3);padding:2px 10px;border-radius:100px}
+.article-date{font-size:13px;color:var(--ink3)}
+.article-read-time{font-size:13px;color:var(--ink3)}
+h1.article-title{font-family:'Caveat Brush',cursive;font-size:clamp(28px,6vw,42px);color:var(--ink);line-height:1.2;margin-bottom:20px;position:relative;display:inline-block}
+h1.article-title::after{content:'';position:absolute;bottom:2px;left:-4px;right:-4px;height:8px;background:var(--yellow);opacity:.5;z-index:-1;transform:rotate(-0.3deg);border-radius:2px}
+.article-lead{font-size:18px;color:var(--ink2);line-height:1.7;margin-bottom:36px;padding-bottom:28px;border-bottom:2px dashed var(--paper3)}
+.article-body{font-size:16px;color:var(--ink2);line-height:1.8}
+.article-body h2{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin:36px 0 14px}
+.article-body p{margin-bottom:18px}
+.article-body ul{margin:0 0 18px 20px}
+.article-body ul li{margin-bottom:8px}
+.article-body strong{color:var(--ink);font-weight:700}
+.article-body .callout{background:var(--paper2);border-left:4px solid var(--gold-d);padding:16px 20px;border-radius:0 8px 8px 0;margin:28px 0;font-size:15px;color:var(--ink2)}
+.article-body .callout strong{display:block;margin-bottom:6px;font-family:'Caveat Brush',cursive;font-size:17px}
+/* Score bars */
+.score-table{margin:24px 0;display:flex;flex-direction:column;gap:10px}
+.score-row{display:flex;align-items:center;gap:12px}
+.score-label{font-size:14px;color:var(--ink2);width:200px;flex-shrink:0}
+.score-bar-wrap{flex:1;background:var(--paper3);border-radius:100px;height:12px;overflow:hidden}
+.score-bar{height:100%;border-radius:100px;transition:width .4s}
+.score-num{font-size:14px;color:var(--ink2);font-weight:700;width:36px;text-align:right;flex-shrink:0}
+@media(max-width:480px){.score-label{width:130px;font-size:13px}}
+.cta-block{background:var(--paper2);border:2px dashed var(--paper3);border-radius:12px;padding:36px 28px;text-align:center;margin:48px 0 40px}
+.cta-block-title{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin-bottom:12px}
+.cta-block-sub{font-size:15px;color:var(--ink2);margin-bottom:24px;line-height:1.6}
+.btn-cta{display:inline-block;font-family:'Patrick Hand',cursive;font-size:16px;font-weight:600;padding:14px 32px;background:var(--ink);color:var(--paper);border-radius:100px;text-decoration:none;transition:transform .15s,box-shadow .15s;box-shadow:3px 4px 0 rgba(44,24,16,.2)}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:4px 6px 0 rgba(44,24,16,.25)}
+.btn-cta-ghost{display:inline-block;font-family:'Patrick Hand',cursive;font-size:15px;padding:10px 24px;border:2px solid var(--paper3);color:var(--ink3);border-radius:100px;text-decoration:none;transition:color .2s,border-color .2s;margin-top:12px}
+.btn-cta-ghost:hover{color:var(--ink);border-color:var(--ink3)}
+footer{border-top:2px dashed var(--paper3);padding:24px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:13px;color:var(--ink3)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:13px;color:var(--ink3);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a href="/" class="nav-logo">🎡 Koleso.live</a>
+    <a href="/blog" class="nav-back">← Блог</a>
+  </nav>
+
+  <article>
+    <div class="article-meta">
+      <span class="article-tag">Самоаналіз</span>
+      <span class="article-date">12 квітня 2026</span>
+      <span class="article-read-time">· 4 хв читання</span>
+    </div>
+
+    <h1 class="article-title">Life Score: що означає твій бал і як його підняти</h1>
+
+    <p class="article-lead">Ми проаналізували результати 3 400+ тестів і побачили цікаве: середній бал по всіх сферах — 5.4/10. Більшість людей живуть приблизно на половину своїх можливостей. І вони навіть не знають де саме губиться решта.</p>
+
+    <div class="article-body">
+
+      <h2>Що таке Life Score?</h2>
+      <p>Life Score — це середнє значення оцінок по всіх 12 сферах твого Колеса Життя. Він показує загальний рівень балансу та задоволеності твоїм життям прямо зараз.</p>
+      <p>Але важливіший не сам бал, а <strong>де саме просідає</strong>. Людина з балом 5.4 і рівними сферами відчуває себе набагато краще, ніж людина з балом 6, але однією сферою на 1/10.</p>
+
+      <h2>Дані по 12 сферах</h2>
+      <p>Середні бали наших користувачів:</p>
+
+      <div class="score-table">
+        <div class="score-row">
+          <span class="score-label">Стосунки та сім'я</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:68%;background:#27ae60"></div></div>
+          <span class="score-num">6.8</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Духовність</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:61%;background:#27ae60"></div></div>
+          <span class="score-num">6.1</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Особистий розвиток</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:58%;background:#f39c12"></div></div>
+          <span class="score-num">5.8</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Кар'єра</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:55%;background:#f39c12"></div></div>
+          <span class="score-num">5.5</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Соціальне коло</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:53%;background:#f39c12"></div></div>
+          <span class="score-num">5.3</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Здоров'я та тіло</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:52%;background:#f39c12"></div></div>
+          <span class="score-num">5.2</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Творчість</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:49%;background:#d35400"></div></div>
+          <span class="score-num">4.9</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Вплив та внесок</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:47%;background:#d35400"></div></div>
+          <span class="score-num">4.7</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Середовище</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:46%;background:#d35400"></div></div>
+          <span class="score-num">4.6</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Ментальне здоров'я</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:44%;background:#d35400"></div></div>
+          <span class="score-num">4.4</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Фінанси</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:43%;background:#d35400"></div></div>
+          <span class="score-num">4.3</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Відпочинок та хобі</span>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:41%;background:#c0392b"></div></div>
+          <span class="score-num">4.1</span>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Що означають ці цифри?</strong>
+        Нижні 4 сфери — "Ментальне здоров'я", "Фінанси" та "Відпочинок" — це зони де більшість людей хронічно недоінвестовують свою увагу. І саме вони найчастіше є коренем проблем в інших сферах.
+      </div>
+
+      <h2>Як інтерпретувати свій бал</h2>
+      <ul>
+        <li><strong>8–10</strong> — зона процвітання. Ця сфера дає тобі енергію</li>
+        <li><strong>6–7</strong> — стабільна зона. Є куди рости, але не критично</li>
+        <li><strong>4–5</strong> — зона уваги. Сфера забирає більше енергії ніж дає</li>
+        <li><strong>1–3</strong> — кризова зона. Потребує негайної дії</li>
+      </ul>
+
+      <h2>Як підняти Life Score?</h2>
+      <p>Помилка більшості — намагатися підняти всі сфери одночасно. Це не працює. <strong>Піднімай знизу вгору</strong>: виправляй найнижчу сферу першою.</p>
+      <p>Коли ти відновлюєш найбільш виснажену зону, це вивільняє енергію для всіх інших сфер. Так один правильний крок дає системний ефект.</p>
+      <p>Саме тому AI-аналіз на Koleso.live визначає не просто твої бали, а конкретну послідовність дій — з чого починати і що зробити наступного тижня.</p>
+
+    </div>
+  </article>
+
+  <div class="cta-block">
+    <div class="cta-block-title">Дізнайся свій Life Score</div>
+    <p class="cta-block-sub">Порівняй себе з 3 400+ користувачами і знайди де ти губиш найбільше.<br>Безкоштовно. 5 хвилин.</p>
+    <a href="/" class="btn-cta">📊 Пройти тест</a><br>
+    <a href="/blog" class="btn-cta-ghost">← Більше статей</a>
+  </div>
+
+  <footer>
+    <div class="footer-copy">© 2026 Koleso.live</div>
+    <div class="footer-links">
+      <a href="/terms">Умови</a>
+      <a href="/privacy">Конфіденційність</a>
+      <a href="mailto:support@koleso.live">Підтримка</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
