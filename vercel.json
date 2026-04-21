@@ -20,7 +20,7 @@
     }
   ],
   "routes": [
-    { "src": "/sitemap.xml", "dest": "/api/sitemap" },
+    { "src": "/sitemap.xml", "dest": "api/sitemap.js" },
     { "src": "/api/(.*)", "dest": "server.js" },
     { "src": "/favicon.svg", "dest": "/public/favicon.svg" },
     { "src": "/logo.svg", "dest": "/public/logo.svg" },
