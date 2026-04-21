@@ -1383,7 +1383,8 @@ ${urls}
 </urlset>`;
 
   res.setHeader('Content-Type', 'application/xml');
-  res.send(xml);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  return res.send(xml);
 });
 
 app.get('/robots.txt', (req, res) => {
