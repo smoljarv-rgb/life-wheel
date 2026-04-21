@@ -1357,35 +1357,6 @@ app.get('/pricing.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pricing.js'));
 });
 
-app.get('/sitemap.xml', (req, res) => {
-  const pages = [
-    { loc: '/',                         lastmod: '2026-04-01', changefreq: 'weekly',  priority: '1.0' },
-    { loc: '/pricing',                  lastmod: '2026-04-01', changefreq: 'monthly', priority: '0.9' },
-    { loc: '/terms',                    lastmod: '2026-03-22', changefreq: 'yearly',  priority: '0.5' },
-    { loc: '/blog/',                    lastmod: '2026-04-21', changefreq: 'weekly',  priority: '0.8' },
-    { loc: '/blog/koleso-zhyttya',      lastmod: '2026-04-10', changefreq: 'monthly', priority: '0.7' },
-    { loc: '/blog/postijjna-vtoma',     lastmod: '2026-04-10', changefreq: 'monthly', priority: '0.7' },
-    { loc: '/blog/life-score',          lastmod: '2026-04-10', changefreq: 'monthly', priority: '0.7' },
-    // { loc: '/blog/12-sfer-zhyttya',  lastmod: '2026-04-21', changefreq: 'monthly', priority: '0.7' },
-  ];
-
-  const base = 'https://koleso.live';
-  const urls = pages.map(p => `  <url>
-    <loc>${base}${p.loc}</loc>
-    <lastmod>${p.lastmod}</lastmod>
-    <changefreq>${p.changefreq}</changefreq>
-    <priority>${p.priority}</priority>
-  </url>`).join('\n');
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
-</urlset>`;
-
-  res.setHeader('Content-Type', 'application/xml');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  return res.send(xml);
-});
 
 app.get('/robots.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
