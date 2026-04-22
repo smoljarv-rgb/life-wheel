@@ -1897,7 +1897,10 @@ function initPortraitBlock(slug){
     localStorage.setItem('lw_portrait_'+slug, JSON.stringify(resultData.analysis.overall_portrait));
     return;
   }
-  // Показуємо блок з кнопкою генерації
+  // Показуємо кнопку тільки якщо аналіз завершено (всі сфери проаналізовані)
+  var totalSpheres = Object.keys(resultData.scores||{}).length;
+  var analyzedCount = ((resultData.analysis&&resultData.analysis.advice)||[]).length;
+  if(analyzedCount < totalSpheres) return;
   el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px 16px">'
     + '<div class="portrait-type">🧠 AI-портрет особистості</div>'
     + '<div style="color:var(--ink2);font-size:.9rem;line-height:1.6;margin:10px 0 16px">Ми проаналізували твої 12 сфер. Отримай персональний психологічний портрет від AI-коуча.</div>'
@@ -1930,8 +1933,8 @@ loadResult().then(function(){
   // Банер успішної оплати якщо ?paid=1
   // Завантажуємо portrait якщо є
   var _slug = window.location.pathname.split('/').pop();
-  var _cached = localStorage.getItem('lw_portrait_'+_slug);
-  initPortraitBlock(_slug);
+  var _isAnalyzing = new URLSearchParams(window.location.search).get('analyzing') === '1';
+  if(!_isAnalyzing) initPortraitBlock(_slug);
 
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
     var b = document.createElement('div');
