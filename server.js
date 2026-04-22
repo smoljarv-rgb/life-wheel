@@ -1150,6 +1150,12 @@ app.post('/api/portrait', async (req, res) => {
     if (!text) return res.json({ success: false, error: 'empty_response' });
     let portrait;
     try { portrait = sanitizeAIResponse(JSON.parse(text)); } catch(e) { return res.json({ success: false, error: 'parse_error' }); }
+    // Рубіж 2: явна постобробка рядкових полів portrait
+    ['type','preview','full_text','core_pattern','growth_vector'].forEach(f => { if(portrait[f]) portrait[f] = fixUkrainianText(portrait[f]); });
+    if(Array.isArray(portrait.month_plan)) portrait.month_plan.forEach(w => {
+      if(w.focus) w.focus = fixUkrainianText(w.focus);
+      if(Array.isArray(w.actions)) w.actions = w.actions.map(a => fixUkrainianText(a||''));
+    });
     // Зберегти в analysis.overall_portrait
     try {
       const { data: row } = await supabase.from('results').select('analysis').eq('slug',slug).single();

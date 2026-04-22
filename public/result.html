@@ -1179,9 +1179,9 @@ function renderSpheres(data){
         if(aiAdvice.overview||aiAdvice.root_cause||aiAdvice.insight){
           h+='<div class="coach-insight-block">';
           h+='<div class="coach-header"><div class="coach-avatar">AI</div><div><div class="coach-title">Персональний висновок</div><div class="coach-sub">на основі твоїх балів</div></div></div>';
-          if(aiAdvice.overview) h+='<div class="coach-overview">'+aiAdvice.overview+'</div>';
-          if(aiAdvice.root_cause) h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+aiAdvice.root_cause+'</div>';
-          if(aiAdvice.insight) h+='<div class="coach-insight"><span class="coach-insight-label">Важливо знати:</span> '+aiAdvice.insight+'</div>';
+          if(aiAdvice.overview) h+='<div class="coach-overview">'+fixUkrainianText(aiAdvice.overview)+'</div>';
+          if(aiAdvice.root_cause) h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+fixUkrainianText(aiAdvice.root_cause)+'</div>';
+          if(aiAdvice.insight) h+='<div class="coach-insight"><span class="coach-insight-label">Важливо знати:</span> '+fixUkrainianText(aiAdvice.insight)+'</div>';
           h+='</div>';
         }
         if(hasNewFmt||hasOldFmt){
@@ -1197,9 +1197,9 @@ function renderSpheres(data){
             h+='<div style="margin-bottom:8px;padding:9px 11px;background:var(--paper);border-radius:9px;border:1px solid var(--ink3)">';
             var dayLabel=hasNewFmt?('День '+d.day):(d.day||(d.title||''));
             h+='<div style="font-size:13px;font-weight:700;color:'+clr+';margin-bottom:3px">'+dayLabel+'</div>';
-            var taskTxt=hasNewFmt?(d.action||''):(d.task||'');
+            var taskTxt=hasNewFmt?fixUkrainianText(d.action||''):fixUkrainianText(d.task||'');
             if(taskTxt) h+='<div style="font-size:13px;color:var(--ink);margin-bottom:5px">⚡ '+taskTxt+'</div>';
-            if(hasNewFmt&&d.why) h+='<div style="font-size:12px;color:var(--ink2);line-height:1.6;padding:5px 9px;border-left:3px solid '+clr+'55;background:'+clr+'11;border-radius:0 7px 7px 0">💡 '+d.why+'</div>';
+            if(hasNewFmt&&d.why) h+='<div style="font-size:12px;color:var(--ink2);line-height:1.6;padding:5px 9px;border-left:3px solid '+clr+'55;background:'+clr+'11;border-radius:0 7px 7px 0">💡 '+fixUkrainianText(d.why)+'</div>';
             if(!hasNewFmt){
               if(d.how_to) h+='<div style="font-size:12px;color:var(--ink2);line-height:1.6;margin-bottom:5px;padding:5px 9px;border-left:3px solid '+clr+'55;background:'+clr+'08;border-radius:0 7px 7px 0">💡 '+d.how_to+'</div>';
               if(d.technique) h+='<div style="margin-bottom:5px;padding:7px 9px;background:rgba(100,60,200,.07);border-left:3px solid rgba(100,60,200,.4);border-radius:0 7px 7px 0"><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#6a3cc8;margin-bottom:2px">🧠 Техніка</div><div style="font-size:12px;color:var(--ink2)">'+d.technique+'</div></div>';
@@ -1207,9 +1207,9 @@ function renderSpheres(data){
             }
             h+='</div>';
           });
-          if(aiAdvice.week_result) h+='<div style="font-size:12px;color:var(--ink2);margin-top:7px;padding:5px 9px;background:var(--paper2);border-radius:7px;border-left:3px solid '+clr+'">📌 <strong>Через 7 днів:</strong> '+aiAdvice.week_result+'</div>';
-          if(aiAdvice.month_goal) h+='<div style="font-size:12px;color:var(--ink2);margin-top:5px;padding:5px 9px;background:var(--paper2);border-radius:7px;border-left:3px solid '+clr+'">📌 <strong>Ціль 30 днів:</strong> '+aiAdvice.month_goal+'</div>';
-          if(aiAdvice.quick_win) h+='<div style="font-size:12px;color:var(--green);margin-top:5px;padding:5px 9px;background:rgba(32,200,140,.06);border-radius:7px">⚡ <strong>Прямо зараз:</strong> '+aiAdvice.quick_win+'</div>';
+          if(aiAdvice.week_result) h+='<div style="font-size:12px;color:var(--ink2);margin-top:7px;padding:5px 9px;background:var(--paper2);border-radius:7px;border-left:3px solid '+clr+'">📌 <strong>Через 7 днів:</strong> '+fixUkrainianText(aiAdvice.week_result)+'</div>';
+          if(aiAdvice.month_goal) h+='<div style="font-size:12px;color:var(--ink2);margin-top:5px;padding:5px 9px;background:var(--paper2);border-radius:7px;border-left:3px solid '+clr+'">📌 <strong>Ціль 30 днів:</strong> '+fixUkrainianText(aiAdvice.month_goal)+'</div>';
+          if(aiAdvice.quick_win) h+='<div style="font-size:12px;color:var(--green);margin-top:5px;padding:5px 9px;background:rgba(32,200,140,.06);border-radius:7px">⚡ <strong>Прямо зараз:</strong> '+fixUkrainianText(aiAdvice.quick_win)+'</div>';
           h+='</div>';
           h+='</div>';
         }
