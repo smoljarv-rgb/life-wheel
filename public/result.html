@@ -1957,6 +1957,7 @@ async function generateOverallPortrait(slug, scores, sphereResults){
 }
 function fixUkrainianText(text){
   if(!text||typeof text!=='string') return text;
+  console.log('fixUkrainianText INPUT:', JSON.stringify(text));
   var fixes=[
     [/відчуваєте\s+відчуття\s+(\w+ості|\w+еня|\w+ання)/gi,'переживаєте $1'],
     [/відчуваєте\s+відчуття/gi,'переживаєте'],
@@ -1985,6 +1986,7 @@ function fixUkrainianText(text){
   var r=text;
   fixes.forEach(function(f){ r=r.replace(f[0],f[1]); });
   r=r.replace(/([^.!?]*відчуваєте[^.!?]*)(відчуваєте)([^.!?]*[.!?])/g,function(m,b,d,a){return b+'переживаєте'+a;});
+  console.log('fixUkrainianText OUTPUT:', JSON.stringify(r));
   return r;
 }
 function sanitizeAIResponse(parsed){
