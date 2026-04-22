@@ -1004,6 +1004,62 @@ app.post('/api/results/update-advice', async (req, res) => {
   }
 });
 
+
+// ══════════════════════════════════════════
+//  OVERALL PORTRAIT
+// ══════════════════════════════════════════
+app.post('/api/portrait', async (req, res) => {
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+  if (!rateLimit(ip, 5, 60000)) return res.status(429).json({ success: false, error: 'rate_limit' });
+
+  const { slug, scores, sphereResults } = req.body;
+  if (!slug || !scores) return res.status(400).json({ success: false, error: 'Missing data' });
+
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return res.status(500).json({ success: false, error: 'GROQ_API_KEY not set' });
+
+  const SNAMES = {love:'Любов',family:"Сім'я",friends:'Друзі',career:"Кар'єра",finance:'Фінанси',health:"Здоров'я",selfdev:'Саморозвиток',spirit:'Духовність',rest:'Відпочинок',env:'Середовище',comm:'Комунікація',appear:'Зовнішність'};
+  const scoresList = Object.entries(scores).map(([k,v]) => (SNAMES[k]||k)+': '+v+'/10').join(', ');
+  const weakCauses = (sphereResults||[]).filter(s=>parseFloat(s.score)<6&&s.root_cause).map(s=>s.sphere+' ('+s.score+'): '+s.root_cause).join('; ');
+
+  const sysPrompt = 'ICF life coach. Warm, specific, no cliches. Ukrainian language. See the whole person, not separate spheres. Respond ONLY with valid JSON.';
+  const userPrompt = 'Людина оцінила 12 сфер: '+scoresList+(weakCauses?'. Кореневі причини слабких сфер: '+weakCauses:'')+'. Відповідай JSON: {"type":"1-3 слова психотип","preview":"2 конкретних речення про цю людину без кліше","full_text":"4-6 речень глибокий аналіз зв язків між сферами","core_pattern":"1 речення головний патерн","growth_vector":"1 речення вектор на місяць","month_plan":[{"week":1,"focus":"назва фокусу","sphere":"сфера","actions":["дія1","дія2","дія3"]},{"week":2,"focus":"","sphere":"","actions":["","",""]},{"week":3,"focus":"","sphere":"","actions":["","",""]},{"week":4,"focus":"","sphere":"","actions":["",""]}]}';
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST', signal: controller.signal,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: userPrompt }],
+        max_tokens: 2000, temperature: 0.5, response_format: { type: 'json_object' }
+      })
+    });
+    clearTimeout(timeoutId);
+    if (!groqRes.ok) {
+      const e = await groqRes.json();
+      return res.status(500).json({ success: false, error: (e.error&&e.error.message)||'Groq error' });
+    }
+    const groqData = await groqRes.json();
+    const text = (groqData.choices&&groqData.choices[0]&&groqData.choices[0].message&&groqData.choices[0].message.content) || '';
+    if (!text) return res.json({ success: false, error: 'empty_response' });
+    let portrait;
+    try { portrait = JSON.parse(text); } catch(e) { return res.json({ success: false, error: 'parse_error' }); }
+    // Зберегти в analysis.overall_portrait
+    try {
+      const { data: row } = await supabase.from('results').select('analysis').eq('slug',slug).single();
+      const cur = (row&&row.analysis)||{};
+      await supabase.from('results').update({ analysis: Object.assign({},cur,{overall_portrait:portrait}) }).eq('slug',slug);
+    } catch(e) { console.error('Portrait save error:', e.message); }
+    res.json({ success: true, portrait });
+  } catch(err) {
+    if (err.name === 'AbortError') return res.json({ success: false, error: 'timeout' });
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ── Безкоштовна активація через 100% промокод ──
 app.post('/api/promo/activate', async (req, res) => {
   const { code, email, plan } = req.body;

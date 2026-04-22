@@ -753,6 +753,25 @@ body::after{
 .coach-root-label{font-weight:700;color:var(--blue)}
 .coach-insight{font-size:.78rem;color:var(--ink2);line-height:1.5}
 .coach-insight-label{font-weight:700;color:var(--blue)}
+.portrait-block{background:var(--paper2);border-radius:16px;padding:20px;margin-bottom:20px;border:1.5px solid rgba(108,77,254,.15)}
+.portrait-type{display:inline-block;font-size:.75rem;font-weight:700;color:var(--blue);background:rgba(108,77,254,.1);border-radius:20px;padding:3px 12px;margin-bottom:12px}
+.portrait-title{font-family:'Patrick Hand',cursive;font-size:1.2rem;font-weight:700;color:var(--ink);margin-bottom:10px}
+.portrait-text{font-size:.9rem;color:var(--ink2);line-height:1.7;margin-bottom:14px}
+.portrait-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.portrait-meta-item{background:var(--paper3);border-radius:10px;padding:8px 12px;flex:1;min-width:140px}
+.portrait-meta-label{font-size:.7rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.portrait-meta-val{font-size:.85rem;color:var(--ink);line-height:1.4}
+.portrait-month{margin-top:14px}
+.portrait-week{background:var(--paper3);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.portrait-week-num{font-size:.7rem;font-weight:700;color:var(--blue);margin-bottom:3px}
+.portrait-week-text{font-size:.85rem;color:var(--ink2);line-height:1.5}
+.portrait-locked{position:relative;overflow:hidden;border-radius:12px}
+.portrait-locked-blur{filter:blur(5px);user-select:none;pointer-events:none}
+.portrait-locked-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(253,246,227,.7);backdrop-filter:blur(2px);border-radius:12px;padding:16px;text-align:center}
+.portrait-locked-icon{font-size:28px;margin-bottom:8px}
+.portrait-locked-msg{font-family:'Patrick Hand',cursive;font-size:1rem;color:var(--ink);margin-bottom:12px}
+.portrait-locked-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'Patrick Hand',cursive;font-size:1rem;cursor:pointer;text-decoration:none;display:inline-block}
+.portrait-loading{text-align:center;padding:24px;color:var(--ink3);font-family:'Patrick Hand',cursive;font-size:1rem}
 </style>
 </head>
 <body>
@@ -802,6 +821,9 @@ body::after{
       </div>
     </div>
   </div>
+
+  <!-- PORTRAIT BLOCK -->
+  <div id="portraitBlock" style="display:none;margin-bottom:20px"></div>
 
   <!-- TABS -->
   <nav class="tabs">
@@ -1802,18 +1824,95 @@ async function startStreamingAnalysis(slug) {
     }catch(e){}
   }
 
+  // Генеруємо AI-портрет після аналізу
+  if(receivedAdvice.length >= 3){
+    generateOverallPortrait(slug, scoresData, receivedAdvice);
+  }
+
   if(banner) banner.style.display='none';
   updateProgress(total);
   setTimeout(function(){ if(apEl) apEl.style.display='none'; }, 2000);
   history.replaceState({}, '', window.location.pathname);
 }
 
+function renderPortraitBlock(portrait){
+  var el = document.getElementById('portraitBlock');
+  if(!el || !portrait) return;
+  var isPro = localStorage.getItem('lw_premium') === '1' && new Date(localStorage.getItem('lw_premium_expires') || 0) > new Date();
+  var html = '<div class="portrait-block">';
+  html += '<div class="portrait-type">🧠 AI-портрет особистості</div>';
+  html += '<div class="portrait-title">' + (portrait.type || '') + '</div>';
+  if(isPro){
+    html += '<div class="portrait-text">' + (portrait.full_text || '') + '</div>';
+    if(portrait.core_pattern || portrait.growth_vector){
+      html += '<div class="portrait-meta">';
+      if(portrait.core_pattern) html += '<div class="portrait-meta-item"><div class="portrait-meta-label">Ключовий патерн</div><div class="portrait-meta-val">' + portrait.core_pattern + '</div></div>';
+      if(portrait.growth_vector) html += '<div class="portrait-meta-item"><div class="portrait-meta-label">Вектор зростання</div><div class="portrait-meta-val">' + portrait.growth_vector + '</div></div>';
+      html += '</div>';
+    }
+    if(portrait.month_plan && portrait.month_plan.length){
+      html += '<div class="portrait-month">';
+      for(var w=0;w<portrait.month_plan.length;w++){
+        var wk=portrait.month_plan[w];
+        html += '<div class="portrait-week"><div class="portrait-week-num">Тиждень ' + (wk.week||w+1) + '</div><div class="portrait-week-text">' + (wk.focus||wk.action||'') + '</div></div>';
+      }
+      html += '</div>';
+    }
+  }else{
+    html += '<div class="portrait-text">' + (portrait.preview || '') + '</div>';
+    var blurHtml = '';
+    if(portrait.core_pattern || portrait.growth_vector){
+      blurHtml += '<div class="portrait-meta">';
+      if(portrait.core_pattern) blurHtml += '<div class="portrait-meta-item"><div class="portrait-meta-label">Ключовий патерн</div><div class="portrait-meta-val">' + portrait.core_pattern + '</div></div>';
+      if(portrait.growth_vector) blurHtml += '<div class="portrait-meta-item"><div class="portrait-meta-label">Вектор зростання</div><div class="portrait-meta-val">' + portrait.growth_vector + '</div></div>';
+      blurHtml += '</div>';
+    }
+    if(portrait.month_plan && portrait.month_plan.length){
+      blurHtml += '<div class="portrait-month">';
+      for(var w2=0;w2<portrait.month_plan.length;w2++){
+        var wk2=portrait.month_plan[w2];
+        blurHtml += '<div class="portrait-week"><div class="portrait-week-num">Тиждень ' + (wk2.week||w2+1) + '</div><div class="portrait-week-text">' + (wk2.focus||wk2.action||'') + '</div></div>';
+      }
+      blurHtml += '</div>';
+    }
+    html += '<div class="portrait-locked"><div class="portrait-locked-blur">' + blurHtml + '</div>';
+    html += '<div class="portrait-locked-overlay"><div class="portrait-locked-icon">🔒</div><div class="portrait-locked-msg">Повний портрет доступний в PRO</div><a href="/pricing" class="portrait-locked-btn">Відкрити PRO</a></div></div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+async function generateOverallPortrait(slug, scores, sphereResults){
+  var el = document.getElementById('portraitBlock');
+  if(el){ el.innerHTML = '<div class="portrait-loading">🤖 AI будує твій особистісний портрет...</div>'; el.style.display='block'; }
+  try{
+    var r = await fetch('/api/portrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:slug,scores:scores,sphereResults:sphereResults})});
+    var d = await r.json();
+    if(d.portrait){
+      localStorage.setItem('lw_portrait_'+slug, JSON.stringify(d.portrait));
+      renderPortraitBlock(d.portrait);
+    }else{ if(el) el.style.display='none'; }
+  }catch(e){ if(el) el.style.display='none'; }
+}
 loadResult().then(function(){
   // Банер успішної оплати якщо ?paid=1
+  // Завантажуємо portrait якщо є
+  var _slug = window.location.pathname.split('/').pop();
+  var _cached = localStorage.getItem('lw_portrait_'+_slug);
+  if(_cached){ try{ renderPortraitBlock(JSON.parse(_cached)); }catch(e){} }
+  else if(resultData && resultData.analysis && resultData.analysis.overall_portrait){
+    renderPortraitBlock(resultData.analysis.overall_portrait);
+    localStorage.setItem('lw_portrait_'+_slug, JSON.stringify(resultData.analysis.overall_portrait));
+  }
+
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
     var b = document.createElement('div');
     b.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--green);color:#fff;font-family:Patrick Hand,cursive;font-size:17px;padding:14px 28px;border-radius:3px 12px 10px 8px;box-shadow:4px 4px 0 rgba(0,0,0,.15);text-align:center;max-width:90vw';
     b.textContent = '🎉 Оплата успішна! Запускаємо повний аналіз всіх 12 сфер...';
+    var _exp = new Date(); _exp.setMonth(_exp.getMonth()+1);
+    localStorage.setItem('lw_premium','1');
+    localStorage.setItem('lw_premium_expires',_exp.toISOString());
     document.body.appendChild(b);
     setTimeout(function(){ b.style.transition='opacity .5s'; b.style.opacity='0'; setTimeout(function(){ b.remove(); },500); },6000);
     history.replaceState({}, '', window.location.pathname);
