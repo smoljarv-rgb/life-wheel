@@ -682,8 +682,8 @@ app.post('/api/analyze', async function(req, res) {
 
   try {
     const controller = new AbortController();
-    // Vercel Hobby ліміт — 10 сек. Встановлюємо 8 сек, щоб встигнути відповісти
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    // Vercel Hobby ліміт — 10 сек. Встановлюємо 9 сек, щоб встигнути відповісти
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -695,8 +695,8 @@ app.post('/api/analyze', async function(req, res) {
           { role: 'system', content: systemPrompt || 'You are a JSON API. Respond ONLY with valid complete JSON. Never truncate. Never add comments or markdown.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 4000,
-        temperature: 0.3,
+        max_tokens: 2000,
+        temperature: 0.4,
         response_format: { type: 'json_object' },
       }),
     });
