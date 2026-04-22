@@ -1749,10 +1749,10 @@ async function startStreamingAnalysis(slug) {
     if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">&#9881;&#xFE0F; Аналізую: <strong>' + (i+1) + ' / ' + total + '</strong> &mdash; ' + s.name + '</div>';
     updateProgress(i);
 
-    var sysPrompt = 'ICF life coach. Ukrainian language. Warm, specific, no clichés. Use imperative: спробуй/зроби/помітиш. Respond ONLY with valid JSON.';
+    var sysPrompt = 'Ти — ICF-коуч і психолог. Пишеш виключно українською мовою. Звертаєшся до людини на "Ви" з великої літери. Ніколи не використовуєш "ця людина / він / вона / людина відчуває". Правила: жодних тавтологій ("відчуваєте відчуття" -> "відчуваєте"; "займайтеся розвитком" -> "розвивайтеся"); замість "відсутність X" -> "Вам бракує X"; кожне речення — нова думка; природна українська без канцеляризмів. overview -> "Ви зараз..."; root_cause -> "Причина — Ви..." або "Ваш корінь..."; insight -> "Можливо, Ви не помічаєте..." або "Важливо: Ви..."; actions -> "Спробуйте / Зробіть / Оберіть...". Respond ONLY with valid JSON.';
     var avgScore = (Object.values(scoresData).reduce(function(acc,v){return acc+parseFloat(v||0);},0)/Math.max(1,Object.keys(scoresData).length)).toFixed(1);
     var otherSpheres = spheres.filter(function(x){return x.key!==s.key;}).map(function(x){return x.name+':'+x.score;}).join(', ');
-        var prompt = "«"+s.name+"» = "+s.score+"/10. Загальний бал: "+avgScore+"/10. Інші сфери: "+otherSpheres+". Відповідай JSON: sphere(string), score(number), overview(2 речення про стан людини), root_cause(1 речення — причина з огляду на інші сфери), insight(1 несподіване спостереження), actions(масив 7 items: day(1-7), action(конкретна дія), why(обгрунтування)), week_result(1 речення — прогноз на 7 днів).";
+        var prompt = "Сфера «"+s.name+"» = "+s.score+"/10. Загальний бал: "+avgScore+"/10. Інші сфери: "+otherSpheres+". Поверни JSON (звертайся на Ви): sphere(string), score(number), overview(2 речення на Ви — що Ви зараз переживаєте в цій сфері), root_cause(1 речення на Ви — Ваша причина з огляду на інші сфери), insight(1 речення на Ви — несподіване спостереження яке Ви впізнаєте як правду), actions(масив 7 items: day(1-7), action(конкретна дія — Спробуйте/Зробіть/Оберіть + що саме), why(чому це допоможе Вам)), week_result(1 речення на Ви — Ваш прогноз через 7 днів).";
     var sphereAdvice = null;
     var lastError = null;
     for(var attempt=0; attempt<3; attempt++){
