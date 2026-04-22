@@ -1010,7 +1010,7 @@ app.post('/api/results/update-advice', async (req, res) => {
 // ══════════════════════════════════════════
 app.post('/api/portrait', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
-  if (!rateLimit(ip, 5, 60000)) return res.status(429).json({ success: false, error: 'rate_limit' });
+  if (!rateLimit(ip, 20, 120000)) return res.status(429).json({ success: false, error: 'rate_limit' });
 
   const { slug, scores, sphereResults } = req.body;
   if (!slug || !scores) return res.status(400).json({ success: false, error: 'Missing data' });

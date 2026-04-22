@@ -1819,10 +1819,9 @@ async function startStreamingAnalysis(slug) {
     }catch(e){}
   }
 
-  // Генеруємо AI-портрет після аналізу (пауза 3с щоб Groq відпочив)
-  if(receivedAdvice.length >= 3){
-    localStorage.setItem('lw_portrait_tried_'+slug, '1');
-    setTimeout(function(){ generateOverallPortrait(slug, scoresData, receivedAdvice); }, 3000);
+  // Після аналізу — показуємо кнопку портрету (не авто-генеруємо щоб не бити по Groq rate limit)
+  if(receivedAdvice.length >= 3 && !localStorage.getItem('lw_portrait_'+slug)){
+    initPortraitBlock(slug);
   }
 
   if(banner) banner.style.display='none';
@@ -1918,8 +1917,10 @@ async function generateOverallPortrait(slug, scores, sphereResults){
     if(d.portrait){
       localStorage.setItem('lw_portrait_'+slug, JSON.stringify(d.portrait));
       renderPortraitBlock(d.portrait);
+    }else if(r.status === 429){
+      if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--ink3);font-size:.9rem;margin-bottom:10px">&#x23F3; Забагато запитів. Зачекай хвилину і спробуй знову.</div>' + _portraitRetryBtn() + '</div>';
     }else{
-      if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--red);font-size:.9rem;margin-bottom:10px">⚠️ Не вдалося згенерувати портрет</div>' + _portraitRetryBtn() + '</div>';
+      if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--red);font-size:.9rem;margin-bottom:10px">&#x26A0;&#xFE0F; Не вдалося згенерувати портрет</div>' + _portraitRetryBtn() + '</div>';
     }
   }catch(e){
     if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--red);font-size:.9rem;margin-bottom:10px">&#x26A0;&#xFE0F; Помилка мережі</div>' + _portraitRetryBtn() + '</div>';
