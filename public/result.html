@@ -1879,33 +1879,58 @@ function renderPortraitBlock(portrait){
   el.style.display = 'block';
 }
 
+function _portraitRetryBtn(){
+  return '<button onclick="startPortraitGen()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-family:Patrick Hand,cursive;font-size:1rem;cursor:pointer;margin-top:8px">🔄 Спробувати знову</button>';
+}
+function startPortraitGen(){
+  var _sl = window.location.pathname.split('/').pop();
+  var _sc = resultData && resultData.scores ? resultData.scores : {};
+  var _adv = resultData && resultData.analysis && resultData.analysis.advice ? resultData.analysis.advice : [];
+  generateOverallPortrait(_sl, _sc, _adv);
+}
+function initPortraitBlock(slug){
+  var el = document.getElementById('portraitBlock');
+  if(!el || !resultData || !resultData.scores) return;
+  var cached = localStorage.getItem('lw_portrait_'+slug);
+  if(cached){ try{ renderPortraitBlock(JSON.parse(cached)); return; }catch(e){} }
+  if(resultData.analysis && resultData.analysis.overall_portrait){
+    renderPortraitBlock(resultData.analysis.overall_portrait);
+    localStorage.setItem('lw_portrait_'+slug, JSON.stringify(resultData.analysis.overall_portrait));
+    return;
+  }
+  // Показуємо блок з кнопкою генерації
+  el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px 16px">'
+    + '<div class="portrait-type">🧠 AI-портрет особистості</div>'
+    + '<div style="color:var(--ink2);font-size:.9rem;line-height:1.6;margin:10px 0 16px">Ми проаналізували твої 12 сфер. Отримай персональний психологічний портрет від AI-коуча.</div>'
+    + '<button onclick="startPortraitGen()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-family:Patrick Hand,cursive;font-size:1rem;cursor:pointer">🤖 Згенерувати мій портрет</button>'
+    + '</div>';
+  el.style.display = 'block';
+}
 async function generateOverallPortrait(slug, scores, sphereResults){
   var el = document.getElementById('portraitBlock');
-  if(el){ el.innerHTML = '<div class="portrait-loading">🤖 AI будує твій особистісний портрет...</div>'; el.style.display='block'; }
+  if(el){
+    el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div class="portrait-loading">🤖 AI будує твій особистісний портрет...</div></div>';
+    el.style.display = 'block';
+  }
   try{
     var r = await fetch('/api/portrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:slug,scores:scores,sphereResults:sphereResults})});
     var d = await r.json();
     if(d.portrait){
       localStorage.setItem('lw_portrait_'+slug, JSON.stringify(d.portrait));
       renderPortraitBlock(d.portrait);
-    }else{ if(el) el.style.display='none'; }
-  }catch(e){ if(el) el.style.display='none'; }
+    }else{
+      if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--red);font-size:.9rem;margin-bottom:10px">⚠️ Не вдалося згенерувати портрет</div>' + _portraitRetryBtn() + '</div>';
+    }
+  }catch(e){
+    if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--red);font-size:.9rem;margin-bottom:10px">&#x26A0;&#xFE0F; Помилка мережі</div>' + _portraitRetryBtn() + '</div>';
+  }
 }
 loadResult().then(function(){
   // Банер успішної оплати якщо ?paid=1
   // Завантажуємо portrait якщо є
   var _slug = window.location.pathname.split('/').pop();
   var _cached = localStorage.getItem('lw_portrait_'+_slug);
-  if(_cached){ try{ renderPortraitBlock(JSON.parse(_cached)); }catch(e){} }
-  else if(resultData && resultData.analysis && resultData.analysis.overall_portrait){
-    renderPortraitBlock(resultData.analysis.overall_portrait);
-    localStorage.setItem('lw_portrait_'+_slug, JSON.stringify(resultData.analysis.overall_portrait));
-  } else if(resultData && resultData.analysis && (resultData.analysis.advice||[]).length >= 3
-      && !localStorage.getItem('lw_portrait_tried_'+_slug)){
-    // Портрет ще не генерувався — запускаємо авто-генерацію
-    localStorage.setItem('lw_portrait_tried_'+_slug, '1');
-    setTimeout(function(){ generateOverallPortrait(_slug, resultData.scores||{}, resultData.analysis.advice||[]); }, 1500);
-  }
+  initPortraitBlock(_slug);
 
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
     var b = document.createElement('div');
