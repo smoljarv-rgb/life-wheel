@@ -11,6 +11,58 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+// ── Post-process AI text: fix tautologies and third-person ──
+function fixUkrainianText(text){
+  if(!text||typeof text!=='string') return text;
+  const fixes=[
+    [/відчуваєте\s+відчуття\s+(\w+ості|\w+еня|\w+ання)/gi,'переживаєте $1'],
+    [/відчуваєте\s+відчуття/gi,'переживаєте'],
+    [/відчуваєте\s+відчутну/gi,'помітно відчуваєте'],
+    [/відчуття\s+відчуття/gi,'відчуття'],
+    [/відчуття\s+ізольованості/gi,'самотність'],
+    [/відчуття\s+порожнечі/gi,'внутрішню порожнечу'],
+    [/відчуття\s+тривоги/gi,'тривогу'],
+    [/відчуття\s+провини/gi,'провину'],
+    [/відчуття\s+страху/gi,'страх'],
+    [/відчуття\s+самотності/gi,'самотність'],
+    [/тісне\s+відчуття/gi,'гнітюче відчуття'],
+    [/вас\s+тісне/gi,'вас гнітить'],
+    [/ця\s+людина\s+відчуває/gi,'Ви відчуваєте'],
+    [/ця\s+людина\s+має/gi,'Ви маєте'],
+    [/ця\s+людина\s+переживає/gi,'Ви переживаєте'],
+    [/ця\s+людина/gi,'Ви'],
+    [/людина\s+відчуває/gi,'Ви відчуваєте'],
+    [/людина\s+має/gi,'Ви маєте'],
+    [/людина\s+переживає/gi,'Ви переживаєте'],
+    [/\bвона\s+відчуває/gi,'Ви відчуваєте'],
+    [/\bвін\s+відчуває/gi,'Ви відчуваєте'],
+    [/відсутність\s+([а-яіїєА-ЯІЇЄ\w]+ості)/gi,'брак $1'],
+    [/відсутність\s+([а-яіїєА-ЯІЇЄ\w]+)/gi,'нестача $1'],
+  ];
+  let r=text;
+  fixes.forEach(([p,rep])=>{ r=r.replace(p,rep); });
+  r=r.replace(/([^.!?]*відчуваєте[^.!?]*)(відчуваєте)([^.!?]*[.!?])/g,(_,b,__,a)=>b+'переживаєте'+a);
+  return r;
+}
+function sanitizeAIResponse(parsed){
+  if(!parsed) return parsed;
+  const fields=['overview','root_cause','insight','week_result','type','preview','full_text','core_pattern','growth_vector'];
+  fields.forEach(f=>{ if(parsed[f]) parsed[f]=fixUkrainianText(parsed[f]); });
+  if(Array.isArray(parsed.actions)) parsed.actions=parsed.actions.map(a=>{
+    if(typeof a==='string') return fixUkrainianText(a);
+    if(a?.action) a.action=fixUkrainianText(a.action);
+    if(a?.why) a.why=fixUkrainianText(a.why);
+    return a;
+  });
+  if(Array.isArray(parsed.month_plan)) parsed.month_plan=parsed.month_plan.map(week=>{
+    if(week.focus) week.focus=fixUkrainianText(week.focus);
+    if(Array.isArray(week.actions)) week.actions=week.actions.map(a=>fixUkrainianText(a));
+    return week;
+  });
+  return parsed;
+}
+
+
 // ── WayForPay ──
 const WFP_MERCHANT  = process.env.WAYFORPAY_MERCHANT || 'koleso_live';
 const WFP_SECRET    = process.env.WAYFORPAY_SECRET   || '';
@@ -1097,7 +1149,7 @@ app.post('/api/portrait', async (req, res) => {
     const text = (groqData.choices&&groqData.choices[0]&&groqData.choices[0].message&&groqData.choices[0].message.content) || '';
     if (!text) return res.json({ success: false, error: 'empty_response' });
     let portrait;
-    try { portrait = JSON.parse(text); } catch(e) { return res.json({ success: false, error: 'parse_error' }); }
+    try { portrait = sanitizeAIResponse(JSON.parse(text)); } catch(e) { return res.json({ success: false, error: 'parse_error' }); }
     // Зберегти в analysis.overall_portrait
     try {
       const { data: row } = await supabase.from('results').select('analysis').eq('slug',slug).single();

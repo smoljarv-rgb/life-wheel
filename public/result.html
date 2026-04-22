@@ -1798,7 +1798,7 @@ async function startStreamingAnalysis(slug) {
         }
         
         if(data.text){
-          var parsed = JSON.parse(data.text);
+          var parsed = sanitizeAIResponse(JSON.parse(data.text));
           if(!parsed.sphere) parsed.sphere = s.name;
           sphereAdvice = parsed;
           break;
@@ -1954,6 +1954,71 @@ async function generateOverallPortrait(slug, scores, sphereResults){
   }catch(e){
     if(el) el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div style="color:var(--red);font-size:.9rem;margin-bottom:10px">&#x26A0;&#xFE0F; Помилка мережі</div>' + _portraitRetryBtn() + '</div>';
   }
+}
+function fixUkrainianText(text){
+  if(!text||typeof text!=='string') return text;
+  var fixes=[
+    [/відчуваєте\s+відчуття\s+(\w+ості|\w+еня|\w+ання)/gi,'переживаєте $1'],
+    [/відчуваєте\s+відчуття/gi,'переживаєте'],
+    [/відчуваєте\s+відчутну/gi,'помітно відчуваєте'],
+    [/відчуття\s+відчуття/gi,'відчуття'],
+    [/відчуття\s+ізольованості/gi,'самотність'],
+    [/відчуття\s+порожнечі/gi,'внутрішню порожнечу'],
+    [/відчуття\s+тривоги/gi,'тривогу'],
+    [/відчуття\s+провини/gi,'провину'],
+    [/відчуття\s+страху/gi,'страх'],
+    [/відчуття\s+самотності/gi,'самотність'],
+    [/тісне\s+відчуття/gi,'гнітюче відчуття'],
+    [/вас\s+тісне/gi,'вас гнітить'],
+    [/ця\s+людина\s+відчуває/gi,'Ви відчуваєте'],
+    [/ця\s+людина\s+має/gi,'Ви маєте'],
+    [/ця\s+людина\s+переживає/gi,'Ви переживаєте'],
+    [/ця\s+людина/gi,'Ви'],
+    [/людина\s+відчуває/gi,'Ви відчуваєте'],
+    [/людина\s+має/gi,'Ви маєте'],
+    [/людина\s+переживає/gi,'Ви переживаєте'],
+    [/\bвона\s+відчуває/gi,'Ви відчуваєте'],
+    [/\bвін\s+відчуває/gi,'Ви відчуваєте'],
+    [/відсутність\s+([а-яіїєА-ЯІЇЄ\w]+ості)/gi,'брак $1'],
+    [/відсутність\s+([а-яіїєА-ЯІЇЄ\w]+)/gi,'нестача $1'],
+  ];
+  var r=text;
+  fixes.forEach(function(f){ r=r.replace(f[0],f[1]); });
+  r=r.replace(/([^.!?]*відчуваєте[^.!?]*)(відчуваєте)([^.!?]*[.!?])/g,function(m,b,d,a){return b+'переживаєте'+a;});
+  return r;
+}
+function sanitizeAIResponse(parsed){
+  if(!parsed) return parsed;
+  var fields=['overview','root_cause','insight','week_result','type','preview','full_text','core_pattern','growth_vector'];
+  fields.forEach(function(f){ if(parsed[f]) parsed[f]=fixUkrainianText(parsed[f]); });
+  if(Array.isArray(parsed.actions)){
+    parsed.actions=parsed.actions.map(function(a){
+      if(typeof a==='string') return fixUkrainianText(a);
+      if(a&&a.action) a.action=fixUkrainianText(a.action);
+      if(a&&a.why) a.why=fixUkrainianText(a.why);
+      return a;
+    });
+  }
+  if(Array.isArray(parsed.advice)){
+    parsed.advice=parsed.advice.map(function(item){
+      ['overview','root_cause','insight','week_result'].forEach(function(f){ if(item[f]) item[f]=fixUkrainianText(item[f]); });
+      if(Array.isArray(item.actions)) item.actions=item.actions.map(function(a){
+        if(typeof a==='string') return fixUkrainianText(a);
+        if(a&&a.action) a.action=fixUkrainianText(a.action);
+        if(a&&a.why) a.why=fixUkrainianText(a.why);
+        return a;
+      });
+      return item;
+    });
+  }
+  if(Array.isArray(parsed.month_plan)){
+    parsed.month_plan=parsed.month_plan.map(function(week){
+      if(week.focus) week.focus=fixUkrainianText(week.focus);
+      if(Array.isArray(week.actions)) week.actions=week.actions.map(function(a){ return fixUkrainianText(a); });
+      return week;
+    });
+  }
+  return parsed;
 }
 loadResult().then(function(){
   // Банер успішної оплати якщо ?paid=1
