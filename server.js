@@ -673,7 +673,7 @@ app.post('/api/analyze', async function(req, res) {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
   if (!rateLimit(ip)) return res.status(429).json({ error: 'Забагато запитів. Спробуйте за хвилину.' });
 
-  const { prompt } = req.body;
+  const { prompt, systemPrompt } = req.body;
   if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'Відсутній prompt' });
   if (prompt.length > 8000) return res.status(400).json({ error: 'Запит надто довгий' });
 
@@ -692,7 +692,7 @@ app.post('/api/analyze', async function(req, res) {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: [
-          { role: 'system', content: 'You are a JSON API. Respond ONLY with valid complete JSON. Never truncate. Never add comments or markdown.' },
+          { role: 'system', content: systemPrompt || 'You are a JSON API. Respond ONLY with valid complete JSON. Never truncate. Never add comments or markdown.' },
           { role: 'user', content: prompt }
         ],
         max_tokens: 4000,
