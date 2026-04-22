@@ -1223,8 +1223,6 @@ function renderSpheres(data){
 function renderPlan(data){
   const advice=(data.analysis&&data.analysis.advice)||[];
   const scores=data.scores||{};
-
-  // Дата
   const now=new Date();
   const days=['неділя','понеділок','вівторок','середа','четвер','п\'ятниця','субота'];
   const months=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
@@ -1234,19 +1232,8 @@ function renderPlan(data){
     const isFreeResult=data&&data.analysis&&data.analysis.isFree;
     const lockedCnt=isFreeResult?11:0;
     const empty=isFreeResult
-      ?`<div class="upgrade-card" style="margin:0">
-          <div class="upgrade-card-tag">✦ PRO доступ</div>
-          <div class="upgrade-card-title">План дій — у повній версії</div>
-          <div class="upgrade-card-sub">Тут буде 7-денний AI-план для кожної з ${lockedCnt} заблокованих сфер: конкретні завдання, техніки і книги.</div>
-          <div class="upgrade-card-feats">
-            <div class="upgrade-card-feat"><span>✦</span>7-денний план для кожної сфери</div>
-            <div class="upgrade-card-feat"><span>✦</span>Мікро-дії на кожен день</div>
-            <div class="upgrade-card-feat"><span>✦</span>Техніки від психологів</div>
-          </div>
-          <a href="/pricing" class="btn-upgrade">Розблокувати план →</a>
-          <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія</div>
-        </div>`
-      :'<div style="text-align:center;padding:28px 16px;color:var(--ink3);font-size:16px;line-height:1.7">✏️ AI-план з\'явиться після завершення аналізу.</div>';
+      ?'<div class="upgrade-card" style="margin:0"><div class="upgrade-card-tag">✶ PRO доступ</div><div class="upgrade-card-title">План дій — у повній версії</div><div class="upgrade-card-sub">Тут буде 7-денний AI-план для кожної з '+lockedCnt+' заблокованих сфер: конкретні завдання, техніки і книги.</div><a href="/pricing" class="btn-upgrade">Розблокувати план →</a><div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія</div></div>'
+      :'✉️ AI-план з\'явиться після завершення аналізу.';
     document.getElementById('microList').innerHTML=empty;
     document.getElementById('weekGrid').innerHTML='';
     document.getElementById('goalList').innerHTML='';
@@ -1254,27 +1241,34 @@ function renderPlan(data){
     return;
   }
 
-  // Мікродії — quick_win кожної сфери
+  // Мікродії (новий формат: actions[0].action; старий: quick_win)
   var mi=0;
   document.getElementById('microList').innerHTML=advice.map(function(a){
     mi++;
     var key=mi;
     var isDone=checkedTasks['micro_'+key]?true:false;
-    return '<div class="micro'+(isDone?' done':'')+'" id="micro_'+key+'" onclick="toggleCheck(\'micro_'+key+'\','+key+')">'
+    var qw=a.quick_win||(a.actions&&a.actions[0]&&a.actions[0].action)||'';
+    if(!qw) return '';
+    return '<div class="micro'+(isDone?' done':'')+' " id="micro_'+key+'" onclick="toggleCheck(\'micro_'+key+'\','+key+')">'
       +'<div class="micro-circle">'+(isDone?'✓':key)+'</div>'
-      +'<div><div class="micro-txt">'+a.quick_win+'</div>'
+      +'<div><div class="micro-txt">'+qw+'</div>'
       +'<div class="micro-meta"><span class="micro-tag">'+a.sphere+'</span><span class="micro-time">Сьогодні</span></div></div>'
       +'</div>';
   }).join('');
 
-  // Тижневий план — по днях
+  // Тижневий план (підтримка actions і days)
   var dayMap={};
   advice.forEach(function(a){
-    if(!a.days) return;
-    a.days.forEach(function(d,i){
-      var dn='День '+(i+1);
+    var items=a.actions||a.days||[];
+    items.forEach(function(d,i){
+      var dn='День '+(d.day||(i+1));
       if(!dayMap[dn]) dayMap[dn]=[];
-      dayMap[dn].push({sphere:a.sphere,task:d.task,technique:d.technique,book:d.book});
+      dayMap[dn].push({
+        sphere:a.sphere,
+        task:d.action||d.task||'',
+        technique:d.why||d.technique||'',
+        book:d.book||''
+      });
     });
   });
   var wh='<div style="display:flex;flex-direction:column;gap:12px">';
@@ -1287,8 +1281,8 @@ function renderPlan(data){
         +'<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px">'+t.task+'</div>'
         +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px">'
         +'<span style="font-size:12px;color:var(--ink3)">📌 '+t.sphere+'</span>'
-        +(t.technique?'<span style="font-size:12px;color:var(--purple)">🧠 '+t.technique+'</span>':'')
-        +(t.book?'<span style="font-size:12px;color:var(--blue)">📖 '+t.book+'</span>':'')
+        +(t.technique?'<span style="font-size:12px;color:var(--ink2)">💡 '+t.technique+'</span>':'')
+        +(t.book?'<span style="font-size:12px;color:var(--blue)">📚 '+t.book+'</span>':'')
         +'</div>'
         +'</div>';
     }).join('');
@@ -1297,19 +1291,20 @@ function renderPlan(data){
   wh+='</div>';
   document.getElementById('weekGrid').innerHTML=wh;
 
-  // Цілі 30 днів
-  document.getElementById('goalList').innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+advice.filter(function(a){return a.month_goal;}).map(function(a,i){
+  // Цілі (новий: week_result; старий: month_goal)
+  document.getElementById('goalList').innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+advice.filter(function(a){return a.month_goal||a.week_result;}).map(function(a){
+    var goal=a.month_goal||a.week_result||'';
     return '<div style="background:var(--paper2);border:1.5px solid var(--ink3);border-radius:10px;padding:12px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.06)">'
       +'<div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:4px">'+a.sphere+'</div>'
-      +'<div style="font-size:15px;color:var(--ink);line-height:1.5">🎯 '+a.month_goal+'</div>'
+      +'<div style="font-size:15px;color:var(--ink);line-height:1.5">🎯 '+goal+'</div>'
       +'</div>';
   }).join('')+'</div>';
 
-  // Roadmap — 4 тижні
-  var rm=['Тиждень 1: Запуск звичок і перші кроки','Тиждень 2: Закріплення та відстеження','Тиждень 3: Поглиблення і корекція','Тиждень 4: Оцінка прогресу і нові цілі'];
-  document.getElementById('roadmap').innerHTML=rm.map(function(r,i){
+  // Roadmap
+  document.getElementById('roadmap').innerHTML=['Запуск звичок','Закріплення','Поглиблення','Оцінка прогресу'].map(function(title,i){
     var sphere=advice[i%advice.length];
-    return '<div class="rl"><div class="rl-dot"></div><div class="rl-week">Тиждень '+(i+1)+'</div><div class="rl-title">'+['Запуск звичок','Закріплення','Поглиблення','Оцінка прогресу'][i]+'</div>'+(sphere?'<div class="rl-text">Фокус: <strong>'+sphere.sphere+'</strong>'+(sphere.quick_win?' — '+sphere.quick_win:'')+'</div>':'')+'</div>';
+    var qw=sphere?(sphere.quick_win||(sphere.actions&&sphere.actions[0]&&sphere.actions[0].action)||''):'';
+    return '<div class="rl"><div class="rl-dot"></div><div class="rl-week">Тиждень '+(i+1)+'</div><div class="rl-title">'+title+'</div>'+(sphere?'<div class="rl-text">Фокус: <strong>'+sphere.sphere+'</strong>'+(qw?' — '+qw:'')+'</div>':'')+'</div>';
   }).join('');
 }
 
@@ -1824,9 +1819,10 @@ async function startStreamingAnalysis(slug) {
     }catch(e){}
   }
 
-  // Генеруємо AI-портрет після аналізу
+  // Генеруємо AI-портрет після аналізу (пауза 3с щоб Groq відпочив)
   if(receivedAdvice.length >= 3){
-    generateOverallPortrait(slug, scoresData, receivedAdvice);
+    localStorage.setItem('lw_portrait_tried_'+slug, '1');
+    setTimeout(function(){ generateOverallPortrait(slug, scoresData, receivedAdvice); }, 3000);
   }
 
   if(banner) banner.style.display='none';
@@ -1904,6 +1900,11 @@ loadResult().then(function(){
   else if(resultData && resultData.analysis && resultData.analysis.overall_portrait){
     renderPortraitBlock(resultData.analysis.overall_portrait);
     localStorage.setItem('lw_portrait_'+_slug, JSON.stringify(resultData.analysis.overall_portrait));
+  } else if(resultData && resultData.analysis && (resultData.analysis.advice||[]).length >= 3
+      && !localStorage.getItem('lw_portrait_tried_'+_slug)){
+    // Портрет ще не генерувався — запускаємо авто-генерацію
+    localStorage.setItem('lw_portrait_tried_'+_slug, '1');
+    setTimeout(function(){ generateOverallPortrait(_slug, resultData.scores||{}, resultData.analysis.advice||[]); }, 1500);
   }
 
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
