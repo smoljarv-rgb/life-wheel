@@ -1735,7 +1735,7 @@ async function startStreamingAnalysis(slug) {
     var sysPrompt = 'ICF life coach. Ukrainian language. Warm, specific, no clichés. Use imperative: спробуй/зроби/помітиш. Respond ONLY with valid JSON.';
     var avgScore = (Object.values(scoresData).reduce(function(acc,v){return acc+parseFloat(v||0);},0)/Math.max(1,Object.keys(scoresData).length)).toFixed(1);
     var otherSpheres = spheres.filter(function(x){return x.key!==s.key;}).map(function(x){return x.name+':'+x.score;}).join(', ');
-    var prompt = '«'+s.name+'» = '+s.score+'/10. Загальний бал: '+avgScore+'/10. Інші сфери: '+otherSpheres+'. Відповідай JSON з полями: sphere(string), score(number), overview(2 речення — стан людини зараз), root_cause(1 речення — причина з огляду на інші сфери), insight(1 несподіване спостереження), actions(масив 7 об'єктів: day(1-7), action(конкретна дія), why(коротке обґрунтування)), week_result(1 речення — чесний прогноз на 7 днів).';
+        var prompt = "«"+s.name+"» = "+s.score+"/10. Загальний бал: "+avgScore+"/10. Інші сфери: "+otherSpheres+". Відповідай JSON: sphere(string), score(number), overview(2 речення про стан людини), root_cause(1 речення — причина з огляду на інші сфери), insight(1 несподіване спостереження), actions(масив 7 items: day(1-7), action(конкретна дія), why(обгрунтування)), week_result(1 речення — прогноз на 7 днів).";
     var sphereAdvice = null;
     var lastError = null;
     for(var attempt=0; attempt<3; attempt++){
