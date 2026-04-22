@@ -1247,7 +1247,7 @@ function renderPlan(data){
     mi++;
     var key=mi;
     var isDone=checkedTasks['micro_'+key]?true:false;
-    var qw=a.quick_win||(a.actions&&a.actions[0]&&a.actions[0].action)||'';
+    var qw=fixUkrainianText(a.quick_win||(a.actions&&a.actions[0]&&a.actions[0].action)||'');
     if(!qw) return '';
     return '<div class="micro'+(isDone?' done':'')+' " id="micro_'+key+'" onclick="toggleCheck(\'micro_'+key+'\','+key+')">'
       +'<div class="micro-circle">'+(isDone?'✓':key)+'</div>'
@@ -1278,10 +1278,10 @@ function renderPlan(data){
     wh+='<div style="font-family:\'Caveat Brush\',cursive;font-size:17px;color:var(--ink);margin-bottom:8px">'+dn+'</div>';
     wh+=tasks.map(function(t){
       return '<div style="margin-bottom:6px;padding:7px 10px;background:var(--paper);border-radius:7px;border-left:3px solid var(--orange)">'
-        +'<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px">'+t.task+'</div>'
+        +'<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px">'+fixUkrainianText(t.task)+'</div>'
         +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px">'
         +'<span style="font-size:12px;color:var(--ink3)">📌 '+t.sphere+'</span>'
-        +(t.technique?'<span style="font-size:12px;color:var(--ink2)">💡 '+t.technique+'</span>':'')
+        +(t.technique?'<span style="font-size:12px;color:var(--ink2)">💡 '+fixUkrainianText(t.technique)+'</span>':'')
         +(t.book?'<span style="font-size:12px;color:var(--blue)">📚 '+t.book+'</span>':'')
         +'</div>'
         +'</div>';
@@ -1296,7 +1296,7 @@ function renderPlan(data){
     var goal=a.month_goal||a.week_result||'';
     return '<div style="background:var(--paper2);border:1.5px solid var(--ink3);border-radius:10px;padding:12px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.06)">'
       +'<div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:4px">'+a.sphere+'</div>'
-      +'<div style="font-size:15px;color:var(--ink);line-height:1.5">🎯 '+goal+'</div>'
+      +'<div style="font-size:15px;color:var(--ink);line-height:1.5">🎯 '+fixUkrainianText(goal)+'</div>'
       +'</div>';
   }).join('')+'</div>';
 
@@ -1304,7 +1304,7 @@ function renderPlan(data){
   document.getElementById('roadmap').innerHTML=['Запуск звичок','Закріплення','Поглиблення','Оцінка прогресу'].map(function(title,i){
     var sphere=advice[i%advice.length];
     var qw=sphere?(sphere.quick_win||(sphere.actions&&sphere.actions[0]&&sphere.actions[0].action)||''):'';
-    return '<div class="rl"><div class="rl-dot"></div><div class="rl-week">Тиждень '+(i+1)+'</div><div class="rl-title">'+title+'</div>'+(sphere?'<div class="rl-text">Фокус: <strong>'+sphere.sphere+'</strong>'+(qw?' — '+qw:'')+'</div>':'')+'</div>';
+    return '<div class="rl"><div class="rl-dot"></div><div class="rl-week">Тиждень '+(i+1)+'</div><div class="rl-title">'+title+'</div>'+(sphere?'<div class="rl-text">Фокус: <strong>'+sphere.sphere+'</strong>'+(qw?' — '+fixUkrainianText(qw):'')+'</div>':'')+'</div>';
   }).join('');
 }
 
@@ -1862,37 +1862,37 @@ function renderPortraitBlock(portrait){
   var isPro = localStorage.getItem('lw_premium') === '1' && new Date(localStorage.getItem('lw_premium_expires') || 0) > new Date();
   var html = '<div class="portrait-block">';
   html += '<div class="portrait-type">🧠 AI-портрет особистості</div>';
-  html += '<div class="portrait-title">' + (portrait.type || '') + '</div>';
+  html += '<div class="portrait-title">' + fixUkrainianText(portrait.type || '') + '</div>';
   if(isPro){
-    html += '<div class="portrait-text">' + (portrait.full_text || '') + '</div>';
+    html += '<div class="portrait-text">' + fixUkrainianText(portrait.full_text || '') + '</div>';
     if(portrait.core_pattern || portrait.growth_vector){
       html += '<div class="portrait-meta">';
-      if(portrait.core_pattern) html += '<div class="portrait-meta-item"><div class="portrait-meta-label">Ключовий патерн</div><div class="portrait-meta-val">' + portrait.core_pattern + '</div></div>';
-      if(portrait.growth_vector) html += '<div class="portrait-meta-item"><div class="portrait-meta-label">Вектор зростання</div><div class="portrait-meta-val">' + portrait.growth_vector + '</div></div>';
+      if(portrait.core_pattern) html += '<div class="portrait-meta-item"><div class="portrait-meta-label">Ключовий патерн</div><div class="portrait-meta-val">' + fixUkrainianText(portrait.core_pattern) + '</div></div>';
+      if(portrait.growth_vector) html += '<div class="portrait-meta-item"><div class="portrait-meta-label">Вектор зростання</div><div class="portrait-meta-val">' + fixUkrainianText(portrait.growth_vector) + '</div></div>';
       html += '</div>';
     }
     if(portrait.month_plan && portrait.month_plan.length){
       html += '<div class="portrait-month">';
       for(var w=0;w<portrait.month_plan.length;w++){
         var wk=portrait.month_plan[w];
-        html += '<div class="portrait-week"><div class="portrait-week-num">Тиждень ' + (wk.week||w+1) + '</div><div class="portrait-week-text">' + (wk.focus||wk.action||'') + '</div></div>';
+        html += '<div class="portrait-week"><div class="portrait-week-num">Тиждень ' + (wk.week||w+1) + '</div><div class="portrait-week-text">' + fixUkrainianText(wk.focus||wk.action||'') + '</div></div>';
       }
       html += '</div>';
     }
   }else{
-    html += '<div class="portrait-text">' + (portrait.preview || '') + '</div>';
+    html += '<div class="portrait-text">' + fixUkrainianText(portrait.preview || '') + '</div>';
     var blurHtml = '';
     if(portrait.core_pattern || portrait.growth_vector){
       blurHtml += '<div class="portrait-meta">';
-      if(portrait.core_pattern) blurHtml += '<div class="portrait-meta-item"><div class="portrait-meta-label">Ключовий патерн</div><div class="portrait-meta-val">' + portrait.core_pattern + '</div></div>';
-      if(portrait.growth_vector) blurHtml += '<div class="portrait-meta-item"><div class="portrait-meta-label">Вектор зростання</div><div class="portrait-meta-val">' + portrait.growth_vector + '</div></div>';
+      if(portrait.core_pattern) blurHtml += '<div class="portrait-meta-item"><div class="portrait-meta-label">Ключовий патерн</div><div class="portrait-meta-val">' + fixUkrainianText(portrait.core_pattern) + '</div></div>';
+      if(portrait.growth_vector) blurHtml += '<div class="portrait-meta-item"><div class="portrait-meta-label">Вектор зростання</div><div class="portrait-meta-val">' + fixUkrainianText(portrait.growth_vector) + '</div></div>';
       blurHtml += '</div>';
     }
     if(portrait.month_plan && portrait.month_plan.length){
       blurHtml += '<div class="portrait-month">';
       for(var w2=0;w2<portrait.month_plan.length;w2++){
         var wk2=portrait.month_plan[w2];
-        blurHtml += '<div class="portrait-week"><div class="portrait-week-num">Тиждень ' + (wk2.week||w2+1) + '</div><div class="portrait-week-text">' + (wk2.focus||wk2.action||'') + '</div></div>';
+        blurHtml += '<div class="portrait-week"><div class="portrait-week-num">Тиждень ' + (wk2.week||w2+1) + '</div><div class="portrait-week-text">' + fixUkrainianText(wk2.focus||wk2.action||'') + '</div></div>';
       }
       blurHtml += '</div>';
     }
