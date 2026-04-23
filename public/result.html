@@ -2019,14 +2019,12 @@ function fixUkrainianText(text){
   r=r.replace(/([^.!?]*відчуваєте[^.!?]*)(відчуваєте)([^.!?]*[.!?])/g,function(m,b,d,a){return b+'переживаєте'+a;});
   return r;
 }
-// SELF-TEST: запускається раз при завантаженні сторінки
-(function(){
-  var _i='Ви відчуваєте відчуття безпорадності.';
-  var _o=fixUkrainianText(_i);
-  console.warn('[FIX-TEST] IN :', _i);
-  console.warn('[FIX-TEST] OUT:', _o);
-  console.warn('[FIX-TEST] OK?', _o.indexOf('відчуваєте відчуття')===-1 ? 'YES — fix works' : 'NO — fix broken');
-})();
+// SELF-TEST
+try{
+  var _ti='Ви відчуваєте відчуття безпорадності.';
+  var _to=fixUkrainianText(_ti);
+  console.error('[FIX-TEST] typeof _to='+typeof _to+' | IN="'+_ti+'" | OUT="'+String(_to)+'" | OK='+(String(_to).indexOf('відчуваєте відчуття')===-1));
+}catch(e){console.error('[FIX-TEST] EXCEPTION:',e.message);}
 function sanitizeAIResponse(parsed){
   if(!parsed) return parsed;
   var fields=['overview','root_cause','insight','week_result','type','preview','full_text','core_pattern','growth_vector'];
