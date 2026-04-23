@@ -1957,6 +1957,12 @@ async function generateOverallPortrait(slug, scores, sphereResults){
 }
 function fixUkrainianText(text){
   if(!text||typeof text!=='string') return text;
+  if(text.indexOf('відчуваєте відчуття')!==-1){
+    console.log('TAUTOLOGY_FOUND includes=true');
+    console.log('TAUTOLOGY_INPUT:', JSON.stringify(text));
+    var _t=/відчуваєте\s+відчуття/gi;
+    console.log('REGEX_TEST:', _t.test(text));
+  }
   var fixes=[
     // --- відчуваєте відчуття: специфічні форми з правильними відмінками ---
     [/відчуваєте\s+відчуття\s+тривог[иіу]?\b/gi,'відчуваєте тривогу'],
