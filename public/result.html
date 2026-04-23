@@ -1179,8 +1179,8 @@ function renderSpheres(data){
         if(aiAdvice.overview||aiAdvice.root_cause||aiAdvice.insight){
           h+='<div class="coach-insight-block">';
           h+='<div class="coach-header"><div class="coach-avatar">AI</div><div><div class="coach-title">Персональний висновок</div><div class="coach-sub">на основі твоїх балів</div></div></div>';
-          if(aiAdvice.overview) h+='<div class="coach-overview">'+fixUkrainianText(aiAdvice.overview)+'</div>';
-          if(aiAdvice.root_cause) h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+fixUkrainianText(aiAdvice.root_cause)+'</div>';
+          if(aiAdvice.overview){var _ov=fixUkrainianText(aiAdvice.overview);if(aiAdvice.overview.indexOf('відчуваєте відчуття')!==-1)console.warn('[RENDER] IN:',aiAdvice.overview,'OUT:',_ov);h+='<div class="coach-overview">'+_ov+'</div>';}
+          if(aiAdvice.root_cause){var _rc=fixUkrainianText(aiAdvice.root_cause);if(aiAdvice.root_cause.indexOf('відчуваєте відчуття')!==-1)console.warn('[RENDER] IN:',aiAdvice.root_cause,'OUT:',_rc);h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+_rc+'</div>';}
           if(aiAdvice.insight) h+='<div class="coach-insight"><span class="coach-insight-label">Важливо знати:</span> '+fixUkrainianText(aiAdvice.insight)+'</div>';
           h+='</div>';
         }
@@ -2019,6 +2019,14 @@ function fixUkrainianText(text){
   r=r.replace(/([^.!?]*відчуваєте[^.!?]*)(відчуваєте)([^.!?]*[.!?])/g,function(m,b,d,a){return b+'переживаєте'+a;});
   return r;
 }
+// SELF-TEST: запускається раз при завантаженні сторінки
+(function(){
+  var _i='Ви відчуваєте відчуття безпорадності.';
+  var _o=fixUkrainianText(_i);
+  console.warn('[FIX-TEST] IN :', _i);
+  console.warn('[FIX-TEST] OUT:', _o);
+  console.warn('[FIX-TEST] OK?', _o.indexOf('відчуваєте відчуття')===-1 ? 'YES — fix works' : 'NO — fix broken');
+})();
 function sanitizeAIResponse(parsed){
   if(!parsed) return parsed;
   var fields=['overview','root_cause','insight','week_result','type','preview','full_text','core_pattern','growth_vector'];
