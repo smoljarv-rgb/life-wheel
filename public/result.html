@@ -1179,8 +1179,8 @@ function renderSpheres(data){
         if(aiAdvice.overview||aiAdvice.root_cause||aiAdvice.insight){
           h+='<div class="coach-insight-block">';
           h+='<div class="coach-header"><div class="coach-avatar">AI</div><div><div class="coach-title">Персональний висновок</div><div class="coach-sub">на основі твоїх балів</div></div></div>';
-          if(aiAdvice.overview){var _ov=fixUkrainianText(aiAdvice.overview);if(aiAdvice.overview.indexOf('відчуваєте відчуття')!==-1)console.warn('[RENDER] IN:',aiAdvice.overview,'OUT:',_ov);h+='<div class="coach-overview">'+_ov+'</div>';}
-          if(aiAdvice.root_cause){var _rc=fixUkrainianText(aiAdvice.root_cause);if(aiAdvice.root_cause.indexOf('відчуваєте відчуття')!==-1)console.warn('[RENDER] IN:',aiAdvice.root_cause,'OUT:',_rc);h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+_rc+'</div>';}
+          if(aiAdvice.overview) h+='<div class="coach-overview">'+fixUkrainianText(aiAdvice.overview)+'</div>';
+          if(aiAdvice.root_cause) h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+fixUkrainianText(aiAdvice.root_cause)+'</div>';
           if(aiAdvice.insight) h+='<div class="coach-insight"><span class="coach-insight-label">Важливо знати:</span> '+fixUkrainianText(aiAdvice.insight)+'</div>';
           h+='</div>';
         }
@@ -1717,6 +1717,11 @@ async function startStreamingAnalysis(slug) {
   var receivedAdvice = [];
   var total = spheres.length;
 
+  // Скидаємо старий аналіз щоб не показувати застарілі дані під час нового
+  if(resultData && resultData.analysis) resultData.analysis.advice = [];
+  renderSpheres(resultData);
+  renderPlan(resultData);
+
   // Показуємо прогрес-бар
   var apEl = document.getElementById('analysisProgress');
   var ptEl = document.getElementById('progressText');
@@ -2019,12 +2024,6 @@ function fixUkrainianText(text){
   r=r.replace(/([^.!?]*відчуваєте[^.!?]*)(відчуваєте)([^.!?]*[.!?])/g,function(m,b,d,a){return b+'переживаєте'+a;});
   return r;
 }
-// SELF-TEST
-try{
-  var _ti='Ви відчуваєте відчуття безпорадності.';
-  var _to=fixUkrainianText(_ti);
-  console.error('[FIX-TEST] typeof _to='+typeof _to+' | IN="'+_ti+'" | OUT="'+String(_to)+'" | OK='+(String(_to).indexOf('відчуваєте відчуття')===-1));
-}catch(e){console.error('[FIX-TEST] EXCEPTION:',e.message);}
 function sanitizeAIResponse(parsed){
   if(!parsed) return parsed;
   var fields=['overview','root_cause','insight','week_result','type','preview','full_text','core_pattern','growth_vector'];
