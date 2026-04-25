@@ -835,6 +835,17 @@ app.post('/api/analyze', async function(req, res) {
     const text = (data.choices?.[0]?.message?.content) || '';
     if (!text) return res.status(500).json({ error: 'Порожня відповідь від Groq' });
 
+    // Застосовуємо fix на сервері — надійніше ніж покладатись тільки на клієнт
+    let cleanText = text;
+    try {
+      const parsed = JSON.parse(text);
+      const sanitized = sanitizeAIResponse(parsed);
+      cleanText = JSON.stringify(sanitized);
+    } catch(e) {
+      // JSON parse failed — apply simple string fix to raw text
+      cleanText = fixUkrainianText(text);
+    }
+
     try {
       const db = loadDB();
       db.events.push({ ts: Date.now(), type: 'analysis_completed', ip, data: {} });
@@ -842,7 +853,7 @@ app.post('/api/analyze', async function(req, res) {
       saveDB(db);
     } catch(e) {}
 
-    res.json({ text });
+    res.json({ text: cleanText });
   } catch (err) {
     // Vercel тайм-аут (AbortError) — повертаємо статус 408 замість 500
     if (err.name === 'AbortError') {
