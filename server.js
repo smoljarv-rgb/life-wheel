@@ -46,6 +46,16 @@ function fixUkrainianText(text){
     ['відчуваєте відчуття тиску','відчуваєте тиск'],
     ['відчуваєте відчуття дискомфорту','відчуваєте дискомфорт'],
     ['відчуваєте відчуття незручності','відчуваєте незручність'],
+    ['відчуваєте відчуття ізоляції','почуваєтесь ізольовано'],
+    ['відчуваєте відчуття зупинки','відчуваєте застій'],
+    ['відчуваєте відчуття застою','відчуваєте застій'],
+    ['відчуваєте відчуття дезорієнтації','дезорієнтовані'],
+    ['відчуваєте відчуття незадоволення','незадоволені'],
+    ['відчуваєте відчуття безкінечної','виснажені від'],
+    ['відчуваєте відчуття нескінченної','виснажені від'],
+    ['відчуваєте відчуття хронічної','відчуваєте хронічну'],
+    ['відчуваєте відчуття глибокої','відчуваєте глибоку'],
+    ['відчуваєте відчуття постійної','відчуваєте постійну'],
     // відчуваєте відчутну
     ['відчуваєте відчутну ','помітно відчуваєте '],
     ['відчуваєте відчутну','помітно відчуваєте'],
@@ -102,37 +112,9 @@ function fixUkrainianText(text){
     ["відсутність зв'язку","брак зв'язку"],
   ];
   pairs.forEach(([from,to])=>{ if(r.indexOf(from)!==-1) r=r.split(from).join(to); });
-  // catch-all: конвертує родовий відмінок → знахідний для будь-якого іменника
-  function genToAcc(n){
-    const l4=n.length>4?n.substring(n.length-4):'';
-    const l3=n.length>3?n.substring(n.length-3):'';
-    const l2=n.length>2?n.substring(n.length-2):'';
-    const l1=n.length>1?n.substring(n.length-1):'';
-    if(l4==='ості') return n.substring(0,n.length-1);    // самотності→самотність
-    if(l4==='ання') return n;                              // розуміння (незмінний)
-    if(l2==='аю')   return n.substring(0,n.length-1)+'й'; // відчаю→відчай
-    if(l2==='ою')   return n.substring(0,n.length-2)+'у'; // рідко
-    if(l2==='ги')   return n.substring(0,n.length-1)+'у'; // тривоги→тривогу
-    if(l2==='зи')   return n.substring(0,n.length-1)+'у'; // (fem -га/-за nouns)
-    if(l1==='у')    return n.substring(0,n.length-1);     // страху→страх, сорому→сором
-    if(l1==='ю')    return n.substring(0,n.length-1);     // болю→бол
-    if(l1==='і')    return n.substring(0,n.length-1)+'ю'; // надії→надію
-    return n;
-  }
-  function fixCatchall(str,marker,repl){
-    let idx=str.indexOf(marker);
-    while(idx!==-1){
-      const after=str.substring(idx+marker.length);
-      let end=0;
-      while(end<after.length&&' .,!?;:)\n\r'.indexOf(after[end])===-1) end++;
-      const noun=after.substring(0,end);
-      str=str.substring(0,idx)+repl+genToAcc(noun)+str.substring(idx+marker.length+end);
-      idx=str.indexOf(marker);
-    }
-    return str;
-  }
-  r=fixCatchall(r,'відчуваєте відчуття ','переживаєте ');
-  r=fixCatchall(r,'Відчуваєте відчуття ','Переживаєте ');
+  // catch-all: прибираємо "відчуття" — залишаємо решту як є (прибирає тавтологію надійно)
+  if(r.indexOf('відчуваєте відчуття ')!==-1) r=r.split('відчуваєте відчуття ').join('переживаєте ');
+  if(r.indexOf('Відчуваєте відчуття ')!==-1) r=r.split('Відчуваєте відчуття ').join('Переживаєте ');
   if(r.indexOf('відчуваєте відчуття')!==-1) r=r.split('відчуваєте відчуття').join('переживаєте');
   if(r.indexOf('Відчуваєте відчуття')!==-1) r=r.split('Відчуваєте відчуття').join('Переживаєте');
   return r;
