@@ -836,14 +836,20 @@ app.post('/api/analyze', async function(req, res) {
     if (!text) return res.status(500).json({ error: 'Порожня відповідь від Groq' });
 
     // Застосовуємо fix на сервері — надійніше ніж покладатись тільки на клієнт
-    let cleanText = text;
+    // Крок 1: raw string replacement ДО JSON.parse — найнадійніший рівень
+    const preFixed = text
+      .replace(/відчуваєте відчуття /g, 'переживаєте ')
+      .replace(/Відчуваєте відчуття /g, 'Переживаєте ')
+      .replace(/відчуваєте відчуття/g, 'переживаєте')
+      .replace(/Відчуваєте відчуття/g, 'Переживаєте');
+    let cleanText = preFixed;
     try {
-      const parsed = JSON.parse(text);
+      const parsed = JSON.parse(preFixed);
       const sanitized = sanitizeAIResponse(parsed);
       cleanText = JSON.stringify(sanitized);
     } catch(e) {
       // JSON parse failed — apply simple string fix to raw text
-      cleanText = fixUkrainianText(text);
+      cleanText = fixUkrainianText(preFixed);
     }
 
     try {

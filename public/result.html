@@ -1804,7 +1804,13 @@ async function startStreamingAnalysis(slug) {
         }
         
         if(data.text){
-          var parsed = sanitizeAIResponse(JSON.parse(data.text));
+          // raw string replacement ДО JSON.parse — найнадійніший рівень
+          var rawFixed = data.text
+            .split('відчуваєте відчуття ').join('переживаєте ')
+            .split('Відчуваєте відчуття ').join('Переживаєте ')
+            .split('відчуваєте відчуття').join('переживаєте')
+            .split('Відчуваєте відчуття').join('Переживаєте');
+          var parsed = sanitizeAIResponse(JSON.parse(rawFixed));
           if(!parsed.sphere) parsed.sphere = s.name;
           sphereAdvice = parsed;
           break;
