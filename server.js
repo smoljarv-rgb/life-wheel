@@ -14,7 +14,7 @@ const crypto = require('crypto');
 // ── Post-process AI text: fix tautologies and third-person ──
 function fixUkrainianText(text){
   if(!text||typeof text!=='string') return text;
-  let r=text;
+  let r=text.normalize('NFC');
   // Всі заміни через split/join (regex ненадійно працює з кирилицею)
   const pairs=[
     // "відчуваєте відчуття X" — специфічні

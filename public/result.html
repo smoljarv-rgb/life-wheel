@@ -1963,7 +1963,7 @@ async function generateOverallPortrait(slug, scores, sphereResults){
 }
 function fixUkrainianText(text){
   if(!text||typeof text!=='string') return text;
-  var r=text;
+  var r=text.normalize('NFC');
   // Всі заміни через split/join (regex ненадійно працює з кирилицею)
   var pairs=[
     // "відчуваєте відчуття X" — специфічні
