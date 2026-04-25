@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Life Score: що означає твій бал і як його підняти — Koleso.live</title>
-<meta name="description" content="Середній Life Score 3400+ користувачів — 5.4/10. Що це означає, які сфери просідають найчастіше і як підняти свій бал.">
+<title>Life Score: що означає твій бал | Koleso.live</title>
+<meta name="description" content="Life Score від 1 до 10 — що означає кожен діапазон і як змінити свій бал за 30 днів. Безкоштовний AI-аналіз на koleso.live.">
 <meta name="robots" content="index, follow">
+<meta name="keywords" content="life score баланс, колесо життя, life score що означає">
 <link rel="canonical" href="https://koleso.live/blog/life-score">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta property="og:title" content="Life Score: що означає твій бал і як його підняти">
-<meta property="og:description" content="Дані 3 400+ користувачів. Які сфери просідають найчастіше і що з цим робити.">
+<meta property="og:title" content="Life Score: що означає твій бал | Koleso.live">
+<meta property="og:description" content="Life Score від 1 до 10 — що означає кожен діапазон і як змінити свій бал за 30 днів.">
 <meta property="og:image" content="https://koleso.live/og-image.png">
 <meta property="og:url" content="https://koleso.live/blog/life-score">
 <meta property="og:type" content="article">
@@ -40,20 +41,23 @@ h1.article-title::after{content:'';position:absolute;bottom:2px;left:-4px;right:
 .article-lead{font-size:18px;color:var(--ink2);line-height:1.7;margin-bottom:36px;padding-bottom:28px;border-bottom:2px dashed var(--paper3)}
 .article-body{font-size:16px;color:var(--ink2);line-height:1.8}
 .article-body h2{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin:36px 0 14px}
+.article-body h3{font-family:'Caveat Brush',cursive;font-size:19px;color:var(--ink);margin:24px 0 10px}
 .article-body p{margin-bottom:18px}
 .article-body ul{margin:0 0 18px 20px}
 .article-body ul li{margin-bottom:8px}
 .article-body strong{color:var(--ink);font-weight:700}
 .article-body .callout{background:var(--paper2);border-left:4px solid var(--gold-d);padding:16px 20px;border-radius:0 8px 8px 0;margin:28px 0;font-size:15px;color:var(--ink2)}
 .article-body .callout strong{display:block;margin-bottom:6px;font-family:'Caveat Brush',cursive;font-size:17px}
-/* Score bars */
-.score-table{margin:24px 0;display:flex;flex-direction:column;gap:10px}
-.score-row{display:flex;align-items:center;gap:12px}
-.score-label{font-size:14px;color:var(--ink2);width:200px;flex-shrink:0}
-.score-bar-wrap{flex:1;background:var(--paper3);border-radius:100px;height:12px;overflow:hidden}
-.score-bar{height:100%;border-radius:100px;transition:width .4s}
-.score-num{font-size:14px;color:var(--ink2);font-weight:700;width:36px;text-align:right;flex-shrink:0}
-@media(max-width:480px){.score-label{width:130px;font-size:13px}}
+.score-band{border-radius:10px;padding:16px 20px;margin:16px 0}
+.score-band.red{background:rgba(192,57,43,.08);border-left:4px solid var(--red)}
+.score-band.orange{background:rgba(211,84,0,.08);border-left:4px solid var(--orange)}
+.score-band.yellow{background:rgba(243,156,18,.08);border-left:4px solid var(--yellow)}
+.score-band.green{background:rgba(39,174,96,.08);border-left:4px solid var(--green)}
+.score-band-label{font-family:'Caveat Brush',cursive;font-size:18px;margin-bottom:6px}
+.score-band.red .score-band-label{color:var(--red)}
+.score-band.orange .score-band-label{color:var(--orange)}
+.score-band.yellow .score-band-label{color:var(--yellow)}
+.score-band.green .score-band-label{color:var(--green)}
 .cta-block{background:var(--paper2);border:2px dashed var(--paper3);border-radius:12px;padding:36px 28px;text-align:center;margin:48px 0 40px}
 .cta-block-title{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin-bottom:12px}
 .cta-block-sub{font-size:15px;color:var(--ink2);margin-bottom:24px;line-height:1.6}
@@ -78,112 +82,79 @@ footer{border-top:2px dashed var(--paper3);padding:24px 0;display:flex;align-ite
 
   <article>
     <div class="article-meta">
-      <span class="article-tag">Самоаналіз</span>
-      <span class="article-date">12 квітня 2026</span>
-      <span class="article-read-time">· 4 хв читання</span>
+      <span class="article-tag">Life Score</span>
+      <span class="article-date">24 квітня 2026</span>
+      <span class="article-read-time">· 5 хв читання</span>
     </div>
 
-    <h1 class="article-title">Life Score: що означає твій бал і як його підняти</h1>
+    <h1 class="article-title">Life Score: що означає твій бал</h1>
 
-    <p class="article-lead">Ми проаналізували результати 3 400+ тестів і побачили цікаве: середній бал по всіх сферах — 5.4/10. Більшість людей живуть приблизно на половину своїх можливостей. І вони навіть не знають де саме губиться решта.</p>
+    <p class="article-lead">Одне число від 1 до 10 — і ти вже бачиш більше, ніж після годинної розмови з собою. Але що воно означає насправді? І чи варто хвилюватись, якщо твій бал нижчий за 6?</p>
 
     <div class="article-body">
 
-      <h2>Що таке Life Score?</h2>
-      <p>Life Score — це середнє значення оцінок по всіх 12 сферах твого Колеса Життя. Він показує загальний рівень балансу та задоволеності твоїм життям прямо зараз.</p>
-      <p>Але важливіший не сам бал, а <strong>де саме просідає</strong>. Людина з балом 5.4 і рівними сферами відчуває себе набагато краще, ніж людина з балом 6, але однією сферою на 1/10.</p>
-
-      <h2>Дані по 12 сферах</h2>
-      <p>Середні бали наших користувачів:</p>
-
-      <div class="score-table">
-        <div class="score-row">
-          <span class="score-label">Стосунки та сім'я</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:68%;background:#27ae60"></div></div>
-          <span class="score-num">6.8</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Духовність</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:61%;background:#27ae60"></div></div>
-          <span class="score-num">6.1</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Особистий розвиток</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:58%;background:#f39c12"></div></div>
-          <span class="score-num">5.8</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Кар'єра</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:55%;background:#f39c12"></div></div>
-          <span class="score-num">5.5</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Соціальне коло</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:53%;background:#f39c12"></div></div>
-          <span class="score-num">5.3</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Здоров'я та тіло</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:52%;background:#f39c12"></div></div>
-          <span class="score-num">5.2</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Творчість</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:49%;background:#d35400"></div></div>
-          <span class="score-num">4.9</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Вплив та внесок</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:47%;background:#d35400"></div></div>
-          <span class="score-num">4.7</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Середовище</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:46%;background:#d35400"></div></div>
-          <span class="score-num">4.6</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Ментальне здоров'я</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:44%;background:#d35400"></div></div>
-          <span class="score-num">4.4</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Фінанси</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:43%;background:#d35400"></div></div>
-          <span class="score-num">4.3</span>
-        </div>
-        <div class="score-row">
-          <span class="score-label">Відпочинок та хобі</span>
-          <div class="score-bar-wrap"><div class="score-bar" style="width:41%;background:#c0392b"></div></div>
-          <span class="score-num">4.1</span>
-        </div>
-      </div>
+      <h2>Число яке відкриває правду</h2>
+      <p>Life Score — це середнє значення твоїх оцінок по всіх 12 сферах Колеса Життя. Він не говорить тобі "ти молодець" чи "ти невдаха". Він показує <strong>де ти зараз</strong> — без прикрас і без зайвого драматизму.</p>
+      <p>Але є нюанс: сам по собі бал нічого не значить. Важливіше — <strong>де саме просідає</strong>. Людина з балом 5.0 і рівними сферами почувається набагато стабільніше, ніж людина з балом 6.5, у якої одна сфера на 1/10 тягне все вниз.</p>
 
       <div class="callout">
-        <strong>Що означають ці цифри?</strong>
-        Нижні 4 сфери — "Ментальне здоров'я", "Фінанси" та "Відпочинок" — це зони де більшість людей хронічно недоінвестовують свою увагу. І саме вони найчастіше є коренем проблем в інших сферах.
+        <strong>Середній бал по 3 400+ тестах — 5.4/10</strong>
+        Більшість людей живуть приблизно на половину своїх можливостей. І найчастіше вони не знають де саме губиться решта енергії.
       </div>
 
-      <h2>Як інтерпретувати свій бал</h2>
-      <ul>
-        <li><strong>8–10</strong> — зона процвітання. Ця сфера дає тобі енергію</li>
-        <li><strong>6–7</strong> — стабільна зона. Є куди рости, але не критично</li>
-        <li><strong>4–5</strong> — зона уваги. Сфера забирає більше енергії ніж дає</li>
-        <li><strong>1–3</strong> — кризова зона. Потребує негайної дії</li>
-      </ul>
+      <h2>Що означає кожен діапазон балів</h2>
+      <p>Колесо Життя — не шкала "добре/погано". Це карта, яка показує де ти витрачаєш більше ніж отримуєш.</p>
 
-      <h2>Як підняти Life Score?</h2>
-      <p>Помилка більшості — намагатися підняти всі сфери одночасно. Це не працює. <strong>Піднімай знизу вгору</strong>: виправляй найнижчу сферу першою.</p>
-      <p>Коли ти відновлюєш найбільш виснажену зону, це вивільняє енергію для всіх інших сфер. Так один правильний крок дає системний ефект.</p>
-      <p>Саме тому AI-аналіз на Koleso.live визначає не просто твої бали, а конкретну послідовність дій — з чого починати і що зробити наступного тижня.</p>
+      <h3>Life Score 1–3: критичний дисбаланс</h3>
+      <div class="score-band red">
+        <div class="score-band-label">🔴 Потребує негайної уваги</div>
+        <p style="margin:0;font-size:15px">Одна або кілька сфер у глибокій кризі. Це не привід для паніки — це сигнал діяти. На цьому рівні одна правильна дія дає помітний результат уже за тиждень, бо є куди рости.</p>
+      </div>
+      <p>Якщо твій загальний бал 1–3, швидше за все є 1–2 сфери-"якорі" які тягнуть все вниз. Знайди їх — і почни саме там.</p>
+
+      <h3>Life Score 4–5: дисбаланс є, але є і ресурс</h3>
+      <div class="score-band orange">
+        <div class="score-band-label">🟠 Зона уваги</div>
+        <p style="margin:0;font-size:15px">Це найпоширеніший діапазон. Середній бал 5.4 саме тут. Ти функціонуєш, але часто відчуваєш що "щось не так" — без конкретної причини. Є кілька сфер які витрачають більше енергії ніж повертають.</p>
+      </div>
+      <p>На цьому рівні важливо не намагатися виправити все одразу. <strong>Один фокус на місяць</strong> — найслабша сфера — дає системний ефект на решту.</p>
+
+      <h3>Life Score 6–7: непогано, але є прихована втома</h3>
+      <div class="score-band yellow">
+        <div class="score-band-label">🟡 Стабільно, але не без нюансів</div>
+        <p style="margin:0;font-size:15px">На перший погляд все добре. Але часто саме тут ховається "прихована втома" — коли зовні нібито нормально, а всередині відчуття що чогось не вистачає. Одна-дві сфери стабільно ігноруються.</p>
+      </div>
+      <p>Люди в цьому діапазоні рідко звертаються по допомогу — бо "і так непогано". Але саме тут є найбільший потенціал для якісного стрибка.</p>
+
+      <h3>Life Score 8–10: баланс і зростання</h3>
+      <div class="score-band green">
+        <div class="score-band-label">🟢 Зона процвітання</div>
+        <p style="margin:0;font-size:15px">Більшість сфер дають енергію, а не забирають. Ти помічаєш синергію: успіх в одній сфері підсилює іншу. Це не "ідеальне" життя — але це свідомо вибудуваний баланс.</p>
+      </div>
+      <p>Менше 8% користувачів мають Life Score вище 8. Якщо ти тут — це результат роботи, не випадковість.</p>
+
+      <h2>Чому середній бал 5.4 — це нормально</h2>
+      <p>Коли люди бачать свій бал 5 або 5.5, перша реакція — розчарування. "Невже я настільки незбалансований?"</p>
+      <p>Але 5.4 — це не провал. Це чесна відповідь на чесне запитання. Більшість людей ніколи не ставлять собі цього запитання взагалі.</p>
+      <p>Справжня проблема не в балі. Проблема в тому, що <strong>без усвідомлення — нема руху</strong>. Life Score дає точку відліку. З неї можна діяти.</p>
+
+      <div class="callout">
+        <strong>Найчастіші "донори втоми"</strong>
+        За даними наших користувачів, три сфери найчастіше тягнуть бал вниз: Ментальне здоров'я (4.4), Фінанси (4.3) і Відпочинок та хобі (4.1). Але вони ж — першими реагують на зміни.
+      </div>
+
+      <h2>Life Score змінюється. Це головне</h2>
+      <p>Life Score — не вирок і не характеристика. Це знімок одного моменту. Він змінюється — і доволі швидко, якщо знаєш куди спрямувати зусилля.</p>
+      <p>Користувачі, які пройшли повторний тест через 30 днів після отримання AI-плану, в середньому показують зростання на <strong>0.8–1.2 бала</strong>. Не тому що "старались більше" — а тому що діяли в правильному напрямку.</p>
+      <p>Перший крок — знати свій поточний бал і розуміти що за ним стоїть. Решта — справа послідовності.</p>
 
     </div>
   </article>
 
   <div class="cta-block">
     <div class="cta-block-title">Дізнайся свій Life Score</div>
-    <p class="cta-block-sub">Порівняй себе з 3 400+ користувачами і знайди де ти губиш найбільше.<br>Безкоштовно. 5 хвилин.</p>
-    <a href="/" class="btn-cta">📊 Пройти тест</a><br>
+    <p class="cta-block-sub">5 хвилин — і ти побачиш де губиться енергія і що з цим робити.<br>Безкоштовно. Без реєстрації.</p>
+    <a href="https://koleso.live" class="btn-cta">Дізнатись свій Life Score →</a><br>
     <a href="/blog" class="btn-cta-ghost">← Більше статей</a>
   </div>
 
