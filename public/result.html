@@ -2050,11 +2050,26 @@ function fixUkrainianText(text){
     ['відсутність зв\'язку','брак зв\'язку'],
   ];
   pairs.forEach(function(p){ if(r.indexOf(p[0])!==-1) r=r.split(p[0]).join(p[1]); });
-  // catch-all: будь-яке "відчуваєте відчуття" що залишилось
-  if(r.indexOf('відчуваєте відчуття ')!==-1) r=r.split('відчуваєте відчуття ').join('відчуваєте ');
-  if(r.indexOf('відчуваєте відчуття')!==-1) r=r.split('відчуваєте відчуття').join('відчуваєте');
-  if(r.indexOf('Відчуваєте відчуття ')!==-1) r=r.split('Відчуваєте відчуття ').join('Відчуваєте ');
-  if(r.indexOf('Відчуваєте відчуття')!==-1) r=r.split('Відчуваєте відчуття').join('Відчуваєте');
+  // catch-all: будь-яке "відчуваєте відчуття Xості" — конвертуємо відмінок ості→ість
+  function fixCatchall(str, marker, repl){
+    var idx=str.indexOf(marker);
+    while(idx!==-1){
+      var after=str.substring(idx+marker.length);
+      var end=0;
+      while(end<after.length&&' .,!?;:)\n\r'.indexOf(after[end])===-1) end++;
+      var noun=after.substring(0,end);
+      var acc=noun;
+      if(noun.length>4&&noun.substring(noun.length-4)==='ості') acc=noun.substring(0,noun.length-1);
+      else if(noun.length>3&&noun.substring(noun.length-3)==='ань') acc=noun;
+      str=str.substring(0,idx)+repl+acc+str.substring(idx+marker.length+end);
+      idx=str.indexOf(marker);
+    }
+    return str;
+  }
+  r=fixCatchall(r,'відчуваєте відчуття ','переживаєте ');
+  r=fixCatchall(r,'Відчуваєте відчуття ','Переживаєте ');
+  if(r.indexOf('відчуваєте відчуття')!==-1) r=r.split('відчуваєте відчуття').join('переживаєте');
+  if(r.indexOf('Відчуваєте відчуття')!==-1) r=r.split('Відчуваєте відчуття').join('Переживаєте');
   return r;
 }
 function sanitizeAIResponse(parsed){
