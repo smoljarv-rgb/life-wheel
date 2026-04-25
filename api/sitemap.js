@@ -9,6 +9,7 @@ module.exports = (req, res) => {
     { loc: 'https://koleso.live/blog/life-score',           priority: '0.7', changefreq: 'monthly' },
     { loc: 'https://koleso.live/blog/12-sfer-zhyttya',       priority: '0.7', changefreq: 'monthly' },
     { loc: 'https://koleso.live/blog/sfera-finansy',         priority: '0.7', changefreq: 'monthly' },
+    { loc: 'https://koleso.live/blog/ai-korenieva-prychyna', priority: '0.7', changefreq: 'monthly' },
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

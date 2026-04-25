@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Як AI знаходить кореневу причину дисбалансу | Koleso.live</title>
+<meta name="description" content="AI аналізує зв'язки між 12 сферами життя і знаходить корінь проблеми — не симптом. Дізнайтесь як це працює на koleso.live.">
+<meta name="robots" content="index, follow">
+<meta name="keywords" content="AI коуч аналіз, коренева причина дисбалансу, колесо життя AI">
+<link rel="canonical" href="https://koleso.live/blog/ai-korenieva-prychyna">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:title" content="Як AI знаходить кореневу причину дисбалансу | Koleso.live">
+<meta property="og:description" content="AI аналізує зв'язки між 12 сферами життя і знаходить корінь проблеми — не симптом.">
+<meta property="og:image" content="https://koleso.live/og-image.png">
+<meta property="og:url" content="https://koleso.live/blog/ai-korenieva-prychyna">
+<meta property="og:type" content="article">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdf6e3;--paper2:#f5ead0;--paper3:#ede0c4;
+  --ink:#2c1810;--ink2:#4a3728;--ink3:#7a6050;--ink4:rgba(44,24,16,.08);
+  --yellow:#f39c12;--gold:#e8c060;--gold-d:#b89040;
+  --green:#27ae60;--red:#c0392b;--blue:#2471a3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Patrick Hand',cursive;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(180,160,120,.12) 28px),repeating-linear-gradient(90deg,transparent,transparent 99%,rgba(180,160,120,.06) 100%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background:var(--paper3);clip-path:polygon(0 0,2% 100%,4% 20%,6% 80%,8% 10%,10% 90%,12% 30%,14% 70%,16% 15%,18% 85%,20% 40%,22% 60%,24% 20%,26% 80%,28% 10%,30% 90%,32% 35%,34% 65%,36% 15%,38% 85%,40% 45%,42% 55%,44% 25%,46% 75%,48% 10%,50% 90%,52% 30%,54% 70%,56% 20%,58% 80%,60% 40%,62% 60%,64% 15%,66% 85%,68% 35%,70% 65%,72% 10%,74% 90%,76% 45%,78% 55%,80% 20%,82% 80%,84% 30%,86% 70%,88% 15%,90% 85%,92% 40%,94% 60%,96% 25%,98% 75%,100% 0);pointer-events:none;z-index:1}
+.wrap{max-width:720px;margin:0 auto;padding:40px 24px 80px;position:relative;z-index:1}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0 32px;border-bottom:2px dashed var(--paper3);margin-bottom:40px}
+.nav-logo{font-family:'Caveat Brush',cursive;font-size:22px;color:var(--ink);text-decoration:none}
+.nav-back{font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink3);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+.nav-back:hover{color:var(--ink)}
+.article-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.article-tag{font-family:'Caveat Brush',cursive;font-size:11px;letter-spacing:.08em;color:var(--ink3);border:1.5px dashed var(--paper3);padding:2px 10px;border-radius:100px}
+.article-date{font-size:13px;color:var(--ink3)}
+.article-read-time{font-size:13px;color:var(--ink3)}
+h1.article-title{font-family:'Caveat Brush',cursive;font-size:clamp(28px,6vw,42px);color:var(--ink);line-height:1.2;margin-bottom:20px;position:relative;display:inline-block}
+h1.article-title::after{content:'';position:absolute;bottom:2px;left:-4px;right:-4px;height:8px;background:var(--yellow);opacity:.5;z-index:-1;transform:rotate(-0.3deg);border-radius:2px}
+.article-lead{font-size:18px;color:var(--ink2);line-height:1.7;margin-bottom:36px;padding-bottom:28px;border-bottom:2px dashed var(--paper3)}
+.article-body{font-size:16px;color:var(--ink2);line-height:1.8}
+.article-body h2{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin:36px 0 14px}
+.article-body p{margin-bottom:18px}
+.article-body ul{margin:0 0 18px 20px}
+.article-body ul li{margin-bottom:8px}
+.article-body strong{color:var(--ink);font-weight:700}
+.article-body .callout{background:var(--paper2);border-left:4px solid var(--gold-d);padding:16px 20px;border-radius:0 8px 8px 0;margin:28px 0;font-size:15px;color:var(--ink2)}
+.article-body .callout strong{display:block;margin-bottom:6px;font-family:'Caveat Brush',cursive;font-size:17px}
+.compare-table{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
+.compare-col{padding:16px 18px;border-radius:10px}
+.compare-col.symptom{background:rgba(192,57,43,.07);border:1.5px dashed rgba(192,57,43,.3)}
+.compare-col.root{background:rgba(39,174,96,.07);border:1.5px dashed rgba(39,174,96,.3)}
+.compare-col-title{font-family:'Caveat Brush',cursive;font-size:16px;margin-bottom:10px}
+.compare-col.symptom .compare-col-title{color:var(--red)}
+.compare-col.root .compare-col-title{color:var(--green)}
+.compare-col ul{margin:0;padding-left:16px}
+.compare-col ul li{font-size:14px;margin-bottom:6px;color:var(--ink2)}
+@media(max-width:520px){.compare-table{grid-template-columns:1fr}}
+.cta-block{background:var(--paper2);border:2px dashed var(--paper3);border-radius:12px;padding:36px 28px;text-align:center;margin:48px 0 40px}
+.cta-block-title{font-family:'Caveat Brush',cursive;font-size:24px;color:var(--ink);margin-bottom:12px}
+.cta-block-sub{font-size:15px;color:var(--ink2);margin-bottom:24px;line-height:1.6}
+.btn-cta{display:inline-block;font-family:'Patrick Hand',cursive;font-size:16px;font-weight:600;padding:14px 32px;background:var(--ink);color:var(--paper);border-radius:100px;text-decoration:none;transition:transform .15s,box-shadow .15s;box-shadow:3px 4px 0 rgba(44,24,16,.2)}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:4px 6px 0 rgba(44,24,16,.25)}
+.btn-cta-ghost{display:inline-block;font-family:'Patrick Hand',cursive;font-size:15px;padding:10px 24px;border:2px solid var(--paper3);color:var(--ink3);border-radius:100px;text-decoration:none;transition:color .2s,border-color .2s;margin-top:12px}
+.btn-cta-ghost:hover{color:var(--ink);border-color:var(--ink3)}
+footer{border-top:2px dashed var(--paper3);padding:24px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:13px;color:var(--ink3)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:13px;color:var(--ink3);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a href="/" class="nav-logo">🎡 Koleso.live</a>
+    <a href="/blog" class="nav-back">← Блог</a>
+  </nav>
+
+  <article>
+    <div class="article-meta">
+      <span class="article-tag">AI-аналіз</span>
+      <span class="article-date">25 квітня 2026</span>
+      <span class="article-read-time">· 5 хв читання</span>
+    </div>
+
+    <h1 class="article-title">Як AI знаходить кореневу причину</h1>
+
+    <p class="article-lead">Більшість людей вирішують не ту проблему. Вони борються з симптомом — і дивуються чому нічого не змінюється. AI-аналіз Колеса Життя робить одне ключове: відрізняє симптом від кореня.</p>
+
+    <div class="article-body">
+
+      <h2>Симптом і корінь — різні речі</h2>
+      <p>Уяви: у тебе постійна втома. Ти йдеш до лікаря, здаєш аналізи — все в нормі. Починаєш "більше відпочивати" — не допомагає. Змінюєш режим сну — теж без змін.</p>
+      <p>Причина проста: <strong>втома — це симптом</strong>. Справжній корінь може бути в іншому місці — хронічний стрес на роботі, конфлікт у стосунках, відчуття безглуздості того що робиш щодня.</p>
+      <p>Так само працює дисбаланс у 12 сферах життя. Ти бачиш проблему в одній сфері — а причина в іншій. І поки ти не знайдеш цю іншу, жодне "виправлення" симптому не допоможе.</p>
+
+      <h2>Як виглядає різниця між симптомом і коренем</h2>
+      <p>Ось кілька реальних патернів які фіксує AI під час аналізу:</p>
+
+      <div class="compare-table">
+        <div class="compare-col symptom">
+          <div class="compare-col-title">😰 Що людина бачить</div>
+          <ul>
+            <li>Немає грошей, фінанси просідають</li>
+            <li>Проблеми у стосунках</li>
+            <li>Немає сил на хобі та відпочинок</li>
+            <li>Не можу схуднути / займатись спортом</li>
+          </ul>
+        </div>
+        <div class="compare-col root">
+          <div class="compare-col-title">🎯 Що знаходить AI</div>
+          <ul>
+            <li>Кар'єра 3/10 → нереалізованість, а не брак грошей</li>
+            <li>Ментальне здоров'я 2/10 → тривожність "з'їдає" близькість</li>
+            <li>Кар'єра забирає всю енергію без сенсу</li>
+            <li>Відпочинок 2/10 → тіло в хронічному стресі</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Цифра яка відкриває очі</strong>
+        У 74% випадків сфера з найнижчим балом — не та, яка є справжнім коренем. Корінь ховається на 1–2 рівні глибше, і знайти його самостійно майже неможливо.
+      </div>
+
+      <h2>Як AI аналізує зв'язки між сферами</h2>
+      <p>Людина оцінює 12 сфер свого Колеса Життя — кожну від 1 до 10. Але AI не дивиться на них окремо. Він шукає <strong>кореляції і залежності</strong> між сферами.</p>
+      <p>Наприклад, якщо "Кар'єра" 3/10, "Фінанси" 4/10 і "Ментальне здоров'я" 3/10 — це не три окремі проблеми. Це один патерн: людина застрягла в роботі яка не дає ні грошей ні сенсу, і це поступово руйнує внутрішній стан.</p>
+      <p>AI перебирає сотні таких комбінацій, знаходить <strong>вузлову точку</strong> — сферу, виправлення якої дасть ланцюговий ефект на решту — і починає саме з неї.</p>
+      <p>Це не магія. Це системний аналіз того, що коуч-людина робила б годинами розмов.</p>
+
+      <h2>Чому це важливо для вас особисто</h2>
+      <p>Коли людина намагається "виправити все одночасно" — вона розпорошує увагу і швидко здається. Зміни не відчуваються, мотивація зникає.</p>
+      <p>Коли є одна чітка точка входу — <strong>починати набагато легше</strong>. Ти знаєш що робиш і чому. Перший результат з'являється швидше, і це підтримує рух вперед.</p>
+      <p>Саме тому AI-аналіз не просто показує бали. Він будує <strong>послідовність дій</strong>: що робити в першу чергу, що стане наслідком, і як один крок веде до наступного.</p>
+
+      <div class="callout">
+        <strong>Реальний приклад</strong>
+        Оксана, 34 роки. Прийшла з "проблемою у стосунках" — постійні сварки з партнером. AI знайшов корінь у сфері "Кар'єра" (3/10) і "Особистий розвиток" (2/10). Через місяць після зміни вектора в кар'єрі стосунки стабілізувались — без жодної "роботи над ними".
+      </div>
+
+      <h2>AI не замінює людину. Він бачить те що людина пропускає</h2>
+      <p>Ми схильні бачити те що хочемо бачити. Пояснювати свій стан через найочевиднішу причину. Уникати сфер де боляче.</p>
+      <p>AI не має цих обмежень. Він дивиться на всі 12 сфер одночасно, без упередженості, без страху назвати незручне.</p>
+      <p>Коуч-людина зробить те саме — але це коштує часу, грошей і декількох сесій перед тим як дійти до суті. AI дає відповідь за 5 хвилин.</p>
+      <p>Чи є це заміною глибокої роботи з людиною? Ні. Але це <strong>чесна точка відліку</strong> — з якої набагато легше починати.</p>
+
+    </div>
+  </article>
+
+  <div class="cta-block">
+    <div class="cta-block-title">Знайди свій корінь безкоштовно</div>
+    <p class="cta-block-sub">AI проаналізує зв'язки між твоїми 12 сферами і покаже де насправді зламалось.<br>5 хвилин. Без реєстрації.</p>
+    <a href="https://koleso.live" class="btn-cta">Знайти свій корінь безкоштовно →</a><br>
+    <a href="/blog" class="btn-cta-ghost">← Більше статей</a>
+  </div>
+
+  <footer>
+    <div class="footer-copy">© 2026 Koleso.live</div>
+    <div class="footer-links">
+      <a href="/terms">Умови</a>
+      <a href="/privacy">Конфіденційність</a>
+      <a href="mailto:support@koleso.live">Підтримка</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
