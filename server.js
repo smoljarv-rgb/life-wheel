@@ -1622,6 +1622,8 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
 });
 
+app.get('/sitemap.xml', require('./api/sitemap'));
+
 app.get('/terms', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
