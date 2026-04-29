@@ -476,6 +476,21 @@ footer{
   .guarantee{grid-template-columns:1fr 1fr}
   .curr-btn{padding:7px 14px}
 }
+/* STICKY MOBILE BUY BAR */
+#mobileBuyBar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--paper);
+  border-top:2px solid var(--gold-d);
+  padding:10px 16px;
+  box-shadow:0 -4px 20px rgba(44,24,16,.15);
+  align-items:center;gap:12px;
+  font-family:'Patrick Hand',cursive;
+}
+@media(max-width:680px){
+  #mobileBuyBar{display:flex}
+  .wrap{padding-bottom:80px}
+}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -709,6 +724,8 @@ function setCurrency(cur, btn) {
     if(periodEl) periodEl.textContent = d.period;
     if(savEl){ savEl.textContent = d.savings; savEl.classList.toggle('show', !!d.savings); }
   });
+  var mobilePrice = document.getElementById('mobileBuyPrice');
+  if(mobilePrice) mobilePrice.textContent = cur==='uah' ? '249 ₴ / міс' : '$5.99 / month';
   if (activePromo) applyDiscountToPrices(activePromo.discount);
 }
 
@@ -906,5 +923,13 @@ function startPayment(plan, btn) {
 }
 </script>
 
+<!-- STICKY MOBILE BUY BAR -->
+<div id="mobileBuyBar">
+  <div style="flex:1;min-width:0">
+    <div style="font-size:15px;font-weight:700;color:var(--ink)">PRO Місячний</div>
+    <div style="font-size:12px;color:var(--ink3)" id="mobileBuyPrice">249 ₴ / міс</div>
+  </div>
+  <button onclick="startPayment('monthly',this)" style="font-family:'Patrick Hand',cursive;font-size:14px;font-weight:700;color:var(--ink);background:var(--gold);border:2px solid var(--gold-d);border-radius:3px 8px 6px 4px;padding:10px 20px;cursor:pointer;white-space:nowrap;box-shadow:2px 3px 0 rgba(184,144,64,.3)">Почати PRO →</button>
+</div>
 </body>
 </html>

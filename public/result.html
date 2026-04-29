@@ -27,6 +27,8 @@
   --orange:#d35400;
   --purple:#7d3c98;
   --yellow:#f39c12;
+  --gold:#e8c060;
+  --gold-d:#b89040;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -740,8 +742,23 @@ body::after{
   .hdr-wheel{display:none}
   .snap-grid{grid-template-columns:repeat(3,1fr)}
   .sph-cols{grid-template-columns:1fr}
-  .btn-row{flex-direction:column}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .btn{min-width:unset}
+  .wrap{padding-top:16px;padding-bottom:90px}
+}
+/* STICKY MOBILE PRO BAR */
+#mobileProBar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--paper);
+  border-top:2px solid var(--gold-d);
+  padding:10px 16px;
+  box-shadow:0 -4px 20px rgba(44,24,16,.15);
+  align-items:center;gap:12px;
+  font-family:'Patrick Hand',cursive;
+}
+@media(max-width:580px){
+  #mobileProBar.show{display:flex}
 }
 .coach-insight-block{border-left:3px solid var(--blue);background:var(--paper2);border-radius:12px;padding:14px 16px;margin-bottom:12px;font-family:'Nunito',sans-serif}
 .coach-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -1129,6 +1146,13 @@ function renderSpheres(data){
       <a href="/pricing" class="btn-upgrade">Розблокувати всі ${lockedCount} сфер →</a>
       <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія</div>
     </div>`:'';
+
+  if(isFree && lockedCount>0){
+    const bar=document.getElementById('mobileProBar');
+    const cnt=document.getElementById('mobileProCount');
+    if(bar) bar.classList.add('show');
+    if(cnt) cnt.textContent=lockedCount;
+  }
 
   document.getElementById('sphList').innerHTML=sorted.map((s,idx)=>{
     const isAnalysed=analysedKeys.includes(s.key);
@@ -2149,5 +2173,14 @@ loadResult().then(function(){
   }, 3000);
 });
 </script>
+
+<!-- STICKY MOBILE PRO BAR -->
+<div id="mobileProBar">
+  <div style="flex:1;min-width:0">
+    <div style="font-size:15px;font-weight:700;color:var(--ink)">🔒 Ще <span id="mobileProCount">11</span> сфер</div>
+    <div style="font-size:12px;color:var(--ink3)">від 99 ₴ · миттєвий доступ</div>
+  </div>
+  <a href="/pricing" style="font-family:'Patrick Hand',cursive;font-size:14px;font-weight:700;color:var(--ink);background:var(--gold);border:2px solid var(--gold-d);border-radius:3px 8px 6px 4px;padding:10px 18px;text-decoration:none;white-space:nowrap;box-shadow:2px 3px 0 rgba(184,144,64,.3)">Розблокувати →</a>
+</div>
 </body>
 </html>
