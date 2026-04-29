@@ -567,10 +567,10 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 <div id="heroSection" style="position:relative;z-index:10;padding:72px 20px 56px;display:flex;justify-content:center;text-align:center">
   <div style="background:var(--sf);border:1.5px solid var(--sb);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:16px;box-shadow:0 8px 32px var(--sh),inset 0 1px 0 rgba(255,255,255,.5);padding:24px;max-width:600px;width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;transition:background 3s,border-color 3s,box-shadow 3s">
     <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,5vw,2.6rem);font-weight:300;color:var(--td);line-height:1.2;margin:0;transition:color 3s">
-      Дізнайся де ти&nbsp;<em style="font-style:italic;color:var(--ac);transition:color 3s">втрачаєш енергію</em>
+      Знайди, чому не вистачає сил —&nbsp;<em style="font-style:italic;color:var(--ac);transition:color 3s">AI покаже за 5 хвилин</em>
     </h1>
     <p style="font-size:clamp(.8rem,2.2vw,.92rem);color:var(--tm);margin:0;line-height:1.6;transition:color 3s">
-      AI-аналіз 12 сфер за 5 хвилин · Безкоштовно · Без реєстрації
+      Оціни 12 сфер життя — AI знайде де справжня проблема і що змінити вже сьогодні
     </p>
     <div id="heroSocialProof" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
       <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--sb);border-radius:20px;padding:4px 12px;font-size:.68rem;color:var(--tl);transition:all 3s">
@@ -578,12 +578,13 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
         <span id="heroCounterText">1 200+ аналізів</span>
       </span>
       <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--sb);border-radius:20px;padding:4px 12px;font-size:.68rem;color:var(--tl);transition:all 3s">
-        ★ Середній результат 5.4/10
+        ★★★★★ 4.9/5 відгуків
       </span>
     </div>
     <button class="btn-start" onclick="document.getElementById('modalOverlay').style.display='';document.getElementById('modalOverlay').style.pointerEvents=''" style="margin-top:4px;max-width:320px">
-      ✦ Почати безкоштовно
+      ✦ Почати безкоштовно — 5 хвилин
     </button>
+    <div style="font-size:.62rem;color:var(--tl);transition:color 3s">Без реєстрації · Результат одразу · Перший аналіз безкоштовно</div>
   </div>
 </div>
 
@@ -637,8 +638,8 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       </div>
     </div>
 
-    <button class="btn-start" onclick="closeModal()">✦ Розпочати оцінку — це безкоштовно</button>
-    <div style="text-align:center;font-size:.62rem;color:var(--tl);margin-top:8px;transition:color 3s">Без реєстрації · Зберігається в браузері</div>
+    <button class="btn-start" onclick="closeModal()">✦ Розпочати оцінку — безкоштовно</button>
+    <div style="text-align:center;font-size:.62rem;color:var(--tl);margin-top:8px;transition:color 3s">Без реєстрації · 5 хвилин · Результат одразу</div>
   </div>
 </div>
 
@@ -1254,9 +1255,10 @@ function renderSocialProofFromCfg(){
   ];
   var reviews = (cfg.reviews && cfg.reviews.length > 0) ? cfg.reviews : defaultReviews;
   var active = reviews.filter(function(r){ return r.active !== false; });
-  if(cfg.social_proof_enabled === true && active.length > 0){
+  if(active.length > 0){
     spReviews.innerHTML = active.map(function(r){
       return '<div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:all 3s">' +
+        '<div style="font-size:.62rem;color:#e8a020;margin-bottom:3px">★★★★★</div>' +
         '<div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«' + r.text + '»</div>' +
         '<div style="font-size:.63rem;color:var(--tl);margin-top:5px;font-weight:600;transition:color 3s">— ' + r.author + ' · ' + r.location + '</div>' +
         '</div>';
@@ -1279,6 +1281,7 @@ function renderSocialProofOnSite(reviews){
   }
   container.innerHTML = active.map(r => `
     <div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;transition:all 3s">
+      <div style="font-size:.62rem;color:#e8a020;margin-bottom:3px">★★★★★</div>
       <div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«${r.text}»</div>
       <div style="font-size:.63rem;color:var(--tl);margin-top:6px;font-weight:600;transition:color 3s">— ${r.author} · ${r.location}</div>
     </div>
