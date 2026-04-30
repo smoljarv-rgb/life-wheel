@@ -1135,16 +1135,16 @@ function renderSpheres(data){
   const upgradeCard=isFree?`
     <div class="upgrade-card">
       <div class="upgrade-card-tag">✦ PRO доступ</div>
-      <div class="upgrade-card-title">Ти бачиш лише 1 із 12 сфер</div>
-      <div class="upgrade-card-sub">Ще ${lockedCount} сфер чекають на аналіз. Розблокуй повну картину — дізнайся де саме ти втрачаєш енергію і що з цим робити.</div>
+      <div class="upgrade-card-title">${botS.name} — не єдина проблема</div>
+      <div class="upgrade-card-sub">Часто причина низького балансу криється не там, де очевидно. Ще ${lockedCount} сфер чекають аналізу — і саме там може бути справжнє джерело втоми.</div>
       <div class="upgrade-card-feats">
-        <div class="upgrade-card-feat"><span>✦</span>Всі 12 сфер з AI-планом</div>
-        <div class="upgrade-card-feat"><span>✦</span>PDF-звіт</div>
-        <div class="upgrade-card-feat"><span>✦</span>Порівняння з іншими</div>
-        <div class="upgrade-card-feat"><span>✦</span>Трекінг прогресу</div>
+        <div class="upgrade-card-feat"><span>✦</span>Повний AI-аналіз усіх ${lockedCount+1} сфер</div>
+        <div class="upgrade-card-feat"><span>✦</span>Покроковий план на 7 днів</div>
+        <div class="upgrade-card-feat"><span>✦</span>Порівняння з 1 200+ людьми</div>
+        <div class="upgrade-card-feat"><span>✦</span>PDF-звіт + трекінг прогресу</div>
       </div>
-      <a href="/pricing" class="btn-upgrade">Розблокувати всі ${lockedCount} сфер →</a>
-      <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія</div>
+      <a href="/pricing" class="btn-upgrade">Розкрити всі ${lockedCount} сфер →</a>
+      <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія повернення</div>
     </div>`:'';
 
   if(isFree && lockedCount>0){
@@ -1776,7 +1776,9 @@ async function startStreamingAnalysis(slug) {
     setSpherePending(s.key);
 
     // Оновлюємо банер і прогрес
-    if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">&#9881;&#xFE0F; Аналізую: <strong>' + (i+1) + ' / ' + total + '</strong> &mdash; ' + s.name + '</div>';
+    var bannerMsgs=['Досліджую','Аналізую','Розбираю','Оцінюю'];
+    var bannerVerb=bannerMsgs[i%bannerMsgs.length];
+    if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(32,120,200,.08);border:1.5px dashed var(--blue);border-radius:10px;font-size:14px;color:var(--blue);text-align:center">🧠 ' + bannerVerb + ': <strong>' + s.name + '</strong> &mdash; ' + (i+1) + ' з ' + total + '</div>';
     updateProgress(i);
 
     var sysPrompt = [
