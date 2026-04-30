@@ -81,6 +81,14 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background
 .no-reports a{color:var(--blue);text-decoration:none}
 .btn-new-test{display:block;width:100%;text-align:center;background:var(--ink);color:var(--paper);font-family:'Patrick Hand',cursive;font-size:16px;padding:15px;border-radius:3px 12px 10px 8px;text-decoration:none;margin-top:28px;box-shadow:4px 5px 0 rgba(44,24,16,.15);transition:all .2s}
 .btn-new-test:hover{transform:translateY(-2px)}
+.nudge-card{background:linear-gradient(135deg,var(--paper2),var(--paper));border:2px dashed var(--paper4);border-radius:3px 14px 10px 8px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.nudge-icon{font-size:28px;flex-shrink:0}
+.nudge-text{flex:1}
+.nudge-title{font-family:'Caveat Brush',cursive;font-size:19px;color:var(--ink);margin-bottom:4px}
+.nudge-sub{font-size:14px;color:var(--ink2);line-height:1.5}
+.nudge-btn{display:inline-block;margin-top:10px;background:var(--ink);color:var(--paper);font-family:'Patrick Hand',cursive;font-size:14px;padding:9px 20px;border-radius:3px 8px 6px 4px;text-decoration:none;box-shadow:2px 3px 0 rgba(44,24,16,.15);transition:all .2s}
+.nudge-btn:hover{transform:translateY(-1px)}
+.report-delta{font-size:13px;font-family:'Patrick Hand',cursive;margin-top:2px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);font-family:'Patrick Hand',cursive;font-size:15px;padding:12px 24px;border-radius:3px 10px 8px 6px;opacity:0;transition:all .3s;z-index:9999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -135,9 +143,11 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background
     <div class="stats-grid">
       <div class="stat-item"><div class="stat-num" id="statDays">0</div><div class="stat-lbl">днів з нами</div></div>
       <div class="stat-item"><div class="stat-num" id="statTests">0</div><div class="stat-lbl">тестів</div></div>
-      <div class="stat-item"><div class="stat-num" id="statAvg">0</div><div class="stat-lbl">середній бал</div></div>
+      <div class="stat-item"><div class="stat-num" id="statAvg">—</div><div class="stat-lbl">середній бал</div></div>
     </div>
-    <div id="statsHint" style="font-size:.72rem;color:#8aabcc;text-align:center;margin-top:8px;display:none">Пройди перший тест щоб побачити статистику</div>
+
+    <!-- RETENTION NUDGE -->
+    <div id="retentionNudge"></div>
 
     <div class="section-label">Підписка</div>
     <div class="sub-card" id="subCard">
@@ -150,7 +160,8 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:6px;background
         <div class="sub-feature locked"><div class="sub-feature-dot"></div>Трекінг прогресу</div>
         <div class="sub-feature locked"><div class="sub-feature-dot"></div>PDF-звіти</div>
       </div>
-      <a href="/pricing" class="btn-upgrade">💎 Отримати PRO →</a>
+      <a href="/pricing" class="btn-upgrade">🔓 Розблокувати всі 12 сфер →</a>
+      <div style="font-size:13px;color:var(--ink3);margin-top:8px">від 99 ₴ · 14 днів гарантія повернення</div>
     </div>
 
     <div class="section-label">Мої звіти</div>
@@ -357,41 +368,61 @@ async function loadReports(){
   var statAvg = document.getElementById('statAvg');
   statTests.textContent = reports.length;
 
+  // ── Retention nudge ──
+  var nudge = document.getElementById('retentionNudge');
+  if(nudge){
+    if(reports.length === 0){
+      nudge.innerHTML = '<div class="nudge-card"><div class="nudge-icon">🎯</div><div class="nudge-text"><div class="nudge-title">Ще немає результатів</div><div class="nudge-sub">Пройди перший тест — AI визначить де ти втрачаєш енергію і що змінити.</div><a href="/" class="nudge-btn">Почати колесо → безкоштовно</a></div></div>';
+    } else {
+      var lastDate = new Date(reports[0].created_at);
+      var daysSince = Math.floor((Date.now() - lastDate.getTime()) / (1000*60*60*24));
+      if(daysSince >= 7){
+        var daysMsg = daysSince >= 30 ? daysSince + ' днів без перевірки балансу' : daysSince + ' ' + (daysSince < 5 ? 'дні' : 'днів') + ' з останнього тесту';
+        nudge.innerHTML = '<div class="nudge-card"><div class="nudge-icon">📅</div><div class="nudge-text"><div class="nudge-title">' + daysMsg + '</div><div class="nudge-sub">Баланс змінюється. Пройди колесо ще раз — порівняй з попереднім результатом.</div><a href="/" class="nudge-btn">Пройти тест → подивитись прогрес</a></div></div>';
+      }
+    }
+  }
+
   if(reports.length > 0){
-    // Calculate avg from latest report
     var latestScores = reports[0].scores || {};
-    var vals = Object.values(latestScores).map(Number).filter(v => v > 0);
+    var vals = Object.values(latestScores).map(Number).filter(function(v){return v>0;});
     var avg = vals.length > 0 ? (vals.reduce(function(a,b){return a+b},0)/vals.length).toFixed(1) : '—';
     statAvg.textContent = avg;
 
-    var html = reports.map(function(r){
+    var html = reports.map(function(r, idx){
       var date = new Date(r.created_at);
       var dateStr = date.toLocaleDateString('uk-UA', {day:'numeric',month:'short',year:'numeric'});
       var scores = r.scores || {};
       var v = Object.values(scores).map(Number).filter(function(x){return x>0;});
       var avg2 = v.length > 0 ? (v.reduce(function(a,b){return a+b},0)/v.length).toFixed(1) : '?';
-      var color = avg2 >= 7 ? '#20d8a0' : avg2 >= 4 ? '#e8c060' : '#e05050';
+      var color = avg2 >= 7 ? '#27ae60' : avg2 >= 4 ? '#d35400' : '#c0392b';
+
+      // Trend vs previous test
+      var deltaHtml = '';
+      if(idx < reports.length - 1){
+        var pv = Object.values(reports[idx+1].scores||{}).map(Number).filter(function(x){return x>0;});
+        if(pv.length > 0){
+          var prevAvg = pv.reduce(function(a,b){return a+b},0)/pv.length;
+          var delta = +(parseFloat(avg2) - prevAvg).toFixed(1);
+          var sign = delta > 0 ? '+' : '';
+          var dc = delta > 0 ? '#27ae60' : delta < 0 ? '#c0392b' : '#7a6050';
+          var arrow = delta > 0 ? '↑' : delta < 0 ? '↓' : '→';
+          deltaHtml = '<div class="report-delta" style="color:' + dc + '">' + arrow + ' ' + sign + delta + ' від попереднього</div>';
+        }
+      }
+
       return '<a href="/result/' + r.slug + '" class="report-item">' +
         '<div class="report-ico">📊</div>' +
         '<div class="report-info">' +
           '<div class="report-date">' + dateStr + '</div>' +
           '<div class="report-score" style="color:' + color + '">' + avg2 + '/10</div>' +
+          deltaHtml +
         '</div>' +
         '<div class="report-arrow">→</div>' +
       '</a>';
     }).join('');
 
     document.getElementById('reportsList').innerHTML = html;
-  } else {
-    statAvg.textContent = '0';
-  }
-  // Show hint when all three metrics are 0
-  var hint = document.getElementById('statsHint');
-  if (hint) {
-    var d = document.getElementById('statDays').textContent;
-    var t = statTests.textContent;
-    var a = statAvg.textContent;
-    hint.style.display = (d==='0' && t==='0' && a==='0') ? 'block' : 'none';
   }
 }
 
