@@ -933,14 +933,16 @@ body::after{
 <!-- EMAIL CAPTURE MODAL -->
 <div class="modal-ov" id="notifModal">
   <div class="modal">
-    <h3>📊 Збережи свій результат</h3>
-    <p>Введи email — надішлемо твій звіт та нагадаємо перевірити прогрес через 30 днів.</p>
+    <h3>📩 Отримай план на 7 днів</h3>
+    <p>Надішлемо твій AI-аналіз + покроковий план що змінити вже цього тижня. Безкоштовно, одразу на пошту.</p>
     <input type="email" id="notifEmail" placeholder="твій@email.com" onkeydown="if(event.key==='Enter')sendNotif()">
     <div class="modal-btns">
-      <button class="btn" onclick="closeNotif()">Пропустити</button>
-      <button class="btn btn-acc" id="notifBtn" onclick="sendNotif()">Зберегти звіт →</button>
+      <button class="btn btn-acc" id="notifBtn" onclick="sendNotif()" style="width:100%">Надіслати план →</button>
     </div>
-    <div style="margin-top:10px;font-size:11px;color:var(--ink3);text-align:center;font-family:'Patrick Hand',cursive">
+    <div style="text-align:center;margin-top:10px">
+      <button onclick="closeNotif()" style="background:none;border:none;font-family:'Patrick Hand',cursive;font-size:13px;color:var(--ink3);cursor:pointer;text-decoration:underline;padding:4px">Пропустити</button>
+    </div>
+    <div style="margin-top:4px;font-size:11px;color:var(--ink3);text-align:center;font-family:'Patrick Hand',cursive">
       Без спаму · Відписатись можна в будь-який момент
     </div>
   </div>
@@ -1686,25 +1688,39 @@ async function sendNotif(){
       // Зберігаємо локально щоб не показувати знову
       localStorage.setItem('lw_email_captured', email);
       closeNotif();
-      showToast('📧 Звіт збережено! Перевір пошту.');
+      showToast('✓ Надіслали! Перевір пошту за 2 хвилини.');
     } else {
       showToast('❌ Помилка. Спробуй ще раз');
-      btn.textContent = 'Зберегти звіт →';
+      btn.textContent = 'Надіслати план →';
       btn.disabled = false;
     }
   } catch(e){
     showToast("❌ Помилка з'єднання");
-    btn.textContent = 'Зберегти звіт →';
+    btn.textContent = 'Надіслати план →';
     btn.disabled = false;
   }
 }
 
 // ── Автоматичний показ email capture після завантаження результату ──
 function maybeShowEmailCapture(){
-  // Не показуємо якщо email вже є
   if(localStorage.getItem('lw_email_captured')) return;
-  // Показуємо через 3 секунди після відображення результату
-  setTimeout(openNotif, 3000);
+  let timeReady=false, scrollReady=false, shown=false;
+  function tryShow(){
+    if(shown||!timeReady||!scrollReady) return;
+    shown=true;
+    openNotif();
+  }
+  // Мінімум 25 сек — юзер встиг прочитати
+  setTimeout(()=>{ timeReady=true; tryShow(); }, 25000);
+  // Або після скролу на 45% сторінки
+  function onScroll(){
+    const h=document.documentElement;
+    const pct=window.scrollY/(h.scrollHeight-h.clientHeight||1);
+    if(pct>0.45){ scrollReady=true; tryShow(); window.removeEventListener('scroll',onScroll); }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  // Якщо сторінка коротка — вважаємо scroll ready одразу
+  if(document.documentElement.scrollHeight<=window.innerHeight+50) scrollReady=true;
 }
 
 function showToast(msg){
@@ -2167,12 +2183,8 @@ loadResult().then(function(){
     if(slug) setTimeout(function(){ startStreamingAnalysis(slug); }, 500);
   }
 
-  // Показуємо email capture через 3 сек після завантаження
-  setTimeout(function(){
-    if(!localStorage.getItem('lw_email_captured')){
-      document.getElementById('notifModal').classList.add('open');
-    }
-  }, 3000);
+  // Email capture — показуємо через scroll+time trigger (в maybeShowEmailCapture)
+  maybeShowEmailCapture();
 });
 </script>
 
