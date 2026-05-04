@@ -356,8 +356,11 @@ app.get('/blog', function(req, res) {
 app.get('/blog/:slug', function(req, res) {
   const slug = req.params.slug.replace(/[^a-z0-9-]/g, '');
   const filePath = path.join(__dirname, 'public', 'blog', slug + '.html');
+  const dirIndex = path.join(__dirname, 'public', 'blog', slug, 'index.html');
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
+  } else if (fs.existsSync(dirIndex)) {
+    res.sendFile(dirIndex);
   } else {
     res.redirect('/blog');
   }
