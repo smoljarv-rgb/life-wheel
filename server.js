@@ -886,6 +886,18 @@ app.get('/api/admin/stats', adminAuth, async function(req, res) {
   const now = Date.now();
   const day = 86400000;
 
+  // Діапазон для графіку
+  const chartDays = Math.min(Math.max(parseInt(req.query.days) || 14, 1), 90);
+  let chartStart, chartEnd;
+  if (req.query.from && req.query.to) {
+    chartStart = new Date(req.query.from).getTime();
+    chartEnd   = new Date(req.query.to).getTime() + day;
+  } else {
+    chartStart = now - chartDays * day;
+    chartEnd   = now;
+  }
+  const fetchWindow = Math.max(chartDays, 30) * day;
+
   // Отримуємо дані з Supabase паралельно
   const [
     { data: recentViews = [] },
@@ -896,11 +908,11 @@ app.get('/api/admin/stats', adminAuth, async function(req, res) {
     { data: allSubs = [] },
     { count: emailCount },
   ] = await Promise.all([
-    supabase.from('pageviews').select('ts,ip').gte('ts', now - 14*day),
+    supabase.from('pageviews').select('ts,ip').gte('ts', now - fetchWindow),
     supabase.from('pageviews').select('ip').gte('ts', now - 90*day),
-    supabase.from('results').select('created_at').gte('created_at', new Date(now - 14*day).toISOString()),
+    supabase.from('results').select('created_at').gte('created_at', new Date(now - fetchWindow).toISOString()),
     supabase.from('results').select('*', { count: 'exact', head: true }),
-    supabase.from('subscriptions').select('created_at,amount').gt('amount', 0).gte('created_at', new Date(now - 30*day).toISOString()),
+    supabase.from('subscriptions').select('created_at,amount').gt('amount', 0).gte('created_at', new Date(now - fetchWindow).toISOString()),
     supabase.from('subscriptions').select('amount').gt('amount', 0),
     supabase.from('subscribers').select('*', { count: 'exact', head: true }),
   ]);
@@ -929,14 +941,15 @@ app.get('/api/admin/stats', adminAuth, async function(req, res) {
     total: (allSubs||[]).reduce(function(s,p){ return s+(p.amount||0); }, 0),
   };
 
-  // Графік за 14 днів
+  // Графік за обраний діапазон
   const chart = [];
-  for (var i = 13; i >= 0; i--) {
-    var from = now - (i+1)*day;
-    var to = now - i*day;
+  const totalChartDays = Math.ceil((chartEnd - chartStart) / day);
+  for (var i = 0; i < totalChartDays; i++) {
+    var from = chartStart + i * day;
+    var to   = chartStart + (i + 1) * day;
     var fromIso = new Date(from).toISOString();
-    var toIso = new Date(to).toISOString();
-    var date = new Date(to).toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit' });
+    var toIso   = new Date(to).toISOString();
+    var date = new Date(from).toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit' });
     chart.push({
       date,
       visitors: new Set((recentViews||[]).filter(function(e){ return e.ts>=from && e.ts<to; }).map(function(e){ return e.ip; })).size,

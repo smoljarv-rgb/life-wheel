@@ -38,10 +38,17 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1520;color:#c8d8f0;mi
 .stat-card.purple .value{color:#a78bfa}
 .card{background:#1a2540;border:1px solid #1e2d48;border-radius:12px;padding:20px;margin-bottom:16px}
 .card h3{font-size:.85rem;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.chart-wrap{height:120px;display:flex;align-items:flex-end;gap:4px;padding-top:10px}
-.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.bar{width:100%;border-radius:4px 4px 0 0;min-height:2px;transition:height .3s}
-.bar-label{font-size:.5rem;color:#4a6a8a;white-space:nowrap}
+.chart-wrap{width:100%;overflow:hidden}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.range-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.range-btn{padding:5px 13px;background:#1e2d48;border:1.5px solid #2a3a5a;border-radius:6px;color:#6a8aaa;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s}
+.range-btn:hover{border-color:#2878c8;color:#c8d8f0}
+.range-btn.active{background:#2878c8;border-color:#2878c8;color:#fff}
+.date-input{padding:5px 9px;background:#0f1520;border:1.5px solid #2a3a5a;border-radius:6px;color:#c8d8f0;font-size:.72rem;outline:none;cursor:pointer}
+.date-input:focus{border-color:#2878c8}
+.chart-legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.68rem;color:#6a8aaa}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 table{width:100%;border-collapse:collapse;font-size:.78rem}
 th{text-align:left;padding:8px 10px;color:#4a6a8a;font-weight:600;font-size:.68rem;text-transform:uppercase;border-bottom:1px solid #1e2d48}
 td{padding:8px 10px;border-bottom:1px solid #131d30;color:#c8d8f0}
@@ -96,8 +103,9 @@ tr:hover td{background:#1e2d48}
   .page-title{font-size:1.1rem;margin-bottom:14px}
   .card{padding:14px}
   .card h3{font-size:.8rem}
-  .chart-wrap{height:90px}
-  .bar-label{font-size:.42rem}
+  .range-bar{gap:6px}
+  .range-btn{padding:4px 10px;font-size:.68rem}
+  .date-input{font-size:.68rem;padding:4px 7px}
   table{font-size:.7rem}
   th,td{padding:6px 7px}
   .btn{padding:8px 14px;font-size:.72rem}
@@ -110,6 +118,7 @@ tr:hover td{background:#1e2d48}
   .export-btn{font-size:.68rem;padding:6px 10px}
   #page-settings .card,#page-emails .card,#page-promos .card{padding:14px}
   .two-col-ad{grid-template-columns:1fr!important}
+  .range-bar > div{width:100%;justify-content:flex-start}
 }
 
 @media(max-width:400px){
@@ -164,13 +173,24 @@ tr:hover td{background:#1e2d48}
       <div class="page-title">📊 Дашборд</div>
       <div class="stats-grid" id="statsGrid"></div>
       <div class="card">
-        <h3>📈 Активність за 14 днів</h3>
-        <div style="display:flex;gap:16px;margin-bottom:8px">
-          <span style="display:flex;align-items:center;gap:5px;font-size:.68rem"><span style="width:10px;height:10px;background:#60a5fa;border-radius:2px;display:inline-block"></span>Відвідувачі</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:.68rem"><span style="width:10px;height:10px;background:#4ade80;border-radius:2px;display:inline-block"></span>Аналізи</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:.68rem"><span style="width:10px;height:10px;background:#fbbf24;border-radius:2px;display:inline-block"></span>Оплати</span>
+        <h3>📈 Активність</h3>
+        <div class="range-bar">
+          <button class="range-btn" id="rangeBtn7" onclick="setRange(7)">7 днів</button>
+          <button class="range-btn active" id="rangeBtn14" onclick="setRange(14)">14 днів</button>
+          <button class="range-btn" id="rangeBtn30" onclick="setRange(30)">30 днів</button>
+          <div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap">
+            <input type="date" id="dateFrom" class="date-input">
+            <span style="color:#4a6a8a;font-size:.75rem">—</span>
+            <input type="date" id="dateTo" class="date-input">
+            <button class="btn" style="padding:5px 12px;font-size:.72rem" onclick="applyCustomRange()">Застосувати</button>
+          </div>
         </div>
-        <div class="chart-wrap" id="chartWrap"></div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#60a5fa"></span>Відвідувачі</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#4ade80"></span>Аналізи</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span>Оплати</span>
+        </div>
+        <div class="chart-wrap" id="chartWrap"><p style="color:#4a6a8a;font-size:.75rem;text-align:center;padding:30px 0">Завантаження...</p></div>
       </div>
       <div class="card">
         <h3>📋 Останні події</h3>
@@ -383,6 +403,7 @@ tr:hover td{background:#1e2d48}
 <script>
 let adminPwd = '';
 let statsData = null;
+let activeRange = 14; // поточний діапазон у днях
 
 // ── LOGIN ──
 function doLogin(){
@@ -459,16 +480,8 @@ function renderDashboard(d){
   </div>`).join('');
 
   // Chart
-  const maxV = Math.max(...d.chart.map(c => c.visitors), 1);
-  document.getElementById('chartWrap').innerHTML = d.chart.map(c => `
-    <div class="bar-group">
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;width:100%">
-        <div class="bar" style="height:${Math.round(c.visitors/maxV*90)}px;background:#60a5fa22;border:1px solid #60a5fa44" title="Відвідувачів: ${c.visitors}"></div>
-        <div class="bar" style="height:${Math.round(c.analyses/maxV*90)}px;background:#4ade8044" title="Аналізів: ${c.analyses}"></div>
-        <div class="bar" style="height:${Math.round(c.payments/maxV*90)}px;background:#fbbf2466" title="Оплат: ${c.payments}"></div>
-      </div>
-      <div class="bar-label">${c.date}</div>
-    </div>`).join('');
+  renderChart(d.chart);
+  setDefaultDates();
 
   // Events table (last 20)
   document.getElementById('eventsTbl').innerHTML = (d.chart || []).length
@@ -871,6 +884,109 @@ function saveSocialProof(){
   api('/api/admin/social-proof', 'POST', { reviews: reviewsData }).then(() => {
     showToast('✅ Відгуки збережено');
   });
+}
+
+// ── CHART ──
+function niceMax(n) {
+  if (n <= 0) return 10;
+  var mag = Math.pow(10, Math.floor(Math.log10(n)));
+  var norm = n / mag;
+  var nice = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
+  return nice * mag;
+}
+
+function renderChart(data) {
+  var wrap = document.getElementById('chartWrap');
+  if (!data || !data.length) {
+    wrap.innerHTML = '<p style="color:#4a6a8a;font-size:.75rem;text-align:center;padding:40px 0">Даних за цей період немає</p>';
+    return;
+  }
+
+  var W = 620, H = 220;
+  var PL = 38, PB = 36, PT = 16, PR = 12;
+  var cW = W - PL - PR;
+  var cH = H - PT - PB;
+  var n = data.length;
+
+  var allMax = Math.max.apply(null, data.map(function(c){ return Math.max(c.visitors, c.analyses, c.payments); }));
+  var maxY = niceMax(allMax || 1);
+  var ticks = 4;
+  var step = maxY / ticks;
+
+  // Y-axis grid
+  var grid = '';
+  for (var t = 0; t <= ticks; t++) {
+    var val = Math.round(step * t);
+    var y = PT + cH - (val / maxY * cH);
+    grid += '<line x1="' + PL + '" y1="' + y + '" x2="' + (W - PR) + '" y2="' + y + '" stroke="#1e2d48" stroke-width="1"' + (t > 0 ? ' stroke-dasharray="3 3"' : '') + '/>';
+    grid += '<text x="' + (PL - 5) + '" y="' + (y + 4) + '" text-anchor="end" fill="#4a6a8a" font-size="10">' + val + '</text>';
+  }
+
+  // Bars
+  var groupW = cW / n;
+  var gap = Math.max(1, groupW * 0.1);
+  var totalBarW = groupW - gap * 2;
+  var barW = Math.max(2, totalBarW / 3 - 1);
+  var skipEvery = n > 20 ? 5 : n > 14 ? 3 : n > 7 ? 2 : 1;
+
+  var bars = '';
+  data.forEach(function(c, i) {
+    var gx = PL + i * groupW + gap;
+    var vh = Math.max(0, c.visitors / maxY * cH);
+    var ah = Math.max(0, c.analyses / maxY * cH);
+    var ph = Math.max(0, c.payments / maxY * cH);
+    var baseY = PT + cH;
+
+    bars += '<rect x="' + gx + '" y="' + (baseY - vh) + '" width="' + barW + '" height="' + Math.max(vh, 1) + '" fill="#60a5fa" opacity="0.75" rx="2"><title>Відвідувачі: ' + c.visitors + '</title></rect>';
+    bars += '<rect x="' + (gx + barW + 1) + '" y="' + (baseY - ah) + '" width="' + barW + '" height="' + Math.max(ah, 1) + '" fill="#4ade80" opacity="0.75" rx="2"><title>Аналізи: ' + c.analyses + '</title></rect>';
+    bars += '<rect x="' + (gx + barW * 2 + 2) + '" y="' + (baseY - ph) + '" width="' + barW + '" height="' + Math.max(ph, 1) + '" fill="#fbbf24" opacity="0.8" rx="2"><title>Оплати: ' + c.payments + '</title></rect>';
+
+    if (i % skipEvery === 0 || i === n - 1) {
+      var lx = PL + i * groupW + groupW / 2;
+      bars += '<text x="' + lx + '" y="' + (H - 8) + '" text-anchor="middle" fill="#4a6a8a" font-size="9">' + c.date + '</text>';
+    }
+  });
+
+  // Axes
+  var axes = '<line x1="' + PL + '" y1="' + PT + '" x2="' + PL + '" y2="' + (PT + cH) + '" stroke="#2a3a5a" stroke-width="1.5"/>';
+  axes += '<line x1="' + PL + '" y1="' + (PT + cH) + '" x2="' + (W - PR) + '" y2="' + (PT + cH) + '" stroke="#2a3a5a" stroke-width="1.5"/>';
+
+  wrap.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;max-height:240px">' + grid + axes + bars + '</svg>';
+}
+
+function setDefaultDates() {
+  var today = new Date();
+  var from = new Date(today.getTime() - activeRange * 86400000);
+  document.getElementById('dateTo').value = today.toISOString().slice(0, 10);
+  document.getElementById('dateFrom').value = from.toISOString().slice(0, 10);
+}
+
+function setRange(days) {
+  activeRange = days;
+  document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('rangeBtn' + days);
+  if (btn) btn.classList.add('active');
+  setDefaultDates();
+  loadChartData(days, null, null);
+}
+
+function applyCustomRange() {
+  var from = document.getElementById('dateFrom').value;
+  var to = document.getElementById('dateTo').value;
+  if (!from || !to) return showToast('⚠️ Вкажи обидві дати');
+  if (from > to) return showToast('⚠️ Початок не може бути після кінця');
+  document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
+  activeRange = 0;
+  loadChartData(null, from, to);
+}
+
+function loadChartData(days, from, to) {
+  var params = days ? '?days=' + days : ('?from=' + from + '&to=' + to);
+  document.getElementById('chartWrap').innerHTML = '<p style="color:#4a6a8a;font-size:.75rem;text-align:center;padding:40px 0">Завантаження...</p>';
+  fetch('/api/admin/stats' + params, { headers: { 'x-admin-password': adminPwd } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderChart(data.chart); })
+    .catch(function() { document.getElementById('chartWrap').innerHTML = '<p style="color:#f87171;font-size:.75rem;text-align:center;padding:40px 0">Помилка завантаження</p>'; });
 }
 
 // ── МОБІЛЬНЕ МЕНЮ ──
