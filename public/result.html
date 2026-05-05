@@ -261,7 +261,7 @@ body::after{
 .snap-sub{font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink2);margin-top:3px}
 
 /* RADAR */
-.radar-wrap{display:flex;justify-content:center;padding:8px 0 20px}
+.radar-wrap{display:flex;justify-content:center;padding:8px 0 20px;overflow:visible}
 
 /* CMP */
 .cmp{
@@ -760,6 +760,36 @@ body::after{
 @media(max-width:580px){
   #mobileProBar.show{display:flex}
 }
+/* STICKY ANALYSIS BAR */
+#analysisSticky{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
+  background:var(--ink);
+  color:#fff;
+  padding:12px 16px;
+  box-shadow:0 -4px 20px rgba(44,24,16,.25);
+  font-family:'Patrick Hand',cursive;
+  align-items:center;gap:12px;
+}
+#analysisSticky.show{display:flex}
+#analysisSticky .as-pulse{
+  width:12px;height:12px;flex-shrink:0;
+  border-radius:50%;
+  background:var(--gold);
+  animation:asPulse 1s ease-in-out infinite;
+}
+@keyframes asPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+#analysisSticky .as-bar{
+  flex:1;height:4px;
+  background:rgba(255,255,255,.2);
+  border-radius:4px;overflow:hidden;
+}
+#analysisSticky .as-fill{
+  height:100%;width:0%;
+  background:var(--gold);
+  border-radius:4px;
+  transition:width .5s ease;
+}
 .coach-insight-block{border-left:3px solid var(--blue);background:var(--paper2);border-radius:12px;padding:14px 16px;margin-bottom:12px;font-family:'Nunito',sans-serif}
 .coach-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .coach-avatar{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--blue);flex-shrink:0}
@@ -859,7 +889,7 @@ body::after{
 
     <div class="sec-ttl">Всі 12 сфер</div>
     <div class="radar-wrap">
-      <svg id="radarSvg" viewBox="0 0 320 320" width="100%" style="max-width:320px">
+      <svg id="radarSvg" viewBox="0 0 420 420" width="100%" style="max-width:420px;overflow:visible">
         <g id="rbGrid"></g><g id="rbShape"></g><g id="rbLabels"></g>
       </svg>
     </div>
@@ -1214,7 +1244,7 @@ function renderSpheres(data){
         if(hasNewFmt||hasOldFmt){
           var planId='ai_plan_'+s.key;
           h+='<div style="margin-top:14px;border:1.5px solid rgba(32,120,200,.2);border-radius:12px;overflow:hidden">';
-          h+='<div onclick="toggleAIPlan(\''+planId+'\') style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(32,120,200,.06);cursor:pointer;user-select:none">';
+          h+='<div onclick="toggleAIPlan(\''+planId+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(32,120,200,.06);cursor:pointer;user-select:none">';
           h+='<span style="font-size:14px;font-weight:700;color:var(--blue)">🤖 AI-план на 7 днів</span>';
           h+='<span id="arr_'+s.key+'" style="font-size:12px;color:var(--blue);transition:transform .25s;display:inline-block;transform:rotate(180deg)">&#9660;</span>';
           h+='</div>';
@@ -1353,24 +1383,73 @@ function renderWheel(scores){
 }
 
 function renderRadar(scores){
-  const n=SPHERES.length,cx=160,cy=160,maxR=120;
-  let g='',s='',l='';
-  [.2,.4,.6,.8,1].forEach(r=>{
-    const pts=SPHERES.map((_,i)=>{const a=(i/n)*Math.PI*2-Math.PI/2;return `${cx+Math.cos(a)*maxR*r},${cy+Math.sin(a)*maxR*r}`;}).join(' ');
-    g+=`<polygon points="${pts}" fill="none" stroke="#2c1810" stroke-width="1" stroke-dasharray="5,4" opacity=".12"/>`;
+  const n=SPHERES.length, cx=210, cy=210, maxR=112;
+  let g='', s='', l='';
+  const PI2=Math.PI*2, bg='rgba(253,246,227,0.92)';
+
+  // Фон чарту
+  g+=`<circle cx="${cx}" cy="${cy}" r="${maxR+8}" fill="white" opacity=".55"/>`;
+  g+=`<circle cx="${cx}" cy="${cy}" r="${maxR+8}" fill="none" stroke="#c0a870" stroke-width="1.5" opacity=".6"/>`;
+
+  // Концентричні кільця (рівні 2,4,6,8,10)
+  [.2,.4,.6,.8,1].forEach((r,ri)=>{
+    const pts=SPHERES.map((_,i)=>{
+      const a=(i/n)*PI2-Math.PI/2;
+      return `${cx+Math.cos(a)*maxR*r},${cy+Math.sin(a)*maxR*r}`;
+    }).join(' ');
+    const outer=r===1;
+    const fill=ri%2===0?'rgba(255,255,255,.25)':'rgba(232,192,96,.07)';
+    g+=`<polygon points="${pts}" fill="${fill}" stroke="#7a6050" stroke-width="${outer?1.5:.7}" stroke-dasharray="${outer?'':'3,3'}" opacity="${outer?.65:.4}"/>`;
   });
-  SPHERES.forEach((_,i)=>{const a=(i/n)*Math.PI*2-Math.PI/2;g+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*maxR}" y2="${cy+Math.sin(a)*maxR}" stroke="#2c1810" stroke-width="1" opacity=".08"/>`;});
-  const pts=SPHERES.map((sp,i)=>{const v=(parseFloat(scores[sp.key])||0)/10,a=(i/n)*Math.PI*2-Math.PI/2;return `${cx+Math.cos(a)*maxR*v},${cy+Math.sin(a)*maxR*v}`;}).join(' ');
-  s=`<polygon points="${pts}" fill="rgba(44,24,16,.08)" stroke="#2c1810" stroke-width="2" stroke-linejoin="round" stroke-dasharray="0"/>`;
+
+  // Позначки рівнів (2,4,6,8) на правій верхній осі
+  [.2,.4,.6,.8].forEach(r=>{
+    const a=(1/n)*PI2-Math.PI/2;
+    const nx=cx+Math.cos(a)*maxR*r, ny=cy+Math.sin(a)*maxR*r;
+    g+=`<circle cx="${nx}" cy="${ny}" r="7" fill="${bg}"/>`;
+    g+=`<text x="${nx}" y="${ny+3.5}" text-anchor="middle" font-family="Patrick Hand,cursive" font-size="9" fill="#7a6050">${r*10}</text>`;
+  });
+
+  // Осьові лінії
+  SPHERES.forEach((_,i)=>{
+    const a=(i/n)*PI2-Math.PI/2;
+    const main=i%3===0;
+    g+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*maxR}" y2="${cy+Math.sin(a)*maxR}" stroke="#7a6050" stroke-width="${main?1.2:.7}" opacity="${main?.32:.17}"/>`;
+  });
+
+  // Заповнена фігура даних
+  const shapePts=SPHERES.map((sp,i)=>{
+    const v=(parseFloat(scores[sp.key])||0)/10;
+    const a=(i/n)*PI2-Math.PI/2;
+    return `${cx+Math.cos(a)*maxR*v},${cy+Math.sin(a)*maxR*v}`;
+  }).join(' ');
+  s=`<polygon points="${shapePts}" fill="rgba(36,113,163,.22)" stroke="#2471a3" stroke-width="2.5" stroke-linejoin="round"/>`;
+
+  // Точки на даних та підписи
   SPHERES.forEach((sp,i)=>{
-    const v=(parseFloat(scores[sp.key])||0)/10,a=(i/n)*Math.PI*2-Math.PI/2;
-    const x=cx+Math.cos(a)*maxR*v,y=cy+Math.sin(a)*maxR*v;
-    const c=v>=.7?'#27ae60':v>=.4?'#d35400':'#c0392b';
-    s+=`<circle cx="${x}" cy="${y}" r="5" fill="${c}" opacity=".8"/>`;
-    const lr=maxR+18,lx=cx+Math.cos(a)*lr,ly=cy+Math.sin(a)*lr;
-    const anchor=lx<cx-5?'end':lx>cx+5?'start':'middle';
-    l+=`<text x="${lx}" y="${ly+4}" text-anchor="${anchor}" font-family="Caveat,cursive" font-size="11" fill="#4a3728" opacity=".85">${sp.name.slice(0,6)} ${parseFloat(scores[sp.key])||0}</text>`;
+    const score=parseFloat(scores[sp.key])||0;
+    const v=Math.max(.06, score/10);
+    const a=(i/n)*PI2-Math.PI/2;
+    const px=cx+Math.cos(a)*maxR*v, py=cy+Math.sin(a)*maxR*v;
+    const c=score>=7?'#27ae60':score>=4?'#d35400':'#c0392b';
+
+    // Точка: білий зовнішній кружок + кольоровий центр
+    s+=`<circle cx="${px}" cy="${py}" r="5.5" fill="white" stroke="${c}" stroke-width="2.5"/>`;
+    s+=`<circle cx="${px}" cy="${py}" r="3" fill="${c}"/>`;
+
+    // Позиція підпису
+    const lr=maxR+27;
+    const lx=cx+Math.cos(a)*lr, ly=cy+Math.sin(a)*lr;
+    const cosA=Math.cos(a);
+    const anchor=cosA<-.12?'end':cosA>.12?'start':'middle';
+    const outline=`paint-order="stroke" stroke="${bg}" stroke-width="5" stroke-linejoin="round"`;
+
+    // Назва сфери (повна)
+    l+=`<text x="${lx}" y="${ly-4}" text-anchor="${anchor}" font-family="Caveat Brush,Caveat,cursive" font-size="12.5" font-weight="700" fill="#2c1810" ${outline}>${sp.name}</text>`;
+    // Бал (кольоровий)
+    l+=`<text x="${lx}" y="${ly+11}" text-anchor="${anchor}" font-family="Patrick Hand,cursive" font-size="11" font-weight="700" fill="${c}" ${outline}>${score}/10</text>`;
   });
+
   document.getElementById('rbGrid').innerHTML=g;
   document.getElementById('rbShape').innerHTML=s;
   document.getElementById('rbLabels').innerHTML=l;
@@ -1763,17 +1842,43 @@ async function startStreamingAnalysis(slug) {
   renderSpheres(resultData);
   renderPlan(resultData);
 
-  // Показуємо прогрес-бар
+  // Показуємо прогрес-бар + sticky-банер
   var apEl = document.getElementById('analysisProgress');
   var ptEl = document.getElementById('progressText');
   var ppEl = document.getElementById('progressPercent');
   var pfEl = document.getElementById('progressFill');
+  var stickyEl = document.getElementById('analysisSticky');
+  var stickyTxt = document.getElementById('analysisStickyText');
+  var stickyFill = document.getElementById('analysisStickyFill');
+  var stickyPct = document.getElementById('analysisStickyPct');
+
+  // beforeunload — попередження при спробі закрити/перейти
+  function _beforeUnloadHandler(e){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+  window.addEventListener('beforeunload', _beforeUnloadHandler);
+
   function updateProgress(done){
     var pct = Math.round(done/total*100);
+    var isDone = done >= total;
+    // inline progress bar
     if(apEl) apEl.style.display='block';
-    if(ptEl) ptEl.textContent = done < total ? ('Аналізую ' + done + ' з ' + total + ' сфер...') : '✓ Аналіз завершено';
+    if(ptEl) ptEl.textContent = isDone ? '✓ Аналіз завершено' : ('Аналізую ' + done + ' з ' + total + ' сфер...');
     if(ppEl) ppEl.textContent = pct + '%';
     if(pfEl) pfEl.style.width = pct + '%';
+    // sticky bottom bar
+    if(stickyEl){
+      if(isDone){
+        stickyEl.classList.remove('show');
+        window.removeEventListener('beforeunload', _beforeUnloadHandler);
+      }else{
+        stickyEl.classList.add('show');
+        if(stickyTxt) stickyTxt.textContent = 'Не закривай! Аналіз ' + done + ' з ' + total + ' сфер...';
+        if(stickyFill) stickyFill.style.width = pct + '%';
+        if(stickyPct) stickyPct.textContent = pct + '%';
+      }
+    }
   }
   updateProgress(0);
 
@@ -1878,6 +1983,15 @@ async function startStreamingAnalysis(slug) {
         renderSpheres(resultData);
         renderPlan(resultData);
       }
+      // Інкрементальне збереження: кожні 3 сфери + остання
+      var isLast = (i === spheres.length - 1);
+      if(receivedAdvice.length % 3 === 0 || isLast){
+        fetch('/api/results/update-advice',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({slug:slug, advice:receivedAdvice})
+        }).catch(function(){});
+      }
     }else if(lastError){
       console.error('Не вдалося отримати рекомендації для ' + s.name + ': ' + lastError);
       if(banner) banner.innerHTML = '<div style="padding:10px 14px;background:rgba(192,57,43,.08);border:1.5px dashed var(--red);border-radius:10px;font-size:14px;color:var(--red);text-align:center">❌ Помилка при аналізі <strong>' + s.name + '</strong>: ' + lastError + '</div>';
@@ -1889,23 +2003,14 @@ async function startStreamingAnalysis(slug) {
     }
   }
 
-  // Зберігаємо фінальний advice в Supabase
-  if(receivedAdvice.length > 0){
-    try{
-      await fetch('/api/results/update-advice',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({slug:slug, advice:receivedAdvice})
-      });
-    }catch(e){}
-  }
-
   // Після аналізу — показуємо кнопку портрету (не авто-генеруємо щоб не бити по Groq rate limit)
-  if(receivedAdvice.length >= 3 && !localStorage.getItem('lw_portrait_'+slug)){
+  if(receivedAdvice.length >= 1 && !localStorage.getItem('lw_portrait_'+slug)){
     initPortraitBlock(slug);
   }
 
   if(banner) banner.style.display='none';
+  window.removeEventListener('beforeunload', _beforeUnloadHandler);
+  if(stickyEl) stickyEl.classList.remove('show');
   updateProgress(total);
   setTimeout(function(){ if(apEl) apEl.style.display='none'; }, 2000);
   history.replaceState({}, '', window.location.pathname);
@@ -1978,10 +2083,9 @@ function initPortraitBlock(slug){
     localStorage.setItem('lw_portrait_'+slug, JSON.stringify(resultData.analysis.overall_portrait));
     return;
   }
-  // Показуємо кнопку тільки якщо аналіз завершено (всі сфери проаналізовані)
-  var totalSpheres = Object.keys(resultData.scores||{}).length;
+  // Показуємо кнопку якщо проаналізовано хоча б 3 сфери
   var analyzedCount = ((resultData.analysis&&resultData.analysis.advice)||[]).length;
-  if(analyzedCount < totalSpheres) return;
+  if(analyzedCount < 3) return;
   el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px 16px">'
     + '<div class="portrait-type">🧠 AI-портрет особистості</div>'
     + '<div style="color:var(--ink2);font-size:.9rem;line-height:1.6;margin:10px 0 16px">Ми проаналізували твої 12 сфер. Отримай персональний психологічний портрет від AI-коуча.</div>'
@@ -2187,6 +2291,16 @@ loadResult().then(function(){
   maybeShowEmailCapture();
 });
 </script>
+
+<!-- STICKY ANALYSIS BAR -->
+<div id="analysisSticky">
+  <div class="as-pulse"></div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:14px;font-weight:700;line-height:1.3" id="analysisStickyText">AI аналізує твої сфери...</div>
+    <div class="as-bar"><div class="as-fill" id="analysisStickyFill"></div></div>
+  </div>
+  <div style="font-size:13px;opacity:.7;flex-shrink:0" id="analysisStickyPct">0%</div>
+</div>
 
 <!-- STICKY MOBILE PRO BAR -->
 <div id="mobileProBar">

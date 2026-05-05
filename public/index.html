@@ -1129,53 +1129,89 @@ const W=480,CX=W/2,CY=W/2,MAXR=200,MINR=22,SL=(Math.PI*2)/12;
 function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
   const ct=c.getContext('2d');
   ct.clearRect(0,0,c.width,c.height);
-  // outer
-  ct.beginPath();ct.arc(cx,cy,maxr+6,0,Math.PI*2);
-  ct.fillStyle='rgba(255,255,255,.30)';ct.fill();
-  // disc
+
+  // Зовнішнє свічення
+  ct.beginPath();ct.arc(cx,cy,maxr+8,0,Math.PI*2);
+  ct.fillStyle='rgba(255,255,255,.28)';ct.fill();
+
+  // Білий диск
   ct.beginPath();ct.arc(cx,cy,maxr,0,Math.PI*2);
-  ct.fillStyle='rgba(255,255,255,.90)';ct.fill();
-  ct.strokeStyle='rgba(60,120,200,.38)';ct.lineWidth=2;ct.stroke();
-  // grid
+  ct.fillStyle='rgba(255,255,255,.94)';ct.fill();
+  ct.strokeStyle='rgba(60,120,200,.42)';ct.lineWidth=2;ct.stroke();
+
+  // Концентричні кільця
   for(let i=1;i<=10;i++){
     const r=minr+(maxr-minr)*i/10;
     ct.beginPath();ct.arc(cx,cy,r,0,Math.PI*2);
-    if(i===5){ct.strokeStyle='rgba(40,100,200,.30)';ct.lineWidth=1.2;}
-    else if(i===10){ct.strokeStyle='rgba(40,100,200,.25)';ct.lineWidth=1.0;}
-    else{ct.strokeStyle='rgba(40,100,200,.10)';ct.lineWidth=.6;}
+    if(i===10){ct.strokeStyle='rgba(40,100,200,.45)';ct.lineWidth=1.5;}
+    else if(i===5){ct.strokeStyle='rgba(40,100,200,.35)';ct.lineWidth=1.2;}
+    else if(i%2===0){ct.strokeStyle='rgba(40,100,200,.22)';ct.lineWidth=.9;}
+    else{ct.strokeStyle='rgba(40,100,200,.12)';ct.lineWidth=.6;}
     ct.stroke();
-    if(i%2===0){ct.font='500 8px Nunito';ct.fillStyle='rgba(40,100,180,.45)';ct.textAlign='left';ct.textBaseline='middle';ct.fillText(i,cx+r+3,cy-3);}
+    // Позначки шкали (2,4,6,8,10)
+    if(i%2===0){
+      const rx=cx+r+5,ry=cy-4;
+      ct.font='600 9px Nunito,sans-serif';
+      ct.fillStyle='rgba(255,255,255,.9)';ct.textAlign='left';ct.textBaseline='middle';
+      ct.fillText(i,rx+.5,ry+.5);
+      ct.fillStyle='rgba(40,100,180,.65)';ct.fillText(i,rx,ry);
+    }
   }
-  // dividers
+
+  // Розділювачі секторів
   for(let i=0;i<12;i++){
     const a=-Math.PI/2+sl*i;
-    ct.beginPath();ct.moveTo(cx+minr*Math.cos(a),cy+minr*Math.sin(a));ct.lineTo(cx+maxr*Math.cos(a),cy+maxr*Math.sin(a));
-    ct.strokeStyle='rgba(40,100,200,.22)';ct.lineWidth=1.0;ct.stroke();
+    ct.beginPath();ct.moveTo(cx+minr*Math.cos(a),cy+minr*Math.sin(a));
+    ct.lineTo(cx+maxr*Math.cos(a),cy+maxr*Math.sin(a));
+    ct.strokeStyle='rgba(40,100,200,.28)';ct.lineWidth=1.0;ct.stroke();
   }
-  // sectors
+
+  // Сектори
   SPHERES.forEach((s,i)=>{
     const sa=-Math.PI/2+sl*i+.020,ea=sa+sl-.040;
     const a=avg(s.id),r=minr+(maxr-minr)*a/10,isAct=s.id===activeId;
+
+    // Заливка сектора
     ct.beginPath();ct.moveTo(cx,cy);ct.arc(cx,cy,r,sa,ea);ct.closePath();
     const g=ct.createRadialGradient(cx,cy,minr*.5,cx,cy,r);
     g.addColorStop(0,s.color+'28');g.addColorStop(.55,s.color+(isAct?'bb':'88'));g.addColorStop(1,s.color+(isAct?'ff':'cc'));
     ct.fillStyle=g;ct.fill();
+
+    // Дуга контур
     ct.beginPath();ct.arc(cx,cy,r,sa,ea);
     ct.strokeStyle=isAct?s.color:s.color+'cc';ct.lineWidth=isAct?3:2;ct.stroke();
     ct.beginPath();ct.moveTo(cx,cy);ct.arc(cx,cy,r,sa,ea);ct.closePath();
     ct.strokeStyle=s.color+'44';ct.lineWidth=.5;ct.stroke();
-    const ma=-Math.PI/2+sl*i+sl/2,lr=maxr+24;
-    ct.save();ct.translate(cx+lr*Math.cos(ma),cy+lr*Math.sin(ma));ct.rotate(ma+Math.PI/2);
-    ct.font=`${isAct?'700':'600'} ${isAct?10.5:9.5}px Nunito,sans-serif`;
-    ct.shadowColor='rgba(255,255,255,.9)';ct.shadowBlur=4;
-    ct.fillStyle=isAct?s.color:s.color+'ee';ct.textAlign='center';ct.textBaseline='middle';
-    ct.fillText(s.name,0,0);ct.shadowBlur=0;ct.restore();
-    const scoreR=Math.max(minr+18,r-20);
-    ct.font='700 9px Nunito';ct.shadowColor='rgba(255,255,255,.95)';ct.shadowBlur=5;
-    ct.fillStyle=isAct?s.color:'rgba(20,50,100,.80)';ct.textAlign='center';ct.textBaseline='middle';
-    ct.fillText(a.toFixed(1),cx+scoreR*Math.cos(ma),cy+scoreR*Math.sin(ma));ct.shadowBlur=0;
+
+    // Підпис сфери
+    const ma=-Math.PI/2+sl*i+sl/2,lr=maxr+26;
+    ct.save();
+    ct.translate(cx+lr*Math.cos(ma),cy+lr*Math.sin(ma));
+    // Нижня половина: перевертаємо щоб підпис не був догори ногами
+    const flip=Math.sin(ma)>0.08;
+    ct.rotate(ma+Math.PI/2+(flip?Math.PI:0));
+    ct.textAlign='center';ct.textBaseline='middle';
+    const fs=isAct?13.5:12;
+    ct.font=`${isAct?'700':'600'} ${fs}px Nunito,sans-serif`;
+    // Білий контур для читабельності
+    ct.lineJoin='round';ct.miterLimit=3;
+    ct.strokeStyle='rgba(255,255,255,.97)';ct.lineWidth=5;
+    ct.strokeText(s.name,0,0);
+    ct.fillStyle=isAct?s.color:s.color+'ee';
+    ct.fillText(s.name,0,0);
+    ct.restore();
+
+    // Бал всередині сектора
+    const scoreR=Math.max(minr+20,r-22);
+    ct.font=`700 ${isAct?10.5:9.5}px Nunito,sans-serif`;
+    ct.strokeStyle='rgba(255,255,255,.95)';ct.lineWidth=4;ct.lineJoin='round';
+    ct.textAlign='center';ct.textBaseline='middle';
+    ct.strokeText(a.toFixed(1),cx+scoreR*Math.cos(ma),cy+scoreR*Math.sin(ma));
+    ct.fillStyle=isAct?s.color:'rgba(20,50,100,.82)';
+    ct.fillText(a.toFixed(1),cx+scoreR*Math.cos(ma),cy+scoreR*Math.sin(ma));
   });
-  // center
+
+  // Центральна точка
   const cg=ct.createRadialGradient(cx,cy,0,cx,cy,14);
   cg.addColorStop(0,'#ffffff');cg.addColorStop(1,'#6ab0e0');
   ct.beginPath();ct.arc(cx,cy,10,0,Math.PI*2);ct.fillStyle=cg;ct.fill();
