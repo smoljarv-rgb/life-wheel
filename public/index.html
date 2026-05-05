@@ -425,33 +425,39 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
   .left-col{display:none!important}
 
   /* Дропдаун вибору сфери */
-  .sphere-dropdown-wrap{
-    display:flex;align-items:center;gap:8px;
-    padding:10px 12px;
+  .sphere-chips-wrap{
+    padding:8px 0 8px 12px;
     background:var(--sf2);
-    border-bottom:1px solid var(--sb);
+    border-bottom:1.5px solid var(--sb);
     position:sticky;top:44px;z-index:50;
+    overflow:hidden;
   }
-  .sphere-dropdown-label{font-size:.68rem;color:var(--tm);white-space:nowrap;flex-shrink:0}
-  .sphere-dropdown{
-    flex:1;
-    padding:9px 12px;
+  .sphere-chips{
+    display:flex;gap:7px;
+    overflow-x:auto;scrollbar-width:none;
+    padding-right:12px;
+    scroll-snap-type:x mandatory;
+  }
+  .sphere-chips::-webkit-scrollbar{display:none}
+  .sphere-chip{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:7px 12px 7px 8px;
+    border-radius:20px;
+    border:2px solid transparent;
     background:var(--sf);
-    border:1.5px solid var(--sb);
-    border-radius:10px;
-    color:var(--t1);
-    font-size:.82rem;
-    font-family:inherit;
-    outline:none;
-    cursor:pointer;
-    appearance:none;
-    -webkit-appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a8aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:right 12px center;
-    padding-right:32px;
+    white-space:nowrap;cursor:pointer;
+    font-size:.78rem;font-weight:600;font-family:inherit;
+    color:var(--t2);
+    transition:transform .12s,box-shadow .12s;
+    flex-shrink:0;
+    scroll-snap-align:start;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
   }
-  .sphere-dropdown:focus{border-color:var(--ac)}
+  .sphere-chip:active{transform:scale(.94)}
+  .sphere-chip.chip-active{color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+  .chip-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .chip-score{font-size:.7rem;font-weight:700;opacity:.82;margin-left:1px}
 
   .center-col{padding:8px 10px}
   .right-col{padding:8px 10px}
@@ -648,11 +654,9 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
 
 <div class="wrapper">
 
-  <!-- МОБІЛЬНИЙ ДРОПДАУН ВИБОРУ СФЕРИ (тільки на телефоні) -->
-  <div class="sphere-dropdown-wrap" id="sphereDropdownWrap" style="display:none">
-    <span class="sphere-dropdown-label">Сфера:</span>
-    <select class="sphere-dropdown" id="sphereDropdown" onchange="onMobileSphereChange(this.value)">
-    </select>
+  <!-- МОБІЛЬНИЙ РЯД ЧІПІВ ВИБОРУ СФЕРИ (тільки на телефоні) -->
+  <div class="sphere-chips-wrap" id="sphereDropdownWrap" style="display:none">
+    <div class="sphere-chips" id="sphereChips"></div>
   </div>
 
   <!-- LEFT -->
@@ -3113,25 +3117,33 @@ function showPrivacyPolicy(){
 // ── МОБІЛЬНИЙ ДРОПДАУН СФЕР ──
 function buildMobileDropdown(){
   const wrap = document.getElementById('sphereDropdownWrap');
-  const sel = document.getElementById('sphereDropdown');
-  if(!wrap || !sel) return;
+  const container = document.getElementById('sphereChips');
+  if(!wrap || !container) return;
 
-  // Показуємо тільки на мобільному
   const isMobile = window.innerWidth <= 600;
-  wrap.style.display = isMobile ? 'flex' : 'none';
+  wrap.style.display = isMobile ? 'block' : 'none';
   if(!isMobile) return;
 
-  // Заповнюємо опції
-  sel.innerHTML = SPHERES.map(s => {
+  container.innerHTML = SPHERES.map(s => {
     const a = avg(s.id).toFixed(1);
-    const icon = a < 4 ? '⚠' : a < 6 ? '~' : a < 8 ? '✓' : '★';
-    return `<option value="${s.id}" ${s.id === active.id ? 'selected' : ''}>${icon} ${s.name} — ${a}/10</option>`;
+    const isAct = s.id === active.id;
+    const bg = isAct ? `background:${s.color};border-color:${s.color}` : `border-color:${s.color}55;background:${s.color}12`;
+    const dotBg = isAct ? 'rgba(255,255,255,.85)' : s.color;
+    return `<button class="sphere-chip${isAct?' chip-active':''}" style="${bg}" onclick="onMobileSphereChange('${s.id}')">
+      <span class="chip-dot" style="background:${dotBg}"></span>${s.name}<span class="chip-score">${a}</span>
+    </button>`;
   }).join('');
+
+  // Скролимо до активного чіпа
+  setTimeout(()=>{
+    const chip = container.querySelector('.chip-active');
+    if(chip) chip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }, 60);
 }
 
 function onMobileSphereChange(id){
   const s = SPHERES.find(x => x.id === id);
-  if(s){ active = s; buildNav(); buildDetail(); drawWheel(); }
+  if(s){ active = s; buildNav(); buildDetail(); drawWheel(); buildMobileDropdown(); }
 }
 
 // Слухаємо зміну розміру — перемикаємо між дропдауном і кнопками
