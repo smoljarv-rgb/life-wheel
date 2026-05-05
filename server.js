@@ -463,15 +463,18 @@ app.post('/api/track', async (req, res) => {
 // RESULTS
 // ══════════════════════════════════════════
 app.post('/api/results/save', async (req, res) => {
-  const { scores, analysis } = req.body;
+  const { scores, analysis, email } = req.body;
   if (!scores) return res.status(400).json({ error: 'Missing scores' });
 
   // Генеруємо унікальний slug (6 символів)
   const slug = Math.random().toString(36).substring(2, 8);
 
+  const row = { slug, scores, analysis };
+  if (email && email.includes('@')) row.email = email.toLowerCase().trim();
+
   const { error } = await supabase
     .from('results')
-    .insert([{ slug, scores, analysis }]);
+    .insert([row]);
 
   if (error) {
     console.error('Supabase error:', error);
@@ -479,6 +482,14 @@ app.post('/api/results/save', async (req, res) => {
   }
 
   res.json({ ok: true, slug, url: `https://koleso.live/result/${slug}` });
+});
+
+// Прив'язати email до існуючого результату
+app.post('/api/results/link-email', async (req, res) => {
+  const { slug, email } = req.body;
+  if (!slug || !email || !email.includes('@')) return res.status(400).json({ error: 'Missing data' });
+  await supabase.from('results').update({ email: email.toLowerCase().trim() }).eq('slug', slug).is('email', null);
+  res.json({ ok: true });
 });
 
 // Stats маршрут МАЄ бути перед :slug щоб Express не плутав 'stats' як slug

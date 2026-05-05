@@ -2085,12 +2085,14 @@ async function runAnalysis(){
 
   // Зберігаємо результат і одразу переходимо на result.html
   try{
+    const _saveEmail = localStorage.getItem('lw_premium_email') || '';
     const saveRes=await fetch('/api/results/save',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         scores:allScoresSnapshot,
-        analysis:{analysedKeys,isFree:isFreeResult,advice:[],weekPlan:[],spheres:{}}
+        analysis:{analysedKeys,isFree:isFreeResult,advice:[],weekPlan:[],spheres:{}},
+        email:_saveEmail||undefined
       })
     });
     const saved=await saveRes.json();
@@ -2440,6 +2442,7 @@ function renderAdvice(parsed){
   }catch(e){ console.error('Snapshot error:', e); }
 
   // Зберігаємо результат в Supabase
+  var _saveEmail2 = localStorage.getItem('lw_premium_email') || '';
 	fetch('/api/results/save', {
 	  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },
@@ -2451,7 +2454,8 @@ function renderAdvice(parsed){
 			  advice: (window._lastParsed && window._lastParsed.advice) ? window._lastParsed.advice : [],
 			  weekPlan: [],
 			  spheres: {}
-			}
+			},
+			email: _saveEmail2 || undefined
 		  })
 		}).then(r => r.json()).then(saved => {
 		  if (saved.slug) {

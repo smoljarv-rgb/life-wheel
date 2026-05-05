@@ -337,32 +337,43 @@ async function loadSubscription(){
 
 async function loadReports(){
   var reports = [];
+  var seenSlugs = new Set();
 
-  // Беремо результати з localStorage (збережені при проходженні тесту)
+  // 1. Supabase — основне джерело (фільтр по email)
+  try {
+    var email = currentUser.email;
+    var sbResult = await sb.from('results')
+      .select('slug, scores, created_at')
+      .eq('email', email)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if(sbResult.data && sbResult.data.length > 0){
+      sbResult.data.forEach(function(r){
+        reports.push(r);
+        seenSlugs.add(r.slug);
+      });
+    }
+  } catch(e) {}
+
+  // 2. localStorage — доповнення (для старих результатів без email)
   try {
     for(var i = 0; i < localStorage.length; i++){
       var key = localStorage.key(i);
       if(key && key.startsWith('lw_result_')){
         var slug = key.replace('lw_result_', '');
+        if(seenSlugs.has(slug)) continue;
         var raw = localStorage.getItem(key);
         if(raw){
           var d = JSON.parse(raw);
-          reports.push({ slug: slug, scores: d.scores || {}, created_at: d.created_at || new Date().toISOString() });
+          reports.push({ slug: slug, scores: d.scores || {}, created_at: d.created_at || new Date(0).toISOString() });
+          seenSlugs.add(slug);
         }
       }
     }
-    reports.sort(function(a,b){ return new Date(b.created_at) - new Date(a.created_at); });
-    reports = reports.slice(0, 10);
   } catch(e) {}
 
-  // Якщо localStorage порожній — спробуємо Supabase (може RLS дозволяє)
-  if(!reports.length){
-    var result = await sb.from('results')
-      .select('slug, scores, created_at')
-      .order('created_at', { ascending: false })
-      .limit(10);
-    if(result.data && result.data.length > 0) reports = result.data;
-  }
+  reports.sort(function(a,b){ return new Date(b.created_at) - new Date(a.created_at); });
+  reports = reports.slice(0, 20);
 
   var statTests = document.getElementById('statTests');
   var statAvg = document.getElementById('statAvg');

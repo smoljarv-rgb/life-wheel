@@ -1769,6 +1769,13 @@ async function sendNotif(){
     if(res.ok || res.status === 409){
       // Зберігаємо локально щоб не показувати знову
       localStorage.setItem('lw_email_captured', email);
+      localStorage.setItem('lw_premium_email', email);
+      // Прив'язуємо email до поточного результату в Supabase
+      if(currentSlug) fetch('/api/results/link-email',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({slug:currentSlug, email:email})
+      }).catch(function(){});
       closeNotif();
       showToast('✓ Надіслали! Перевір пошту за 2 хвилини.');
     } else {
