@@ -870,6 +870,9 @@ body::after{
     </div>
   </div>
 
+  <!-- RESUME ANALYSIS BANNER -->
+  <div id="resumeAnalysisBanner" style="display:none;background:var(--paper2);border:2px solid var(--blue);border-radius:10px;padding:16px 18px;margin-bottom:20px"></div>
+
   <!-- PORTRAIT BLOCK -->
   <div id="portraitBlock" style="display:none;margin-bottom:20px"></div>
 
@@ -2067,6 +2070,12 @@ function renderPortraitBlock(portrait){
 function _portraitRetryBtn(){
   return '<button onclick="startPortraitGen()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-family:Patrick Hand,cursive;font-size:1rem;cursor:pointer;margin-top:8px">🔄 Спробувати знову</button>';
 }
+function resumeAnalysis(){
+  var _slug = window.location.pathname.split('/').pop();
+  var _resumeEl = document.getElementById('resumeAnalysisBanner');
+  if(_resumeEl) _resumeEl.style.display = 'none';
+  if(_slug) startStreamingAnalysis(_slug);
+}
 function startPortraitGen(){
   var _sl = window.location.pathname.split('/').pop();
   var _sc = resultData && resultData.scores ? resultData.scores : {};
@@ -2255,11 +2264,29 @@ function sanitizeAIResponse(parsed){
   return parsed;
 }
 loadResult().then(function(){
-  // Банер успішної оплати якщо ?paid=1
-  // Завантажуємо portrait якщо є
   var _slug = window.location.pathname.split('/').pop();
   var _isAnalyzing = new URLSearchParams(window.location.search).get('analyzing') === '1';
-  if(!_isAnalyzing) initPortraitBlock(_slug);
+
+  // Якщо аналіз незавершений — показуємо банер відновлення
+  if(!_isAnalyzing){
+    var _advice = (resultData && resultData.analysis && resultData.analysis.advice) || [];
+    var _scores = (resultData && resultData.scores) || {};
+    var _total = Object.keys(_scores).length;
+    if(_total > 0 && _advice.length < _total){
+      var _resumeEl = document.getElementById('resumeAnalysisBanner');
+      if(_resumeEl){
+        var _done = _advice.length;
+        _resumeEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+          + '<div><div style="font-size:15px;font-weight:700;color:var(--ink)">⏸ Аналіз незавершений</div>'
+          + '<div style="font-size:13px;color:var(--ink2);margin-top:2px">Проаналізовано ' + _done + ' з ' + _total + ' сфер' + (_done === 0 ? '' : ' — залишилось ' + (_total - _done)) + '</div></div>'
+          + '<button onclick="resumeAnalysis()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:Patrick Hand,cursive;font-size:15px;cursor:pointer;white-space:nowrap">▶ Продовжити аналіз</button>'
+          + '</div>';
+        _resumeEl.style.display = 'block';
+      }
+    } else {
+      initPortraitBlock(_slug);
+    }
+  }
 
   if(new URLSearchParams(window.location.search).get('paid') === '1'){
     var b = document.createElement('div');

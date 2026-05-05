@@ -683,6 +683,12 @@ body.mood-storm .modal,body.mood-overcast .modal{background:rgba(22,30,50,.97);b
       <div style="text-align:center;margin-top:6px"><div class="wheel-hint">👆 Клікни на сферу · Пересувай повзунок для оцінки</div></div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
+    <!-- Посилання на останній результат -->
+    <div id="lastResultLink" style="display:none;width:100%;max-width:500px;margin-top:10px;text-align:center">
+      <a id="lastResultAnchor" href="#" style="display:inline-flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:600;color:var(--tm);text-decoration:none;padding:8px 18px;border:1.5px solid var(--sb);border-radius:20px;transition:all .2s;background:var(--sf)" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
+        📋 Мій останній результат →
+      </a>
+    </div>
     <!-- Блок повного звіту — з'являється після аналізу -->
     <div id="fullResultBlock" style="display:none;width:100%;max-width:500px"></div>
   </div>
@@ -1890,6 +1896,15 @@ function _renderModalActions(){
   footer.style.cssText='font-size:.62rem;text-align:center;padding:8px 12px;border-radius:8px;background:'+footerBg+';color:'+footerColor;
   footer.innerHTML=footerText;
   area.appendChild(footer);
+
+  // Посилання на останній результат якщо є
+  var _lastSlug=localStorage.getItem('lw_last_result');
+  if(_lastSlug){
+    var lastLink=document.createElement('div');
+    lastLink.style.cssText='text-align:center;margin-top:10px';
+    lastLink.innerHTML='<a href="/result/'+_lastSlug+'" style="font-size:.7rem;color:var(--tm);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border:1px solid var(--sb);border-radius:20px;transition:all .2s" onmouseover="this.style.borderColor=\'var(--ac)\';this.style.color=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--sb)\';this.style.color=\'var(--tm)\'">📋 Переглянути мій останній результат →</a>';
+    area.appendChild(lastLink);
+  }
 }
 
 function _renderModalChips(){
@@ -3270,6 +3285,15 @@ function triggerPayment(plan, currency) {
 }
 
 buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();
+
+// Показуємо посилання на останній результат якщо є
+(function initLastResultLink(){
+  var slug = localStorage.getItem('lw_last_result');
+  if(!slug) return;
+  var wrap = document.getElementById('lastResultLink');
+  var a = document.getElementById('lastResultAnchor');
+  if(wrap && a){ a.href = '/result/' + slug; wrap.style.display = 'block'; }
+})();
 
 // Mobile sticky CTA
 (function initMobileCta(){
