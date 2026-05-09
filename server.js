@@ -1655,6 +1655,10 @@ app.get('/terms', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
 
+app.get('/landing', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+
 app.get('/pricing', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pricing.html'));
 });

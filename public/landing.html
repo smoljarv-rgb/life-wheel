@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S9Y88THBWZ"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-S9Y88THBWZ');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Знайди причину вигорання за 5 хвилин | koleso.live</title>
+<meta name="description" content="AI аналізує 12 сфер твого життя безкоштовно.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0D0D1A;
+    --bg2: #13132a;
+    --teal: #20D8A0;
+    --purple: #6C4DFE;
+    --text: #F0F0F5;
+    --muted: #8888AA;
+    --radius: 14px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Logo ── */
+  .logo-bar {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 20px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .logo {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--teal); }
+
+  /* ── Hero ── */
+  .hero {
+    width: 100%;
+    max-width: 480px;
+    padding: 32px 20px 28px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.7rem, 6vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+  .hero h1 .accent { color: var(--teal); }
+
+  .hero-sub {
+    font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 360px;
+  }
+
+  .cta-btn {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 18px 24px;
+    background: var(--teal);
+    color: #0D0D1A;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity .18s, transform .18s;
+    letter-spacing: -0.01em;
+  }
+  .cta-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .cta-btn:active { transform: translateY(0); opacity: 1; }
+
+  .cta-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: -6px;
+  }
+
+  /* ── Social proof ── */
+  .proof {
+    width: 100%;
+    max-width: 480px;
+    padding: 0 20px 32px;
+  }
+  .proof-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .proof-item {
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 14px 8px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .proof-num {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--teal);
+    line-height: 1;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .proof-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: block;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: calc(100% - 40px);
+    max-width: 440px;
+    height: 1px;
+    background: rgba(255,255,255,.07);
+    margin: 0 auto 28px;
+  }
+
+  /* ── Problem ── */
+  .section {
+    width: 100%;
+    max-width: 480px;
+    padding: 0 20px 32px;
+  }
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-align: center;
+    color: var(--text);
+  }
+  .problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .problem-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--bg2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,.06);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+  .problem-item.bad { border-left: 3px solid #ff5e5e; }
+  .problem-item.good { border-left: 3px solid var(--teal); }
+  .problem-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .problem-text strong { display: block; color: var(--text); font-weight: 600; }
+  .problem-text span { color: var(--muted); font-size: 0.82rem; }
+
+  /* ── How it works ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--bg2);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--purple);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-body strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .step-body span {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── Final CTA ── */
+  .final-cta {
+    width: 100%;
+    max-width: 480px;
+    padding: 8px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+  }
+  .final-cta h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .promo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(108, 77, 254, 0.15);
+    border: 1px solid rgba(108, 77, 254, 0.4);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    color: #b8a8ff;
+    line-height: 1.4;
+    text-align: left;
+  }
+  .promo-code {
+    font-weight: 700;
+    color: #c8baff;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<!-- Logo -->
+<div class="logo-bar">
+  <a class="logo" href="/">koleso<span>.live</span></a>
+</div>
+
+<!-- БЛОК 1: Hero -->
+<section class="hero">
+  <h1>
+    Ти не вигорів від роботи.<br>
+    <span class="accent">Ти вигорів від дисбалансу.</span>
+  </h1>
+  <p class="hero-sub">AI аналізує 12 сфер твого життя і знаходить справжню причину за 5 хвилин.</p>
+  <a class="cta-btn" href="/" onclick="gtag('event','cta_hero_click',{event_category:'landing',event_label:'hero'})">
+    Пройти безкоштовний тест →
+  </a>
+  <p class="cta-hint">Без реєстрації · Без оплати · Результат одразу</p>
+</section>
+
+<!-- БЛОК 2: Соціальний доказ -->
+<div class="proof">
+  <div class="proof-grid">
+    <div class="proof-item">
+      <span class="proof-num">3 400+</span>
+      <span class="proof-label">аналізів</span>
+    </div>
+    <div class="proof-item">
+      <span class="proof-num">12</span>
+      <span class="proof-label">сфер життя</span>
+    </div>
+    <div class="proof-item">
+      <span class="proof-num">5 хв</span>
+      <span class="proof-label">до результату</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- БЛОК 3: Проблема -->
+<section class="section">
+  <p class="section-title">Чому стандартні поради не працюють</p>
+  <div class="problem-list">
+    <div class="problem-item bad">
+      <span class="problem-icon">❌</span>
+      <div class="problem-text">
+        <strong>«Більше відпочивай»</strong>
+        <span>Не вирішує корінь — тільки маскує симптом</span>
+      </div>
+    </div>
+    <div class="problem-item bad">
+      <span class="problem-icon">❌</span>
+      <div class="problem-text">
+        <strong>«Займись хобі»</strong>
+        <span>Симптом, а не причина — завтра повернеться</span>
+      </div>
+    </div>
+    <div class="problem-item good">
+      <span class="problem-icon">✅</span>
+      <div class="problem-text">
+        <strong>AI знаходить де саме починається дисбаланс</strong>
+        <span>Не здогадки, а аналіз зв'язків між 12 сферами</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- БЛОК 4: Як це працює -->
+<section class="section">
+  <p class="section-title">Як це працює</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Оціни 12 сфер від 1 до 10</strong>
+        <span>Кар'єра, здоров'я, стосунки, фінанси та інші — 5 хвилин</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>AI аналізує зв'язки між сферами</strong>
+        <span>Знаходить де втрачається найбільше енергії — автоматично</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Отримай Life Score і план дій</strong>
+        <span>Конкретні кроки на 7 днів під твою ситуацію — одразу</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- БЛОК 5: Повторний CTA -->
+<section class="final-cta">
+  <h2>Дізнайся де твій корінь</h2>
+  <a class="cta-btn" href="/" onclick="gtag('event','cta_bottom_click',{event_category:'landing',event_label:'bottom'})">
+    Пройти тест безкоштовно →
+  </a>
+  <div class="promo-badge">
+    🎁 PRO план зі знижкою 50% → промокод <span class="promo-code">LAUNCH50</span>
+  </div>
+</section>
+
+</body>
+</html>
