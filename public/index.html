@@ -685,8 +685,8 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
 .constellation-svg{
   display:block;
   width:100%;
+  height:auto;
   margin:0 auto;
-  overflow:visible;
 }
 
 /* ═══════════════════════════════════════════
@@ -975,94 +975,114 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           <span>Сузір'я · Приклад</span>
           <span>6.4 / 10</span>
         </div>
-        <svg class="constellation-svg" viewBox="-60 -30 400 360" xmlns="http://www.w3.org/2000/svg">
+        <svg class="constellation-svg" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+          <!--
+            Центр: cx=180, cy=180
+            Внутрішнє кільце r=52  → бал ~4
+            Середнє кільце  r=90  → бал ~7
+            Зовнішнє кільце r=128 → бал 10
+            12 сфер по 30° кожна, перша — 12 годин (270° від East)
+            Позиції вузлів (score ~6-8, демо):
+            1 Любов     (180, 52)   — score 9.8
+            2 Сім'я     (244, 74)   — score 8.5
+            3 Друзі     (292, 130)  — score 7.7
+            4 Кар'єра   (292, 200)  — score 7.5
+            5 Фінанси   (250, 254)  — score 7.2
+            6 Самор.    (205, 280)  — score 7.8
+            7 Духовн.   (155, 280)  — score 6.4 ← life score
+            8 Відпоч.   (110, 250)  — score 5.5
+            9 Серед.    (72,  200)  — score 6.1
+           10 Комун.    (68,  130)  — score 5.8
+           11 Здоров.   (116, 76)   — score 7.0
+           12 Зовн.     (180, 56)   — score 9.5 (close to Любов)
+          -->
 
-          <!-- Осьові лінії (поділки) від центру до кожної сфери -->
-          <g stroke="rgba(244,239,230,0.09)" stroke-width="0.8">
-            <line x1="140" y1="140" x2="140" y2="6"/>
-            <line x1="140" y1="140" x2="207" y2="26"/>
-            <line x1="140" y1="140" x2="257" y2="77"/>
-            <line x1="140" y1="140" x2="274" y2="140"/>
-            <line x1="140" y1="140" x2="253" y2="212"/>
-            <line x1="140" y1="140" x2="182" y2="267"/>
-            <line x1="140" y1="140" x2="140" y2="274"/>
-            <line x1="140" y1="140" x2="66" y2="252"/>
-            <line x1="140" y1="140" x2="19" y2="197"/>
-            <line x1="140" y1="140" x2="6" y2="140"/>
-            <line x1="140" y1="140" x2="18" y2="85"/>
-            <line x1="140" y1="140" x2="58" y2="34"/>
+          <!-- Осьові лінії (поділки) — від центру до кожного вузла -->
+          <g stroke="rgba(244,239,230,0.12)" stroke-width="1">
+            <line x1="180" y1="180" x2="180" y2="48"/>
+            <line x1="180" y1="180" x2="246" y2="68"/>
+            <line x1="180" y1="180" x2="295" y2="120"/>
+            <line x1="180" y1="180" x2="310" y2="180"/>
+            <line x1="180" y1="180" x2="295" y2="240"/>
+            <line x1="180" y1="180" x2="246" y2="292"/>
+            <line x1="180" y1="180" x2="180" y2="312"/>
+            <line x1="180" y1="180" x2="114" y2="292"/>
+            <line x1="180" y1="180" x2="65" y2="240"/>
+            <line x1="180" y1="180" x2="50" y2="180"/>
+            <line x1="180" y1="180" x2="65" y2="120"/>
+            <line x1="180" y1="180" x2="114" y2="68"/>
           </g>
 
-          <!-- Маркери шкали на верхній осі -->
-          <g font-family="monospace" font-size="6" fill="rgba(244,239,230,0.28)" text-anchor="start">
-            <text x="144" y="89">4</text>
-            <text x="144" y="48">7</text>
-            <text x="144" y="16">10</text>
+          <!-- Маркери шкали (4 / 7 / 10) на осі 12 годин -->
+          <g font-family="monospace" font-size="8" fill="rgba(244,239,230,0.35)" text-anchor="start">
+            <text x="184" y="132">4</text>
+            <text x="184" y="94">7</text>
+            <text x="184" y="57">10</text>
           </g>
-          <!-- Тіки шкали на верхній осі -->
-          <g stroke="rgba(244,239,230,0.20)" stroke-width="0.75">
-            <line x1="138" y1="85" x2="142" y2="85"/>
-            <line x1="138" y1="45" x2="142" y2="45"/>
-            <line x1="138" y1="12" x2="142" y2="12"/>
+          <g stroke="rgba(244,239,230,0.25)" stroke-width="1">
+            <line x1="177" y1="128" x2="183" y2="128"/>
+            <line x1="177" y1="90"  x2="183" y2="90"/>
+            <line x1="177" y1="52"  x2="183" y2="52"/>
           </g>
 
           <!-- Концентричні кільця -->
-          <circle cx="140" cy="140" r="55" fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="2 6"/>
-          <circle cx="140" cy="140" r="95" fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="2 6"/>
-          <circle cx="140" cy="140" r="128" fill="none" stroke="rgba(244,239,230,0.10)" stroke-dasharray="2 6"/>
+          <circle cx="180" cy="180" r="52"  fill="none" stroke="rgba(244,239,230,0.10)" stroke-dasharray="3 7"/>
+          <circle cx="180" cy="180" r="90"  fill="none" stroke="rgba(244,239,230,0.10)" stroke-dasharray="3 7"/>
+          <circle cx="180" cy="180" r="128" fill="none" stroke="rgba(244,239,230,0.14)" stroke-dasharray="3 7"/>
 
-          <!-- Заповнений полігон балів -->
+          <!-- Полігон — заповнена площа балів -->
           <polygon
-            points="140,14 196,44 232,90 228,140 200,178 160,200 140,210 100,200 60,178 34,140 30,90 66,44"
-            fill="rgba(224,138,78,0.22)"
+            points="180,52 244,74 292,130 292,200 250,254 205,280 155,280 110,250 72,200 68,130 116,76 180,56"
+            fill="rgba(224,138,78,0.30)"
             stroke="#E08A4E"
-            stroke-opacity="0.85"
-            stroke-width="2"/>
+            stroke-opacity="0.90"
+            stroke-width="2"
+            stroke-linejoin="round"/>
 
-          <!-- 12 вузлів-балів -->
-          <g fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.4">
-            <circle cx="140" cy="14" r="4.5"/>
-            <circle cx="196" cy="44" r="4.5"/>
-            <circle cx="232" cy="90" r="4.5"/>
-            <circle cx="228" cy="140" r="4.5"/>
-            <circle cx="200" cy="178" r="4.5"/>
-            <circle cx="160" cy="200" r="4.5"/>
-            <circle cx="140" cy="210" r="4.5"/>
-            <circle cx="100" cy="200" r="4.5"/>
-            <circle cx="60" cy="178" r="4.5"/>
-            <circle cx="34" cy="140" r="4.5"/>
-            <circle cx="30" cy="90" r="4.5"/>
-            <circle cx="66" cy="44" r="4.5"/>
+          <!-- 12 вузлів -->
+          <g fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5">
+            <circle cx="180" cy="52"  r="5"/>
+            <circle cx="244" cy="74"  r="5"/>
+            <circle cx="292" cy="130" r="5"/>
+            <circle cx="292" cy="200" r="5"/>
+            <circle cx="250" cy="254" r="5"/>
+            <circle cx="205" cy="280" r="5"/>
+            <circle cx="155" cy="280" r="5"/>
+            <circle cx="110" cy="250" r="5"/>
+            <circle cx="72"  cy="200" r="5"/>
+            <circle cx="68"  cy="130" r="5"/>
+            <circle cx="116" cy="76"  r="5"/>
+            <circle cx="180" cy="56"  r="5"/>
           </g>
 
-          <!-- Назви сфер -->
-          <g font-family="monospace" font-size="7.5" fill="rgba(244,239,230,0.50)">
-            <text x="140" y="-13" text-anchor="middle">ЛЮБОВ</text>
-            <text x="214" y="14" text-anchor="start">СІМ'Я</text>
-            <text x="269" y="70" text-anchor="start">ДРУЗІ</text>
-            <text x="288" y="144" text-anchor="start">КАР'ЄРА</text>
-            <text x="265" y="219" text-anchor="start">ФІНАНСИ</text>
-            <text x="187" y="281" text-anchor="middle">САМОР.</text>
-            <text x="140" y="292" text-anchor="middle">ДУХ.</text>
-            <text x="58" y="268" text-anchor="end">ВІДПОЧ.</text>
-            <text x="6" y="207" text-anchor="end">СЕРЕД.</text>
-            <text x="-8" y="144" text-anchor="end">КОМУН.</text>
-            <text x="6" y="83" text-anchor="end">ЗДОРОВ.</text>
-            <text x="50" y="23" text-anchor="end">ЗОВН.</text>
+          <!-- Назви сфер — розміщені між вузлом і краєм полотна -->
+          <g font-family="monospace" font-size="8" fill="rgba(244,239,230,0.60)" letter-spacing="0.03em">
+            <text x="180"  y="36"  text-anchor="middle">ЛЮБОВ</text>
+            <text x="250"  y="60"  text-anchor="start" >СІМ'Я</text>
+            <text x="302"  y="120" text-anchor="start" >ДРУЗІ</text>
+            <text x="306"  y="204" text-anchor="start" >КАР'Я</text>
+            <text x="258"  y="270" text-anchor="start" >ФІН.</text>
+            <text x="210"  y="297" text-anchor="middle">САМОР.</text>
+            <text x="155"  y="297" text-anchor="middle">ДУХ.</text>
+            <text x="100"  y="268" text-anchor="end"  >ВІДП.</text>
+            <text x="58"   y="204" text-anchor="end"  >СЕР.</text>
+            <text x="54"   y="124" text-anchor="end"  >КОМ.</text>
+            <text x="106"  y="65"  text-anchor="end"  >ЗДОР.</text>
+            <text x="180"  y="328" text-anchor="middle">ЗОВН.</text>
           </g>
 
           <!-- Life Score по центру -->
-          <text x="140" y="148" text-anchor="middle"
+          <text x="180" y="190" text-anchor="middle"
             font-family="'Instrument Serif', serif"
             font-style="italic"
-            font-size="46"
+            font-size="52"
             fill="#F4EFE6"
-            opacity="0.9">6.4</text>
-          <text x="140" y="168" text-anchor="middle"
+            opacity="0.92">6.4</text>
+          <text x="180" y="210" text-anchor="middle"
             font-family="monospace"
             font-size="9"
             letter-spacing="5"
-            fill="rgba(244,239,230,0.4)">KOLESO</text>
+            fill="rgba(244,239,230,0.38)">KOLESO</text>
         </svg>
   </div>
 </section>
