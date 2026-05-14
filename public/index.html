@@ -577,16 +577,14 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
   position:relative;z-index:10;
 }
 #heroMain{
-  max-width:1100px;margin:0 auto;
+  max-width:640px;margin:0 auto;
   padding:48px 20px 24px;
+  text-align:center;
 }
-.hero-inner{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
+.hero-text{
+  display:flex;flex-direction:column;
   align-items:center;
 }
-.hero-left{}
 .hero-kicker{
   font-family:monospace;font-size:10px;
   letter-spacing:.18em;text-transform:uppercase;
@@ -618,16 +616,17 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
   transition:all .3s;
   box-shadow:0 8px 24px rgba(232,193,122,.25);
   display:block;width:100%;max-width:320px;
+  margin:0 auto;
 }
 .hero-cta:hover{box-shadow:0 10px 32px rgba(232,193,122,.4);transform:translateY(-2px)}
 .hero-cta-hint{
   font-size:10px;color:var(--muted);
   text-align:center;margin-top:8px;
-  max-width:320px;
+  width:100%;
 }
 .hero-stats{
   display:grid;grid-template-columns:repeat(3,1fr);
-  gap:10px;margin-top:24px;
+  gap:10px;margin-top:24px;width:100%;
 }
 .hero-stat{
   background:var(--ink-2);
@@ -647,13 +646,33 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
 }
 
 /* Constellation */
-.hero-right{}
 .constellation-wrap{
   border:1px solid var(--line);
   border-radius:22px;
   padding:20px;
   background:rgba(244,239,230,0.015);
+  cursor:pointer;
+  transition:border-color .25s, background .25s;
+  margin-top:28px;
+  max-width:480px;
+  margin-left:auto;
+  margin-right:auto;
+  position:relative;
 }
+.constellation-wrap:hover{
+  border-color:rgba(224,138,78,0.35);
+  background:rgba(224,138,78,0.03);
+}
+.constellation-wrap::after{
+  content:"▶ Почати оцінку";
+  position:absolute;
+  bottom:16px;right:20px;
+  font-family:monospace;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ember);opacity:0;
+  transition:opacity .25s;
+}
+.constellation-wrap:hover::after{opacity:1}
 .constellation-meta{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:12px;
@@ -868,17 +887,14 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
    MOBILE HERO RESPONSIVE
 ═══════════════════════════════════════════ */
 @media(max-width:768px){
-  .hero-inner{grid-template-columns:1fr;gap:24px}
-  .hero-right{order:-1}
-  .constellation-svg{max-width:220px}
   .steps-grid{grid-template-columns:1fr}
-  .hero-cta,.bottom-cta-btn{width:100%;max-width:100%;display:block;box-sizing:border-box}
-  .hero-cta-hint{max-width:100%}
+  .hero-cta,.bottom-cta-btn{max-width:100%;display:block;box-sizing:border-box}
   .hero-h1{font-size:clamp(28px,8vw,42px)}
-  #heroSection{padding:20px 16px 16px}
+  #heroMain{padding:20px 16px 16px!important}
   #howItWorks,#testimonialSection,#bottomCta{padding-left:16px;padding-right:16px}
   .hero-stats{gap:8px}
   .nav-links{display:none}
+  .constellation-wrap{margin-top:20px}
 }
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -925,36 +941,36 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
 
 <!-- HERO -->
 <section id="heroMain">
-  <div class="hero-inner">
-    <!-- LEFT: copy + CTA -->
-    <div class="hero-left">
-      <p class="hero-kicker">AI · Life Score · 12 сфер</p>
-      <h1 class="hero-h1">Знайди де губиться твоя <em>енергія</em></h1>
-      <p class="hero-sub">AI аналізує зв'язки між 12 сферами і знаходить корінь — не симптом.</p>
-      <button class="hero-cta" onclick="document.getElementById('modalOverlay').style.display='';document.getElementById('modalOverlay').style.pointerEvents=''">
-        Почати безкоштовно →
-      </button>
-      <p class="hero-cta-hint">Без реєстрації · 5 хвилин · Результат одразу</p>
-      <!-- Stats -->
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-num"><span id="heroCounterText">3 400+</span></span>
-          <span class="hero-stat-lbl">аналізів</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-num">12</span>
-          <span class="hero-stat-lbl">сфер</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-num">4.9★</span>
-          <span class="hero-stat-lbl">рейтинг</span>
-        </div>
+  <!-- Hero text -->
+  <div class="hero-text">
+    <p class="hero-kicker">AI · Life Score · 12 сфер</p>
+    <h1 class="hero-h1">Знайди де губиться твоя <em>енергія</em></h1>
+    <p class="hero-sub">AI аналізує зв'язки між 12 сферами і знаходить корінь — не симптом.</p>
+    <button class="hero-cta" onclick="document.getElementById('modalOverlay').style.display='';document.getElementById('modalOverlay').style.pointerEvents=''">
+      Почати безкоштовно →
+    </button>
+    <p class="hero-cta-hint">Без реєстрації · 5 хвилин · Результат одразу</p>
+    <!-- Stats -->
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num"><span id="heroCounterText">3 400+</span></span>
+        <span class="hero-stat-lbl">аналізів</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">12</span>
+        <span class="hero-stat-lbl">сфер</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">4.9★</span>
+        <span class="hero-stat-lbl">рейтинг</span>
       </div>
     </div>
+  </div>
 
-    <!-- RIGHT: Constellation SVG -->
-    <div class="hero-right">
-      <div class="constellation-wrap">
+  <!-- Constellation під hero-текстом, клікабельна -->
+  <div class="constellation-wrap" role="button" tabindex="0"
+    title="Натисни щоб почати оцінку"
+    onclick="document.getElementById('modalOverlay').style.display='';document.getElementById('modalOverlay').style.pointerEvents=''">
         <div class="constellation-meta">
           <span>Сузір'я · Приклад</span>
           <span>6.4 / 10</span>
@@ -995,13 +1011,13 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           <circle cx="140" cy="140" r="95" fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="2 6"/>
           <circle cx="140" cy="140" r="128" fill="none" stroke="rgba(244,239,230,0.10)" stroke-dasharray="2 6"/>
 
-          <!-- Полігон балів -->
+          <!-- Заповнений полігон балів -->
           <polygon
             points="140,14 196,44 232,90 228,140 200,178 160,200 140,210 100,200 60,178 34,140 30,90 66,44"
-            fill="rgba(224,138,78,0.08)"
+            fill="rgba(224,138,78,0.22)"
             stroke="#E08A4E"
-            stroke-opacity="0.65"
-            stroke-width="1.5"/>
+            stroke-opacity="0.85"
+            stroke-width="2"/>
 
           <!-- 12 вузлів-балів -->
           <g fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.4">
@@ -1048,8 +1064,6 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
             letter-spacing="5"
             fill="rgba(244,239,230,0.4)">KOLESO</text>
         </svg>
-      </div>
-    </div>
   </div>
 </section>
 
