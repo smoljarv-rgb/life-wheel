@@ -150,7 +150,7 @@ body::after{
 }
 
 /* ── LAYOUT ── */
-.wrapper{position:relative;z-index:10;display:grid;grid-template-columns:292px 1fr 320px;grid-template-rows:auto auto;padding-top:52px}
+.wrapper{position:relative;z-index:10;display:grid;grid-template-columns:240px 1fr 260px;column-gap:0;grid-template-rows:auto auto;padding-top:52px}
 .analysis-row{grid-column:1/-1;padding:14px 16px 24px;display:none}
 
 /* ── GLASS ── */
@@ -176,8 +176,8 @@ body::after{
 .bg{background:rgba(50,160,90,.15);color:#207040}.bb{background:rgba(40,130,210,.15);color:#1860a0}
 
 /* ══ CENTER ══ */
-.center-col{display:flex;flex-direction:column;align-items:center;padding:14px 16px;gap:14px;}
-.wheel-card{width:100%;max-width:500px;padding:20px;position:relative;background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:22px}
+.center-col{display:flex;flex-direction:column;align-items:center;padding:8px 10px;gap:8px;}
+.wheel-card{width:100%;max-width:500px;padding:12px;position:relative;background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:22px}
 canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-shadow(0 4px 22px rgba(0,0,0,.45));}
 .wheel-hint{font-size:.8rem;font-weight:700;color:var(--ac);text-align:center;margin-top:10px;padding:8px 18px;background:rgba(40,120,200,.12);border-radius:24px;border:2px solid rgba(40,120,200,.3);display:inline-block;transition:all 3s;animation:hintPulse 2.5s ease-in-out infinite;letter-spacing:.01em}
 .detail-box{width:100%;max-width:500px;padding:18px 20px}
@@ -825,11 +825,11 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .s-name{font-size:.78rem;font-weight:500;color:var(--fog);display:flex;align-items:center;gap:5px}
 .s-avg{font-size:.62rem;color:var(--muted);margin-top:1px}
 .rank-name{font-size:.69rem;color:var(--muted);flex:1}
-.rank-score{font-size:.72rem;font-weight:700;color:var(--fog);background:var(--ink-3);padding:2px 7px;border-radius:10px;border:1px solid var(--line)}
+.rank-score{font-size:.72rem;font-weight:700;color:#E08A4E;background:var(--ink-3);padding:2px 7px;border-radius:10px;border:1px solid rgba(224,138,78,0.3)}
 
 /* Det box */
 .det-name{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.55rem;font-weight:400;color:var(--fog)}
-.det-score{font-family:'Instrument Serif',serif;font-style:italic;font-size:2.8rem;font-weight:400;line-height:1}
+.det-score{font-family:'Instrument Serif',serif;font-style:italic;font-size:2.8rem;font-weight:400;line-height:1;color:#E08A4E}
 .det-score-lbl{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .sub-lbl{font-size:.76rem;color:var(--muted);font-weight:500}
 .sub-num{font-size:.72rem;font-weight:700;min-width:22px;text-align:right}
@@ -1220,7 +1220,16 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
     <div class="wheel-card glass">
       <canvas id="wheel" width="480" height="480" style="display:none"></canvas>
       <svg id="constellation-svg" viewBox="-50 -50 500 500" xmlns="http://www.w3.org/2000/svg"
-        style="width:100%;max-width:360px;display:block;margin:0 auto;touch-action:none;cursor:default">
+        style="width:100%;display:block;margin:0 auto;touch-action:none;cursor:default">
+        <defs>
+          <radialGradient id="consGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="rgba(224,138,78,0.14)"/>
+            <stop offset="55%"  stop-color="rgba(224,138,78,0.05)"/>
+            <stop offset="100%" stop-color="rgba(224,138,78,0)"/>
+          </radialGradient>
+        </defs>
+        <!-- Background glow -->
+        <circle cx="200" cy="200" r="150" fill="url(#consGrad)"/>
         <!-- Axis lines (built by JS) -->
         <g id="const-axes" stroke="rgba(244,239,230,0.12)" stroke-width="1"></g>
         <!-- Scale rings: r=60→score 4, r=105→score 7, r=150→score 10 -->
@@ -1618,7 +1627,7 @@ function buildDetail(){
       <div style="font-size:.65rem;color:var(--tl);margin-top:2px;font-style:italic;transition:color 3s">${sd.label} — ${sd.desc.substring(0,62)}…</div>
     </div>
     <div class="det-score-wrap">
-      <div class="det-score" style="color:${s.color}">${a.toFixed(1)}</div>
+      <div class="det-score">${a.toFixed(1)}</div>
       <div class="det-score-lbl">середній бал</div>
     </div>
   </div>
@@ -1687,10 +1696,10 @@ function updateResults(){
     let bc='',badge='';
     if(a<4){bc='bc';badge='!';}else if(a<6){bc='bw';badge='~';}else if(a<8){bc='bg';badge='✓';}else{bc='bb';badge='★';}
     return `<div class="rank-row">
-      <div class="rank-pip" style="background:${s.color};box-shadow:0 0 4px ${s.color}88"></div>
+      <div class="rank-pip" style="background:#E08A4E;box-shadow:0 0 4px rgba(224,138,78,0.5)"></div>
       <div class="rank-name">${s.name}</div>
       <span class="badge ${bc}">${badge}</span>
-      <div class="rank-score" style="color:${s.color}">${a.toFixed(1)}</div>
+      <div class="rank-score">${a.toFixed(1)}</div>
     </div>`;
   }).join('');
 }
