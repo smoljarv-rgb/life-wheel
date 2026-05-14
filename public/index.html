@@ -157,8 +157,8 @@ body::after{
 .glass{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--rad);box-shadow:0 8px 32px var(--sh);transition:background .25s,border-color .25s,box-shadow .25s}
 
 /* ══ LEFT ══ */
-.left-col{padding:14px 8px 14px 12px;display:flex;flex-direction:column;gap:4px;scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
-.page-title{font-family:'Instrument Serif',serif;font-size:1.6rem;font-weight:400;font-style:italic;color:var(--fog);line-height:1.1;padding:10px 10px 14px;margin-bottom:6px;border-bottom:1px solid var(--line);letter-spacing:.02em}
+.left-col{padding:6px 6px 6px 8px;display:flex;flex-direction:column;gap:3px;scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+.page-title{font-family:'Instrument Serif',serif;font-size:1.6rem;font-weight:400;font-style:italic;color:var(--fog);line-height:1.1;padding:6px 8px 10px;margin-bottom:4px;border-bottom:1px solid var(--line);letter-spacing:.02em}
 .page-title em{font-style:italic;color:var(--ember)}
 
 .sphere-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;border:1.5px solid transparent;background:transparent;cursor:pointer;text-align:left;width:100%;transition:var(--trans)}
@@ -180,14 +180,14 @@ body::after{
 .wheel-card{width:100%;max-width:500px;padding:12px;position:relative;background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:22px}
 canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-shadow(0 4px 22px rgba(0,0,0,.45));}
 .wheel-hint{font-size:.8rem;font-weight:700;color:var(--ac);text-align:center;margin-top:10px;padding:8px 18px;background:rgba(40,120,200,.12);border-radius:24px;border:2px solid rgba(40,120,200,.3);display:inline-block;transition:all 3s;animation:hintPulse 2.5s ease-in-out infinite;letter-spacing:.01em}
-.detail-box{width:100%;max-width:500px;padding:18px 20px}
-.det-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1.5px solid var(--sb);transition:border-color 3s}
+.detail-box{width:100%;max-width:500px;padding:10px 12px}
+.det-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--sb);transition:border-color 3s}
 .det-stripe{width:5px;height:48px;border-radius:4px;flex-shrink:0;box-shadow:0 0 12px currentColor}
 .det-name{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:400;color:var(--td);transition:color 3s}
 .det-score-wrap{margin-left:auto;text-align:right}
 .det-score{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;line-height:1;transition:color 3s}
 .det-score-lbl{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tl);transition:color 3s}
-.sub-list{display:flex;flex-direction:column;gap:14px}
+.sub-list{display:flex;flex-direction:column;gap:6px}
 .sub-item{display:flex;flex-direction:column;gap:5px;padding:10px 12px;background:var(--sf2);border-radius:10px;border:1px solid rgba(128,160,200,.1);transition:var(--trans)}
 .sub-item:hover{border-color:var(--sb);background:var(--sf)}
 .sub-top{display:flex;justify-content:space-between;align-items:center}
@@ -202,7 +202,7 @@ input[type=range].qc::-webkit-slider-thumb:hover,input[type=range].srange::-webk
 input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thumb,input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#F4EFE6;border:2px solid #E08A4E;box-shadow:0 4px 12px rgba(0,0,0,0.35)}
 
 /* ══ RIGHT ══ */
-.right-col{padding:14px 12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+.right-col{padding:6px 8px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
 .panel-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--td);letter-spacing:.04em;margin-bottom:9px;display:flex;align-items:center;gap:8px;transition:color 3s}
 .panel-title::after{content:'';flex:1;height:1.5px;background:var(--sb);border-radius:1px;transition:background 3s}
 .total-big{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:var(--ac);line-height:1;transition:color 3s}
@@ -797,7 +797,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 ═══════════════════════════════════════════ */
 #wheelSection{
   max-width:1100px;margin:0 auto;
-  padding:0 20px 40px;
+  padding:0 16px 20px;
 }
 #wheelSection .wrapper{padding-top:0}
 
@@ -1621,7 +1621,7 @@ function buildDetail(){
   const s=active,a=avg(s.id),sd=sDesc(a);
   const box=document.getElementById('detailBox');
   box.innerHTML=`<div class="det-head">
-    <div class="det-stripe" style="background:${s.color};box-shadow:0 0 10px ${s.color}66"></div>
+    <div class="det-stripe" style="background:#E08A4E;box-shadow:0 0 10px rgba(224,138,78,0.4)"></div>
     <div>
       <div class="det-name">${s.name}</div>
       <div style="font-size:.65rem;color:var(--tl);margin-top:2px;font-style:italic;transition:color 3s">${sd.label} — ${sd.desc.substring(0,62)}…</div>
@@ -3845,8 +3845,8 @@ function buildMobileDropdown(){
   container.innerHTML = SPHERES.map(s => {
     const a = avg(s.id).toFixed(1);
     const isAct = s.id === active.id;
-    const bg = isAct ? `background:${s.color};border-color:${s.color}` : `border-color:${s.color}55;background:${s.color}12`;
-    const dotBg = isAct ? 'rgba(255,255,255,.85)' : s.color;
+    const bg = isAct ? `background:#E08A4E;border-color:#E08A4E` : `border-color:rgba(224,138,78,0.4);background:rgba(224,138,78,0.08)`;
+    const dotBg = isAct ? 'rgba(255,255,255,.85)' : '#E08A4E';
     return `<button class="sphere-chip${isAct?' chip-active':''}" style="${bg}" onclick="onMobileSphereChange('${s.id}')">
       <span class="chip-dot" style="background:${dotBg}"></span>${s.name}<span class="chip-score">${a}</span>
     </button>`;
