@@ -1471,7 +1471,7 @@ document.addEventListener('DOMContentLoaded', loadUserCounter);
 
 /* ── CLOUDS ── */
 function makeClouds(){
-  const c=document.getElementById('clouds');c.innerHTML='';
+  const c=document.getElementById('clouds');if(!c)return;c.innerHTML='';
   [{w:320,h:85},{w:200,h:58},{w:440,h:105},{w:170,h:52},{w:360,h:95},{w:250,h:72},{w:190,h:58},{w:520,h:125}].forEach(sh=>{
     const el=document.createElement('div');el.className='cloud';
     const top=4+Math.random()*38,dur=55+Math.random()*85,delay=-Math.random()*dur;
