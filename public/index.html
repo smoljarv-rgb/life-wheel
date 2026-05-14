@@ -665,8 +665,9 @@ input[type=range].srange:active::-webkit-slider-thumb{transform:scale(1.15)}
 }
 .constellation-svg{
   display:block;
-  width:100%;max-width:280px;
+  width:100%;
   margin:0 auto;
+  overflow:visible;
 }
 
 /* ═══════════════════════════════════════════
@@ -958,19 +959,51 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           <span>Сузір'я · Приклад</span>
           <span>6.4 / 10</span>
         </div>
-        <svg class="constellation-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+        <svg class="constellation-svg" viewBox="-60 -30 400 360" xmlns="http://www.w3.org/2000/svg">
+
+          <!-- Осьові лінії (поділки) від центру до кожної сфери -->
+          <g stroke="rgba(244,239,230,0.09)" stroke-width="0.8">
+            <line x1="140" y1="140" x2="140" y2="6"/>
+            <line x1="140" y1="140" x2="207" y2="26"/>
+            <line x1="140" y1="140" x2="257" y2="77"/>
+            <line x1="140" y1="140" x2="274" y2="140"/>
+            <line x1="140" y1="140" x2="253" y2="212"/>
+            <line x1="140" y1="140" x2="182" y2="267"/>
+            <line x1="140" y1="140" x2="140" y2="274"/>
+            <line x1="140" y1="140" x2="66" y2="252"/>
+            <line x1="140" y1="140" x2="19" y2="197"/>
+            <line x1="140" y1="140" x2="6" y2="140"/>
+            <line x1="140" y1="140" x2="18" y2="85"/>
+            <line x1="140" y1="140" x2="58" y2="34"/>
+          </g>
+
+          <!-- Маркери шкали на верхній осі -->
+          <g font-family="monospace" font-size="6" fill="rgba(244,239,230,0.28)" text-anchor="start">
+            <text x="144" y="89">4</text>
+            <text x="144" y="48">7</text>
+            <text x="144" y="16">10</text>
+          </g>
+          <!-- Тіки шкали на верхній осі -->
+          <g stroke="rgba(244,239,230,0.20)" stroke-width="0.75">
+            <line x1="138" y1="85" x2="142" y2="85"/>
+            <line x1="138" y1="45" x2="142" y2="45"/>
+            <line x1="138" y1="12" x2="142" y2="12"/>
+          </g>
+
           <!-- Концентричні кільця -->
           <circle cx="140" cy="140" r="55" fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="2 6"/>
           <circle cx="140" cy="140" r="95" fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="2 6"/>
           <circle cx="140" cy="140" r="128" fill="none" stroke="rgba(244,239,230,0.10)" stroke-dasharray="2 6"/>
-          <!-- Полігон сузір'я -->
+
+          <!-- Полігон балів -->
           <polygon
-            points="140,14 196,44 232,90 228,140 200,178 160,200 140,210 100,200 60,178 34,140 30,90 66,44 120,16"
+            points="140,14 196,44 232,90 228,140 200,178 160,200 140,210 100,200 60,178 34,140 30,90 66,44"
             fill="rgba(224,138,78,0.08)"
             stroke="#E08A4E"
             stroke-opacity="0.65"
             stroke-width="1.5"/>
-          <!-- 12 вузлів -->
+
+          <!-- 12 вузлів-балів -->
           <g fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.4">
             <circle cx="140" cy="14" r="4.5"/>
             <circle cx="196" cy="44" r="4.5"/>
@@ -985,11 +1018,28 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
             <circle cx="30" cy="90" r="4.5"/>
             <circle cx="66" cy="44" r="4.5"/>
           </g>
+
+          <!-- Назви сфер -->
+          <g font-family="monospace" font-size="7.5" fill="rgba(244,239,230,0.50)">
+            <text x="140" y="-13" text-anchor="middle">ЛЮБОВ</text>
+            <text x="214" y="14" text-anchor="start">СІМ'Я</text>
+            <text x="269" y="70" text-anchor="start">ДРУЗІ</text>
+            <text x="288" y="144" text-anchor="start">КАР'ЄРА</text>
+            <text x="265" y="219" text-anchor="start">ФІНАНСИ</text>
+            <text x="187" y="281" text-anchor="middle">САМОР.</text>
+            <text x="140" y="292" text-anchor="middle">ДУХ.</text>
+            <text x="58" y="268" text-anchor="end">ВІДПОЧ.</text>
+            <text x="6" y="207" text-anchor="end">СЕРЕД.</text>
+            <text x="-8" y="144" text-anchor="end">КОМУН.</text>
+            <text x="6" y="83" text-anchor="end">ЗДОРОВ.</text>
+            <text x="50" y="23" text-anchor="end">ЗОВН.</text>
+          </g>
+
           <!-- Life Score по центру -->
           <text x="140" y="148" text-anchor="middle"
             font-family="'Instrument Serif', serif"
             font-style="italic"
-            font-size="48"
+            font-size="46"
             fill="#F4EFE6"
             opacity="0.9">6.4</text>
           <text x="140" y="168" text-anchor="middle"
