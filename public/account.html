@@ -451,6 +451,7 @@ async function init(){
   var session = await sb.auth.getSession();
   if(session.data.session){
     currentUser = session.data.session.user;
+    await linkLocalResults(currentUser.email);
     showAccount();
   } else {
     showLogin();
@@ -461,7 +462,7 @@ async function init(){
     if(event === 'SIGNED_IN' && session){
       currentUser = session.user;
       saveSubscriberEmail(session.user.email);
-      linkLocalResults(session.user.email);
+      linkLocalResults(session.user.email).then(function(){ loadReports(); });
       showAccount();
     } else if(event === 'SIGNED_OUT'){
       currentUser = null;
