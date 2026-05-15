@@ -1821,15 +1821,18 @@ function saveChecks(){
 }
 
 function exportPDF(){
+  const activeTab=document.querySelector('.mob-tab.on');
+  const tabMap=['snap','spheres','plan'];
+  let activeIdx=0;
+  if(activeTab){document.querySelectorAll('.mob-tab').forEach((t,i)=>{if(t===activeTab)activeIdx=i;});}
   document.querySelectorAll('.pg').forEach(s=>s.classList.add('on'));
   const title=document.title;document.title='Колесо Життя — Повний звіт';
-  window.print();document.title=title;
+  window.print();
+  document.title=title;
   setTimeout(()=>{
     document.querySelectorAll('.pg').forEach(s=>s.classList.remove('on'));
-    const active=document.querySelector('.tab.on');
-    if(active){const map={'Знімок':'snap','Сфери':'spheres','План':'plan'};const txt=active.textContent.trim();const id=Object.entries(map).find(([k])=>txt.includes(k));if(id)document.getElementById('sc-'+id[1]).classList.add('on');}
-    else document.getElementById('sc-snap').classList.add('on');
-  },500);
+    goScreen(tabMap[activeIdx]||'snap');
+  },100);
 }
 
 
