@@ -1153,13 +1153,6 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
   <!-- RESUME ANALYSIS BANNER -->
   <div id="resumeAnalysisBanner" style="display:none;background:var(--paper2);border:1px solid rgba(107,165,216,.3);border-radius:10px;padding:16px 18px;margin-bottom:20px"></div>
 
-  <!-- TABS -->
-  <nav class="tabs">
-    <button class="tab on" onclick="goScreen('snap')">① Результат</button>
-    <button class="tab" onclick="goScreen('spheres')">② Аналіз сфер</button>
-    <button class="tab" onclick="goScreen('plan')">③ Мій план</button>
-  </nav>
-  <div class="tabs-border"></div>
 
   <!-- ══ ЕКРАН 1 ══ -->
   <div class="pg on" id="sc-snap">
@@ -1776,12 +1769,11 @@ function renderRadar(scores){
 
 function goScreen(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('sc-'+id).classList.add('on');
   const map={snap:0,spheres:1,plan:2};
-  document.querySelectorAll('.tab')[map[id]].classList.add('on');
-  document.querySelectorAll('.mob-tab')[map[id]].classList.add('on');
+  const tabs=document.querySelectorAll('.mob-tab');
+  if(tabs[map[id]]) tabs[map[id]].classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
