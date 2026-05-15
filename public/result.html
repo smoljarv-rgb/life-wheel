@@ -970,6 +970,30 @@ body::after{
 .sph-loader{border:2px solid rgba(244,239,230,.15);border-top-color:var(--ember)}
 .analysisProgress-wrap{background:var(--paper2);border:1px solid var(--line);border-radius:10px}
 #progressFill{background:var(--ember)}
+/* ── Plan sections ── */
+.plan-today-wrap{
+  background:rgba(224,138,78,.06);border:1px solid rgba(224,138,78,.2);
+  border-radius:16px;padding:20px 20px 16px;margin-bottom:4px;
+}
+.plan-today-wrap .sec-ttl{margin-top:0;color:var(--fog)}
+.plan-section-toggle{
+  background:var(--paper2);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;margin-top:10px;
+}
+.plan-section-toggle[open]{border-color:rgba(244,239,230,.2)}
+.plan-toggle-hdr{
+  display:flex;align-items:center;gap:12px;
+  padding:15px 18px;cursor:pointer;list-style:none;user-select:none;
+}
+.plan-toggle-hdr::-webkit-details-marker{display:none}
+.plan-toggle-hdr::marker{display:none}
+.plan-toggle-hdr:hover{background:rgba(244,239,230,.04)}
+.plan-toggle-ico{font-size:18px;flex-shrink:0}
+.plan-toggle-ttl{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:600;color:var(--fog);flex:1}
+.plan-toggle-cnt{font-family:monospace;font-size:11px;letter-spacing:.1em;color:var(--ink3)}
+.plan-toggle-arr{font-size:16px;color:var(--ink3);transition:transform .2s;display:inline-block}
+.plan-section-toggle[open] .plan-toggle-arr{transform:rotate(90deg)}
+.plan-toggle-body{padding:0 18px 18px}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <!-- Meta Pixel Code -->
@@ -1121,27 +1145,46 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
       <div class="ph-sub">Маленькі кроки щодня — ось що насправді змінює баланс</div>
     </div>
 
-    <div class="sec-ttl">⚡ Сьогодні · мікродії</div>
-    <div class="micro-list" id="microList"></div>
-
-    <div class="sec-ttl">📅 Тиждень</div>
-    <div id="weekGrid"></div>
-    <div style="margin-top:10px">
-      <button class="btn" style="max-width:200px" onclick="saveChecks()">💾 Зберегти</button>
+    <!-- Сьогодні — виділена зона -->
+    <div class="plan-today-wrap">
+      <div class="sec-ttl">⚡ Сьогодні · мікродії</div>
+      <div class="micro-list" id="microList"></div>
     </div>
 
-    <div class="sec-ttl" style="margin-top:28px">🎯 Цілі на 30 днів</div>
-    <div id="goalList"></div>
+    <!-- Тиждень — accordion -->
+    <details class="plan-section-toggle">
+      <summary class="plan-toggle-hdr">
+        <span class="plan-toggle-ico">📅</span>
+        <span class="plan-toggle-ttl">Тижневий план</span>
+        <span class="plan-toggle-arr">›</span>
+      </summary>
+      <div class="plan-toggle-body">
+        <div id="weekGrid"></div>
+        <div style="margin-top:10px">
+          <button class="btn" style="max-width:200px" onclick="saveChecks()">💾 Зберегти</button>
+        </div>
+      </div>
+    </details>
 
-    <div class="sec-ttl">🗺 Roadmap</div>
-    <div class="roadmap" id="roadmap"></div>
+    <!-- Цілі + Roadmap — accordion -->
+    <details class="plan-section-toggle">
+      <summary class="plan-toggle-hdr">
+        <span class="plan-toggle-ico">🎯</span>
+        <span class="plan-toggle-ttl">Цілі на 30 днів і Roadmap</span>
+        <span class="plan-toggle-arr">›</span>
+      </summary>
+      <div class="plan-toggle-body">
+        <div class="sec-ttl" style="margin-top:0">Цілі на 30 днів</div>
+        <div id="goalList"></div>
+        <div class="sec-ttl" style="margin-top:20px">Roadmap</div>
+        <div class="roadmap" id="roadmap"></div>
+      </div>
+    </details>
 
-    <div class="btn-row">
-      <button class="btn" onclick="shareStory()">📸 Story</button>
-      <button class="btn btn-acc" onclick="openNotif()">🔔 Нагадати завтра о 8:00</button>
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn btn-acc" onclick="openNotif()" style="flex:2">🔔 Нагадати завтра о 8:00</button>
       <button class="btn" onclick="exportPDF()">📄 PDF</button>
       <button class="btn" onclick="copyLink()">🔗 Поділитись</button>
-      <button class="btn" onclick="window.location.href='https://koleso.live'">🔄 Пройти ще раз</button>
     </div>
   </div>
 
@@ -1410,23 +1453,9 @@ function renderSpheres(data){
     const clr=s.score>=7?'var(--green)':s.score>=4?'var(--orange)':'var(--red)';
     const status=s.score>=7?'Сильна зона ✦':s.score>=4?'Є потенціал':'⚠ Критична';
 
-    // Вставляємо upgrade-card після першої (аналізованої) сфери
-    const insertUpgrade=isFree&&idx===1?upgradeCard:'';
-
-    if(!showFull){return insertUpgrade+`<div class="sph" style="opacity:.85">
-      <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}</div><div class="sph-status" style="color:var(--ink3)">🔒 Заблоковано</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
-      <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
-      <div class="sph-blur-wrap">
-        <div class="sph-blur-inner">
-          <div class="sph-cols"><div class="sph-col"><div class="sph-col-t">Сильні сторони</div><div class="sph-item"><span class="sph-mk">✦</span>${act.strength}</div></div><div class="sph-col"><div class="sph-col-t">Проблема</div><div class="sph-item"><span class="sph-mk">—</span>${act.problem}</div></div></div>
-          <div class="sph-why"><strong>💡 Чому важливо:</strong> ${act.why}</div>
-        </div>
-        <div class="sph-lock-overlay">
-          <a href="/pricing" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:14px;font-weight:600;color:var(--gold-d);background:var(--paper);border:1.5px solid var(--gold-d);border-radius:100px;padding:6px 18px;text-decoration:none;box-shadow:2px 3px 0 rgba(184,144,64,.2)">🔓 Розблокувати →</a>
-        </div>
-      </div>
-    </div>`;}
-    return insertUpgrade+`<div class="sph">
+    // Після першої відкритої сфери — один upgrade-card, решта заблокованих не рендеряться
+    if(!showFull){return idx===1?upgradeCard:'';}
+    return `<div class="sph">
       <div class="sph-hdr"><div class="sph-left"><div class="sph-ico">${s.icon}</div><div><div class="sph-name">${s.name}<span id="sph-status-${s.key}"></span></div><div class="sph-status">${status}</div></div></div><div class="sph-score" style="color:${clr}">${s.score}</div></div>
       <div class="sph-bar"><div class="sph-fill" style="width:${s.score*10}%;background:${clr}"></div></div>
       <div class="sph-cols">
