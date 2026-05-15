@@ -177,7 +177,7 @@ body::after{
 
 /* ══ CENTER ══ */
 .center-col{display:flex;flex-direction:column;align-items:center;padding:8px 10px;gap:8px;}
-.wheel-card{width:100%;max-width:500px;padding:12px;position:relative;background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:22px}
+.wheel-card{width:100%;max-width:620px;padding:12px;position:relative;background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:22px}
 canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-shadow(0 4px 22px rgba(0,0,0,.45));}
 .wheel-hint{font-size:.8rem;font-weight:700;color:var(--ac);text-align:center;margin-top:10px;padding:8px 18px;background:rgba(40,120,200,.12);border-radius:24px;border:2px solid rgba(40,120,200,.3);display:inline-block;transition:all 3s;animation:hintPulse 2.5s ease-in-out infinite;letter-spacing:.01em}
 .detail-box{width:100%;max-width:500px;padding:10px 12px}
@@ -1232,25 +1232,36 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           </radialGradient>
         </defs>
         <!-- Background glow -->
-        <circle cx="200" cy="200" r="165" fill="url(#consGrad)"/>
+        <circle cx="200" cy="200" r="180" fill="url(#consGrad)"/>
         <!-- Axis lines (built by JS) -->
         <g id="const-axes" stroke="rgba(244,239,230,0.12)" stroke-width="1"></g>
-        <!-- Scale rings: r=66→score 4, r=115→score 7, r=165→score 10 -->
-        <circle cx="200" cy="200" r="66"  fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="3 7"/>
-        <circle cx="200" cy="200" r="115" fill="none" stroke="rgba(244,239,230,0.08)" stroke-dasharray="3 7"/>
-        <circle cx="200" cy="200" r="165" fill="none" stroke="rgba(244,239,230,0.12)" stroke-dasharray="3 7"/>
-        <!-- Ring labels on top axis -->
-        <text x="207" y="134" font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">4</text>
-        <text x="207" y="85"  font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">7</text>
-        <text x="207" y="35"  font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">10</text>
+        <!-- Scale rings: rPS=18 → score2=36, score4=72, score6=108, score8=144, score10=180 -->
+        <circle cx="200" cy="200" r="36"  fill="none" stroke="rgba(244,239,230,0.05)" stroke-dasharray="2 8"/>
+        <circle cx="200" cy="200" r="72"  fill="none" stroke="rgba(244,239,230,0.08)" stroke-dasharray="3 7"/>
+        <circle cx="200" cy="200" r="108" fill="none" stroke="rgba(244,239,230,0.08)" stroke-dasharray="3 7"/>
+        <circle cx="200" cy="200" r="144" fill="none" stroke="rgba(244,239,230,0.08)" stroke-dasharray="3 7"/>
+        <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(244,239,230,0.13)" stroke-dasharray="3 7"/>
+        <!-- Score gradation numbers 1–10 along top axis (right side) -->
+        <g font-family="monospace" font-size="7.5" fill="rgba(244,239,230,0.22)" text-anchor="start" dominant-baseline="middle">
+          <text x="204" y="182">1</text>
+          <text x="204" y="164">2</text>
+          <text x="204" y="146">3</text>
+          <text x="204" y="128">4</text>
+          <text x="204" y="110">5</text>
+          <text x="204" y="92">6</text>
+          <text x="204" y="74">7</text>
+          <text x="204" y="56">8</text>
+          <text x="204" y="38">9</text>
+          <text x="204" y="20">10</text>
+        </g>
         <!-- Polygon (updated by JS) -->
         <polygon id="constellation-polygon"
-          points="200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35"
+          points="200,20 200,20 200,20 200,20 200,20 200,20 200,20 200,20 200,20 200,20 200,20 200,20"
           fill="rgba(224,138,78,0.12)" stroke="#E08A4E" stroke-opacity="0.75" stroke-width="1.5" stroke-linejoin="round"/>
         <!-- Dots with hit areas (built by JS) -->
         <g id="const-dots"></g>
-        <!-- Sphere labels (built by JS, updated on each slider change) -->
-        <g id="const-labels" font-family="'Inter Tight',sans-serif" font-size="8.5" fill="rgba(244,239,230,0.60)" letter-spacing="0.02em"></g>
+        <!-- Sphere labels (built by JS, repositioned on every update) -->
+        <g id="const-labels" font-family="'Inter Tight',sans-serif" font-size="9" fill="rgba(244,239,230,0.70)" font-weight="600"></g>
         <!-- Center Life Score -->
         <text id="constellation-score" x="200" y="207" text-anchor="middle"
           font-family="'Instrument Serif',Georgia,serif"
@@ -1826,7 +1837,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
 function drawWheel(){drawWheelOnCtx(cv,CX,CY,MAXR,MINR,SL,active.id);}
 
 function updateConstellation(scores){
-  const cx=200,cy=200,rPS=16.5,maxR=165; // r=score*16.5 → 4→66, 7→115, 10→165
+  const cx=200,cy=200,rPS=18,maxR=180; // r=score*18 → 2→36, 4→72, 6→108, 8→144, 10→180
   const angles=Array.from({length:12},(_,i)=>(i*30-90)*Math.PI/180);
   const names=SPHERES.map(s=>s.name.toUpperCase());
 
@@ -1884,16 +1895,32 @@ function updateConstellation(scores){
     const dot=document.getElementById('dot-'+i);
     if(dot)dot.setAttribute('stroke',color);
 
-    // Label: along the axis line, just beyond the dot (min 55% of maxR)
-    const labelR=Math.max(r+20, maxR*0.55);
-    const lx=(cx+labelR*Math.cos(angles[i])).toFixed(1);
-    const ly=(cy+labelR*Math.sin(angles[i])).toFixed(1);
-    let angleDeg=i*30-90;
-    if(Math.cos(angles[i])<-0.01) angleDeg+=180; // flip left-half text
+    // Label: horizontal, just beyond dot with gap, anchored by quadrant
+    const gap=16;
+    const cosA=Math.cos(angles[i]),sinA=Math.sin(angles[i]);
+    let lx2,ly2,anchor;
+    if(Math.abs(sinA)>0.9){
+      // Pure top / bottom
+      anchor='middle';
+      lx2=x;
+      ly2=sinA>0?y+gap+6:y-gap;
+    } else if(cosA>0){
+      // Right half
+      anchor='start';
+      lx2=x+gap;
+      ly2=y+sinA*5;
+    } else {
+      // Left half
+      anchor='end';
+      lx2=x-gap;
+      ly2=y+sinA*5;
+    }
     const lbl=document.getElementById('const-label-'+i);
     if(lbl){
-      lbl.setAttribute('x',lx);lbl.setAttribute('y',ly);
-      lbl.setAttribute('transform',`rotate(${angleDeg},${lx},${ly})`);
+      lbl.setAttribute('x',lx2.toFixed(1));
+      lbl.setAttribute('y',ly2.toFixed(1));
+      lbl.setAttribute('text-anchor',anchor);
+      lbl.removeAttribute('transform');
     }
     return x.toFixed(1)+','+y.toFixed(1);
   });
@@ -1938,7 +1965,7 @@ function _consMove(e){
   e.preventDefault();
   const pt=_consPt(e);
   const proj=(pt.x-200)*_consDrag.ax+(pt.y-200)*_consDrag.ay;
-  const score=Math.max(1,Math.min(10,Math.round(proj/16.5)));
+  const score=Math.max(1,Math.min(10,Math.round(proj/18)));
   const sph=SPHERES[_consDrag.i];
   if(Math.round(avg(sph.id))===score)return;
   sph.sub.forEach(sub=>{state[sph.id][sub.k]=score;});
