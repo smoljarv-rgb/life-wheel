@@ -165,8 +165,11 @@ body::after{
 .sphere-btn:hover{background:var(--sf2);border-color:var(--sb);transform:translateX(2px)}
 .sphere-btn.active{background:var(--sf);border-color:var(--ac);box-shadow:0 3px 14px var(--sh);transform:translateX(4px)}
 .sphere-btn.active .s-name{color:var(--ac);font-weight:700}
-.sphere-btn.sphere-pulse{animation:sphereBtnPulse 2s ease-in-out infinite;border-color:rgba(232,193,122,0.5);background:rgba(232,193,122,0.06)}
-@keyframes sphereBtnPulse{0%,100%{border-color:rgba(232,193,122,0.3);box-shadow:0 0 0 0 rgba(232,193,122,0)}50%{border-color:rgba(232,193,122,0.7);box-shadow:0 0 0 4px rgba(232,193,122,0.12)}}
+.sphere-btn.sphere-pulse{animation:sphereBtnPulse 1.8s ease-in-out infinite;border-color:rgba(232,193,122,0.6);background:rgba(232,193,122,0.09)}
+@keyframes sphereBtnPulse{
+  0%,100%{border-color:rgba(232,193,122,0.3);box-shadow:0 0 0 0 rgba(232,193,122,0);transform:translateX(0)}
+  50%{border-color:rgba(232,193,122,1);box-shadow:0 0 0 6px rgba(232,193,122,0.16),0 0 18px rgba(232,193,122,0.35);transform:translateX(4px)}
+}
 .s-pip{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
 .s-info{flex:1;min-width:0}
 .s-name{font-size:.78rem;font-weight:500;color:var(--td);display:flex;align-items:center;gap:5px;transition:color 3s}
@@ -446,6 +449,12 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   }
   .sphere-chip:active{transform:scale(.94)}
   .sphere-chip.chip-active{color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+  .sphere-chip.chip-pulse{animation:chipPulse 1.8s ease-in-out infinite}
+  @keyframes chipPulse{
+    0%,100%{border-color:rgba(232,193,122,0.4);box-shadow:0 0 0 0 rgba(232,193,122,0)}
+    50%{border-color:rgba(232,193,122,1);box-shadow:0 0 0 4px rgba(232,193,122,0.22),0 0 14px rgba(232,193,122,0.4)}
+  }
+  .mobile-chip-hint{font-size:.72rem;font-weight:700;color:#E8C17A;padding:0 0 6px 0;display:flex;align-items:center;gap:5px;animation:hintPulse 2.5s ease-in-out infinite}
   .chip-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
   .chip-score{font-size:.7rem;font-weight:700;opacity:.82;margin-left:1px}
 
@@ -1199,6 +1208,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
 
   <!-- МОБІЛЬНИЙ РЯД ЧІПІВ ВИБОРУ СФЕРИ (тільки на телефоні) -->
   <div class="sphere-chips-wrap" id="sphereDropdownWrap" style="display:none">
+    <div class="mobile-chip-hint" id="mobileChipHint"><span>☝️</span><span>Гортай та обери сферу — постав бал</span></div>
     <div class="sphere-chips" id="sphereChips"></div>
   </div>
 
@@ -4003,12 +4013,22 @@ function buildMobileDropdown(){
   wrap.style.display = isMobile ? 'block' : 'none';
   if(!isMobile) return;
 
+  // Перший нерейтингований чіп для пульсу
+  const firstUnrated = !sphereHintDismissed
+    ? SPHERES.find(s => s.sub.every(sub => state[s.id][sub.k] === 5))
+    : null;
+
+  // Хінт — показуємо поки hint не dismissed
+  const hint = document.getElementById('mobileChipHint');
+  if(hint) hint.style.display = sphereHintDismissed ? 'none' : 'flex';
+
   container.innerHTML = SPHERES.map(s => {
     const a = avg(s.id).toFixed(1);
     const isAct = s.id === active.id;
+    const isPulse = firstUnrated && s.id === firstUnrated.id && !isAct;
     const bg = isAct ? `background:#E08A4E;border-color:#E08A4E` : `border-color:rgba(224,138,78,0.4);background:rgba(224,138,78,0.08)`;
     const dotBg = isAct ? 'rgba(255,255,255,.85)' : '#E08A4E';
-    return `<button class="sphere-chip${isAct?' chip-active':''}" style="${bg}" onclick="onMobileSphereChange('${s.id}')">
+    return `<button class="sphere-chip${isAct?' chip-active':''}${isPulse?' chip-pulse':''}" style="${bg}" onclick="onMobileSphereChange('${s.id}')">
       <span class="chip-dot" style="background:${dotBg}"></span>${s.name}<span class="chip-score">${a}</span>
     </button>`;
   }).join('');
@@ -4022,7 +4042,13 @@ function buildMobileDropdown(){
 
 function onMobileSphereChange(id){
   const s = SPHERES.find(x => x.id === id);
-  if(s){ active = s; buildNav(); buildDetail(); drawWheel(); buildMobileDropdown(); }
+  if(!s) return;
+  if(!sphereHintDismissed){
+    sphereHintDismissed = true;
+    const h = document.getElementById('mobileChipHint');
+    if(h) h.style.display = 'none';
+  }
+  active = s; buildNav(); buildDetail(); drawWheel(); buildMobileDropdown();
 }
 
 // Слухаємо зміну розміру — перемикаємо між дропдауном і кнопками
