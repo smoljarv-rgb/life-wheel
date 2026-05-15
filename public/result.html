@@ -750,7 +750,34 @@ body::after{
 }
 .toast.show{display:block;animation:fadeIn .3s ease}
 
+/* MOBILE NAV */
+#resultMobileNav{
+  display:none;position:sticky;top:0;z-index:200;
+  background:rgba(14,27,44,0.92);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(244,239,230,0.10);
+  height:52px;
+}
+.result-nav-inner{
+  display:flex;align-items:center;gap:0;
+  padding:0 16px;height:52px;
+}
+.result-nav-logo{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-style:italic;font-size:19px;
+  color:var(--fog);text-decoration:none;flex:1;
+}
+.result-nav-links{display:flex;gap:16px;align-items:center}
+.result-nav-links a{
+  font-family:'Inter Tight',system-ui,sans-serif;
+  font-size:13px;color:rgba(244,239,230,0.55);
+  text-decoration:none;white-space:nowrap;transition:color .2s;
+}
+.result-nav-links a:hover{color:var(--fog)}
+
 @media(max-width:580px){
+  #resultMobileNav{display:flex}
+  #hdrNavLinks{display:none}
   .hdr-grid{grid-template-columns:1fr}
   .hdr-wheel{display:none}
   .snap-grid{grid-template-columns:repeat(3,1fr)}
@@ -1021,6 +1048,18 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
 </head>
 <body>
 
+<!-- MOBILE NAV (visible only on mobile) -->
+<nav id="resultMobileNav">
+  <div class="result-nav-inner">
+    <span class="result-nav-logo">Koleso Live</span>
+    <div class="result-nav-links">
+      <a href="/blog">Блог</a>
+      <a href="/account">Кабінет</a>
+      <a href="/">← Головна</a>
+    </div>
+  </div>
+</nav>
+
 <div class="loader" id="loader">
   <div class="loader-pencil">✏️</div>
   <div class="loader-txt">Малюємо твій звіт...</div>
@@ -1041,7 +1080,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
   <div class="hdr">
     <div class="hdr-label" style="display:flex;align-items:center;justify-content:space-between">
       <span>Koleso.live · Твій звіт</span>
-      <div style="display:flex;align-items:center;gap:14px">
+      <div id="hdrNavLinks" style="display:flex;align-items:center;gap:14px">
         <a href="/" style="font-family:'Inter Tight',sans-serif;font-size:13px;color:var(--ink3);text-decoration:none;transition:color .2s;font-weight:500" onmouseover="this.style.color='var(--ember)'" onmouseout="this.style.color='var(--ink3)'">← Головна</a>
         <a href="/blog" style="font-family:'Inter Tight',sans-serif;font-size:13px;color:var(--ink3);text-decoration:none;transition:color .2s;font-weight:500" onmouseover="this.style.color='var(--ember)'" onmouseout="this.style.color='var(--ink3)'">Блог</a>
         <a href="/account" style="font-family:'Inter Tight',sans-serif;font-size:13px;color:var(--ink3);text-decoration:none;transition:color .2s;font-weight:500" onmouseover="this.style.color='var(--ember)'" onmouseout="this.style.color='var(--ink3)'">Кабінет</a>
