@@ -1142,7 +1142,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
     <div class="plan-hero">
       <div class="ph-date" id="planDate">—</div>
       <div class="ph-title">Твій план дій</div>
-      <div class="ph-sub">Маленькі кроки щодня — ось що насправді змінює баланс</div>
+      <div class="ph-sub">Почни з мікродій нижче — кожна займає 5–15 хвилин і запускає реальну зміну</div>
     </div>
 
     <!-- Сьогодні — виділена зона -->
@@ -1345,7 +1345,9 @@ function renderResult(data){
 
   document.getElementById('scoreBig').innerHTML=`${avgR}<span class="score-denom">/10</span>`;
   const _wLbl=document.getElementById('wheelLbl');if(_wLbl)_wLbl.textContent=avgR;
-  document.getElementById('hdrMsg').innerHTML=`Твій баланс <strong>${pct}%</strong> — краще ніж у ${betterThan}% людей. ${weak>0?`<strong>${weak} зон</strong> тягнуть вниз.`:'Чудовий результат!'}`;
+  document.getElementById('hdrMsg').innerHTML=weak>0
+    ?`У тебе <strong>${strong} сильних</strong> і <strong>${weak} критичних</strong> сфер. AI вже визначає де найбільші точки росту.`
+    :`<strong>${strong} з 12 сфер</strong> на рівні 7+. Відмінний результат — AI покаже як утримати баланс.`;
   document.getElementById('hdrChips').innerHTML=`<span class="chip chip-g">${strong} сильних</span><span class="chip chip-r">${weak} критичних</span><span class="chip chip-y">${mid} середніх</span>`;
 
   renderWheel(scores);
@@ -1397,7 +1399,8 @@ function renderResult(data){
       }).join('')}</div>
     </div>`;
   } else {
-    document.getElementById('progressBlock').innerHTML=`<div class="no-prev">Тут буде порівняння після другого тесту.<br><a href="https://koleso.live" style="color:var(--blue)">Пройти колесо ще раз через тиждень →</a></div>`;
+    document.getElementById('progressTitle').style.display='none';
+    document.getElementById('progressBlock').style.display='none';
   }
 
   // SPHERES
