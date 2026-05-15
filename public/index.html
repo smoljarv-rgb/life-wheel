@@ -451,8 +451,8 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   .sphere-chip.chip-active{color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.22)}
   .sphere-chip.chip-pulse{animation:chipPulse 1.8s ease-in-out infinite}
   @keyframes chipPulse{
-    0%,100%{border-color:rgba(232,193,122,0.4);box-shadow:0 0 0 0 rgba(232,193,122,0)}
-    50%{border-color:rgba(232,193,122,1);box-shadow:0 0 0 4px rgba(232,193,122,0.22),0 0 14px rgba(232,193,122,0.4)}
+    0%,100%{box-shadow:0 0 0 0 rgba(232,193,122,0)}
+    50%{box-shadow:0 0 0 5px rgba(232,193,122,0.35),0 0 18px rgba(232,193,122,0.55)}
   }
   .mobile-chip-hint{font-size:.72rem;font-weight:700;color:#E8C17A;padding:0 0 6px 0;display:flex;align-items:center;gap:5px;animation:hintPulse 2.5s ease-in-out infinite}
   .chip-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
@@ -1208,7 +1208,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
 
   <!-- МОБІЛЬНИЙ РЯД ЧІПІВ ВИБОРУ СФЕРИ (тільки на телефоні) -->
   <div class="sphere-chips-wrap" id="sphereDropdownWrap" style="display:none">
-    <div class="mobile-chip-hint" id="mobileChipHint"><span>☝️</span><span>Гортай та обери сферу — постав бал</span></div>
+    <div class="mobile-chip-hint" id="mobileChipHint"><span>👇</span><span>Гортай та обери сферу — постав бал</span></div>
     <div class="sphere-chips" id="sphereChips"></div>
   </div>
 
@@ -4025,7 +4025,7 @@ function buildMobileDropdown(){
   container.innerHTML = SPHERES.map(s => {
     const a = avg(s.id).toFixed(1);
     const isAct = s.id === active.id;
-    const isPulse = firstUnrated && s.id === firstUnrated.id && !isAct;
+    const isPulse = firstUnrated && s.id === firstUnrated.id;
     const bg = isAct ? `background:#E08A4E;border-color:#E08A4E` : `border-color:rgba(224,138,78,0.4);background:rgba(224,138,78,0.08)`;
     const dotBg = isAct ? 'rgba(255,255,255,.85)' : '#E08A4E';
     return `<button class="sphere-chip${isAct?' chip-active':''}${isPulse?' chip-pulse':''}" style="${bg}" onclick="onMobileSphereChange('${s.id}')">
