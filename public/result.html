@@ -1420,6 +1420,8 @@ function renderResult(data){
   const _wLbl=document.getElementById('wheelLbl');if(_wLbl)_wLbl.textContent=avgR;
   document.getElementById('hdrMsg').innerHTML=weak>0
     ?`У тебе <strong>${strong} сильних</strong> і <strong>${weak} критичних</strong> сфер. AI вже визначає де найбільші точки росту.`
+    :strong===0
+    ?`Всі сфери в середньому діапазоні — AI покаже де найбільший потенціал зростання.`
     :`<strong>${strong} з 12 сфер</strong> на рівні 7+. Відмінний результат — AI покаже як утримати баланс.`;
   document.getElementById('hdrChips').innerHTML=`<span class="chip chip-g">${strong} сильних</span><span class="chip chip-r">${weak} критичних</span><span class="chip chip-y">${mid} середніх</span>`;
 
