@@ -409,6 +409,8 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 @media(max-width:600px){
   body{font-size:14px}
   .wrapper{padding-top:0;display:flex;flex-direction:column}
+  .wrapper.test-started{display:flex!important}
+  .wrapper:not(.test-started){display:none!important}
 
   /* Footer мобільний */
   #siteFooter>div>div:first-child{grid-template-columns:1fr 1fr!important;gap:16px!important}
@@ -1467,6 +1469,8 @@ function closeModal(){
   m.style.pointerEvents='none';
   const hero=document.getElementById('heroSection');
   if(hero) hero.style.display='none';
+  const w=document.querySelector('.wrapper');
+  if(w) w.classList.add('test-started');
   sphereHintDismissed=true;
   const h=document.getElementById('sphereClickHint');
   if(h)h.remove();
@@ -4183,6 +4187,8 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   var wrap = document.getElementById('lastResultLink');
   var a = document.getElementById('lastResultAnchor');
   if(wrap && a){ a.href = '/result/' + slug; wrap.style.display = 'block'; }
+  var fl = document.getElementById('footerResultLink');
+  if(fl) fl.href = '/result/' + slug;
 })();
 
 // Mobile sticky CTA
@@ -4260,7 +4266,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         <div style="font-size:.62rem;font-weight:700;color:var(--td);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;transition:color 3s">Сервіс</div>
         <a href="/pricing" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">💎 Тарифи PRO</a>
         <a href="/" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">🌀 Колесо Життя</a>
-        <a href="/result" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">📊 Мій звіт</a>
+        <a id="footerResultLink" href="/result" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">📊 Мій звіт</a>
       </div>
 
       <!-- Колонка 3: Підтримка -->
