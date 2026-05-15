@@ -1222,8 +1222,8 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
   <div class="center-col">
     <div class="wheel-card glass">
       <canvas id="wheel" width="480" height="480" style="display:none"></canvas>
-      <svg id="constellation-svg" viewBox="-50 -50 500 500" xmlns="http://www.w3.org/2000/svg"
-        style="width:100%;max-width:480px;display:block;margin:0 auto;touch-action:none;cursor:default">
+      <svg id="constellation-svg" viewBox="-30 -30 460 460" xmlns="http://www.w3.org/2000/svg"
+        style="width:100%;display:block;margin:0 auto;touch-action:none;cursor:default">
         <defs>
           <radialGradient id="consGrad" cx="50%" cy="50%" r="50%">
             <stop offset="0%"   stop-color="rgba(224,138,78,0.14)"/>
@@ -1232,25 +1232,25 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           </radialGradient>
         </defs>
         <!-- Background glow -->
-        <circle cx="200" cy="200" r="150" fill="url(#consGrad)"/>
+        <circle cx="200" cy="200" r="165" fill="url(#consGrad)"/>
         <!-- Axis lines (built by JS) -->
         <g id="const-axes" stroke="rgba(244,239,230,0.12)" stroke-width="1"></g>
-        <!-- Scale rings: r=60→score 4, r=105→score 7, r=150→score 10 -->
-        <circle cx="200" cy="200" r="60"  fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="3 7"/>
-        <circle cx="200" cy="200" r="105" fill="none" stroke="rgba(244,239,230,0.08)" stroke-dasharray="3 7"/>
-        <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(244,239,230,0.12)" stroke-dasharray="3 7"/>
+        <!-- Scale rings: r=66→score 4, r=115→score 7, r=165→score 10 -->
+        <circle cx="200" cy="200" r="66"  fill="none" stroke="rgba(244,239,230,0.07)" stroke-dasharray="3 7"/>
+        <circle cx="200" cy="200" r="115" fill="none" stroke="rgba(244,239,230,0.08)" stroke-dasharray="3 7"/>
+        <circle cx="200" cy="200" r="165" fill="none" stroke="rgba(244,239,230,0.12)" stroke-dasharray="3 7"/>
         <!-- Ring labels on top axis -->
-        <text x="208" y="140" font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">4</text>
-        <text x="208" y="95"  font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">7</text>
-        <text x="208" y="50"  font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">10</text>
+        <text x="207" y="134" font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">4</text>
+        <text x="207" y="85"  font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">7</text>
+        <text x="207" y="35"  font-family="monospace" font-size="8" fill="rgba(244,239,230,0.28)" dominant-baseline="middle">10</text>
         <!-- Polygon (updated by JS) -->
         <polygon id="constellation-polygon"
-          points="200,50 200,50 200,50 200,50 200,50 200,50 200,50 200,50 200,50 200,50 200,50 200,50"
+          points="200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35 200,35"
           fill="rgba(224,138,78,0.12)" stroke="#E08A4E" stroke-opacity="0.75" stroke-width="1.5" stroke-linejoin="round"/>
         <!-- Dots with hit areas (built by JS) -->
         <g id="const-dots"></g>
-        <!-- Sphere labels (built by JS) -->
-        <g id="const-labels" font-family="'Inter Tight',sans-serif" font-size="9.5" fill="rgba(244,239,230,0.55)"></g>
+        <!-- Sphere labels (built by JS, updated on each slider change) -->
+        <g id="const-labels" font-family="'Inter Tight',sans-serif" font-size="8.5" fill="rgba(244,239,230,0.60)" letter-spacing="0.02em"></g>
         <!-- Center Life Score -->
         <text id="constellation-score" x="200" y="207" text-anchor="middle"
           font-family="'Instrument Serif',Georgia,serif"
@@ -1826,8 +1826,10 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
 function drawWheel(){drawWheelOnCtx(cv,CX,CY,MAXR,MINR,SL,active.id);}
 
 function updateConstellation(scores){
-  const cx=200,cy=200,rPS=15,maxR=150; // r = score*15 → score4→r60, score7→r105, score10→r150
+  const cx=200,cy=200,rPS=16.5,maxR=165; // r=score*16.5 → 4→66, 7→115, 10→165
   const angles=Array.from({length:12},(_,i)=>(i*30-90)*Math.PI/180);
+  const names=SPHERES.map(s=>s.name.toUpperCase());
+
   // Build axis lines once
   const axesG=document.getElementById('const-axes');
   if(axesG&&!axesG.dataset.init){
@@ -1856,25 +1858,20 @@ function updateConstellation(scores){
       dot.id='dot-'+i;dotsG.appendChild(dot);
     }
   }
-  // Build labels once
+  // Build labels once (positions updated below on every call)
   const labelsG=document.getElementById('const-labels');
   if(labelsG&&!labelsG.dataset.init){
     labelsG.dataset.init='1';
-    const labelR=maxR+22;
-    const names=SPHERES.map(s=>s.name.length>9?s.name.slice(0,8)+'.':s.name);
-    angles.forEach((a,i)=>{
-      const lx=cx+labelR*Math.cos(a);
-      const ly=cy+labelR*Math.sin(a);
-      const cosA=Math.cos(a);
-      const anchor=Math.abs(cosA)<0.2?'middle':cosA>0?'start':'end';
+    for(let i=0;i<12;i++){
       const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',lx.toFixed(1));t.setAttribute('y',ly.toFixed(1));
-      t.setAttribute('text-anchor',anchor);t.setAttribute('dominant-baseline','middle');
-      t.id='const-label-'+i;t.textContent=names[i];
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('dominant-baseline','middle');
+      t.id='const-label-'+i;
+      t.textContent=names[i];
       labelsG.appendChild(t);
-    });
+    }
   }
-  // Update positions
+  // Update dot + label positions on every call
   const points=scores.map((score,i)=>{
     const r=score*rPS;
     const x=cx+r*Math.cos(angles[i]);
@@ -1886,6 +1883,18 @@ function updateConstellation(scores){
     const color=score<=3?'#C2553F':score<=6?'#E08A4E':'#C9712F';
     const dot=document.getElementById('dot-'+i);
     if(dot)dot.setAttribute('stroke',color);
+
+    // Label: along the axis line, just beyond the dot (min 55% of maxR)
+    const labelR=Math.max(r+20, maxR*0.55);
+    const lx=(cx+labelR*Math.cos(angles[i])).toFixed(1);
+    const ly=(cy+labelR*Math.sin(angles[i])).toFixed(1);
+    let angleDeg=i*30-90;
+    if(Math.cos(angles[i])<-0.01) angleDeg+=180; // flip left-half text
+    const lbl=document.getElementById('const-label-'+i);
+    if(lbl){
+      lbl.setAttribute('x',lx);lbl.setAttribute('y',ly);
+      lbl.setAttribute('transform',`rotate(${angleDeg},${lx},${ly})`);
+    }
     return x.toFixed(1)+','+y.toFixed(1);
   });
   const poly=document.getElementById('constellation-polygon');
@@ -1913,8 +1922,8 @@ function _consPt(e){
   const svg=document.getElementById('constellation-svg');
   const r=svg.getBoundingClientRect();
   const t=e.touches?e.touches[0]:e;
-  // viewBox "-50 -50 500 500" → map pixel → SVG coords
-  return{x:(t.clientX-r.left)/r.width*500-50,y:(t.clientY-r.top)/r.height*500-50};
+  // viewBox "-30 -30 460 460" → map pixel → SVG coords
+  return{x:(t.clientX-r.left)/r.width*460-30,y:(t.clientY-r.top)/r.height*460-30};
 }
 function _consStart(e){
   const m=(e.target.id||'').match(/^dot-hit-(\d+)$/);
@@ -1929,7 +1938,7 @@ function _consMove(e){
   e.preventDefault();
   const pt=_consPt(e);
   const proj=(pt.x-200)*_consDrag.ax+(pt.y-200)*_consDrag.ay;
-  const score=Math.max(1,Math.min(10,Math.round(proj/15)));
+  const score=Math.max(1,Math.min(10,Math.round(proj/16.5)));
   const sph=SPHERES[_consDrag.i];
   if(Math.round(avg(sph.id))===score)return;
   sph.sub.forEach(sub=>{state[sph.id][sub.k]=score;});
