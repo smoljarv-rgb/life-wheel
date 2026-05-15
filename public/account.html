@@ -451,7 +451,7 @@ async function init(){
   var session = await sb.auth.getSession();
   if(session.data.session){
     currentUser = session.data.session.user;
-    await linkLocalResults(currentUser.email);
+    linkLocalResults(currentUser.email); // fire-and-forget, не блокуємо UI
     showAccount();
   } else {
     showLogin();
@@ -733,16 +733,15 @@ async function linkLocalResults(email){
   }catch(e){}
   // І окремо lw_last_result
   try{ var ls=localStorage.getItem('lw_last_result'); if(ls) slugs.add(ls); }catch(e){}
-  // Прив'язуємо кожен slug до email (сервер пропускає вже прив'язані)
-  for(var slug of slugs){
-    try{
-      await fetch('/api/results/link-email',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({slug:slug,email:email})
-      });
-    }catch(e){}
-  }
+  // Прив'язуємо кожен slug до email (паралельно, сервер пропускає вже прив'язані)
+  var promises = Array.from(slugs).map(function(slug){
+    return fetch('/api/results/link-email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({slug:slug,email:email})
+    }).catch(function(){});
+  });
+  await Promise.all(promises);
 }
 
 function renderAccountConstellation(scores, slug){
