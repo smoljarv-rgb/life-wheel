@@ -1022,6 +1022,10 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           <div style="font-size:13px;color:var(--ink3);font-family:'Inter Tight',system-ui,sans-serif">Це займе 30–60 секунд</div>
         </div>
         <div class="chips" id="hdrChips"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+          <button onclick="(function(){var sc=document.getElementById('scoreBig');var score=sc?sc.textContent.split('/')[0].trim():'?';var url=encodeURIComponent(window.location.href);var text=encodeURIComponent('Мій Life Score: '+score+'/10 — перевір свій баланс на koleso.live');window.open('https://t.me/share/url?url='+url+'&text='+text,'_blank');})()" style="padding:11px 18px;border-radius:999px;background:#E08A4E;color:#0E1B2C;border:none;font-family:'Inter Tight',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">✈ Telegram</button>
+          <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='✓ Скопійовано';setTimeout(()=>{this.textContent='Скопіювати посилання';},2000);})" style="padding:11px 18px;border-radius:999px;background:transparent;color:#F4EFE6;border:1px solid rgba(244,239,230,.22);font-family:'Inter Tight',sans-serif;font-size:13px;cursor:pointer;">Скопіювати посилання</button>
+        </div>
       </div>
       <div class="hdr-wheel">
         <!-- legacy wheel (hidden, kept for JS null-guard) -->
@@ -1447,9 +1451,9 @@ function renderSpheres(data){
         var clr=s.score>=7?'var(--green)':s.score>=4?'var(--orange)':'var(--red)';
         var h='';
         if(aiAdvice.overview||aiAdvice.root_cause||aiAdvice.insight){
-          h+='<div class="coach-insight-block">';
-          h+='<div class="coach-header"><div class="coach-avatar">AI</div><div><div class="coach-title">Персональний висновок</div><div class="coach-sub">на основі твоїх балів</div></div></div>';
-          if(aiAdvice.overview) h+='<div class="coach-overview">'+fixUkrainianText(aiAdvice.overview)+'</div>';
+          h+='<div style="padding:24px 28px;background:rgba(224,138,78,.06);border-radius:18px;border:1px solid rgba(224,138,78,.25);margin-bottom:20px">';
+          h+='<div style="font-family:monospace;font-size:10px;letter-spacing:.18em;color:#E08A4E;margin-bottom:12px">AI · НАРАТИВ</div>';
+          if(aiAdvice.overview) h+='<div style="font-family:\'Instrument Serif\',Georgia,serif;font-style:italic;font-size:20px;line-height:1.55;color:#F4EFE6;margin-bottom:12px">'+fixUkrainianText(aiAdvice.overview)+'</div>';
           if(aiAdvice.root_cause) h+='<div class="coach-root"><span class="coach-root-label">Корінь:</span> '+fixUkrainianText(aiAdvice.root_cause)+'</div>';
           if(aiAdvice.insight) h+='<div class="coach-insight"><span class="coach-insight-label">Важливо знати:</span> '+fixUkrainianText(aiAdvice.insight)+'</div>';
           h+='</div>';
