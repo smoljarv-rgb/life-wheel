@@ -1311,8 +1311,14 @@ async function loadResult(){
   currentSlug=getSlug();
   if(!currentSlug||currentSlug==='result'){
     const last=localStorage.getItem('lw_last_result');
-    if(last){const c=loadFromStorage(last);if(c){renderResult(c);return;}}
-    window.location.href='/?msg=no_result';return;
+    if(last){
+      const c=loadFromStorage(last);
+      if(c){renderResult(c);return;}
+      window.location.replace('/result/'+last);return;
+    }
+    document.getElementById('loader').classList.add('hide');
+    document.getElementById('errState').style.display='flex';
+    return;
   }
   const cached=loadFromStorage(currentSlug);
   if(cached){renderResult(cached);return;}
