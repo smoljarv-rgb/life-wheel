@@ -293,7 +293,7 @@ body::after{
   padding:16px;background:rgba(244,239,230,.015);
 }
 #acc-layout{
-  display:grid;grid-template-columns:minmax(0,280px) 1fr;
+  display:grid;grid-template-columns:minmax(0,360px) 1fr;
   gap:28px;align-items:start;margin-bottom:32px;
 }
 /* ── PRO блок ── */
@@ -395,7 +395,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
     <div id="acc-layout">
       <div class="acc-glass">
         <div class="acc-section-title">ОСТАННІЙ ЗНІМОК</div>
-        <svg id="acc-svg" viewBox="-60 -60 320 320" width="100%" style="max-width:220px;display:block;margin:0 auto"></svg>
+        <svg id="acc-svg" viewBox="-70 -70 340 340" width="100%" style="display:block;margin:0 auto"></svg>
         <div style="text-align:center;margin-top:10px" id="acc-svg-link"></div>
       </div>
       <div class="acc-glass">
@@ -725,27 +725,34 @@ function renderAccountConstellation(scores, slug){
   if(!svg) return;
   var keys = Object.keys(scores);
   var n = keys.length || 12;
-  var cx = 100, cy = 100, R_MIN = 10, R_MAX = 36;
-  var pts = [];
+  var cx = 100, cy = 100, R_MIN = 18, R_MAX = 82;
+  var pts = [], vals2 = [];
   keys.forEach(function(k, i){
-    var v = parseFloat(scores[k]) || 1;
+    var v = Math.max(1, Math.min(10, parseFloat(scores[k]) || 1));
     var r = R_MIN + (R_MAX - R_MIN) * ((v - 1) / 9);
     var angle = (2 * Math.PI * i / n) - Math.PI / 2;
     pts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
+    vals2.push(v);
   });
-  var svgHtml = '<defs><radialGradient id="accG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#E08A4E" stop-opacity=".35"/><stop offset="100%" stop-color="#E08A4E" stop-opacity=".05"/></radialGradient></defs>';
+  var svgHtml = '<defs><radialGradient id="accG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#E08A4E" stop-opacity=".3"/><stop offset="100%" stop-color="#E08A4E" stop-opacity=".04"/></radialGradient></defs>';
   [0.25, 0.5, 0.75, 1].forEach(function(f){
-    svgHtml += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R_MAX * f) + '" fill="none" stroke="rgba(244,239,230,.06)" stroke-width="1"/>';
+    svgHtml += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R_MAX * f).toFixed(1) + '" fill="none" stroke="rgba(244,239,230,.08)" stroke-width="1"/>';
   });
   keys.forEach(function(k, i){
     var angle = (2 * Math.PI * i / n) - Math.PI / 2;
-    svgHtml += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R_MAX * Math.cos(angle)).toFixed(1) + '" y2="' + (cy + R_MAX * Math.sin(angle)).toFixed(1) + '" stroke="rgba(244,239,230,.06)" stroke-width="1"/>';
+    svgHtml += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R_MAX * Math.cos(angle)).toFixed(1) + '" y2="' + (cy + R_MAX * Math.sin(angle)).toFixed(1) + '" stroke="rgba(244,239,230,.08)" stroke-width="1"/>';
   });
   if(pts.length > 2){
-    svgHtml += '<polygon points="' + pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ') + '" fill="url(#accG)" stroke="#E08A4E" stroke-width="1.5" stroke-linejoin="round"/>';
+    svgHtml += '<polygon points="' + pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ') + '" fill="url(#accG)" stroke="#E08A4E" stroke-width="2" stroke-linejoin="round"/>';
   }
-  pts.forEach(function(p){
-    svgHtml += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="2.5" fill="#E08A4E"/>';
+  pts.forEach(function(p, i){
+    var labelR = R_MAX + 16;
+    var angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    var lx = (cx + labelR * Math.cos(angle)).toFixed(1);
+    var ly = (cy + labelR * Math.sin(angle)).toFixed(1);
+    var anchor = Math.cos(angle) > 0.1 ? 'start' : Math.cos(angle) < -0.1 ? 'end' : 'middle';
+    svgHtml += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" fill="#E08A4E"/>';
+    svgHtml += '<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" dominant-baseline="middle" font-size="11" font-family="monospace" fill="rgba(244,239,230,.65)">' + vals2[i] + '</text>';
   });
   svg.innerHTML = svgHtml;
   var linkEl = document.getElementById('acc-svg-link');
