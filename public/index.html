@@ -165,6 +165,8 @@ body::after{
 .sphere-btn:hover{background:var(--sf2);border-color:var(--sb);transform:translateX(2px)}
 .sphere-btn.active{background:var(--sf);border-color:var(--ac);box-shadow:0 3px 14px var(--sh);transform:translateX(4px)}
 .sphere-btn.active .s-name{color:var(--ac);font-weight:700}
+.sphere-btn.sphere-pulse{animation:sphereBtnPulse 2s ease-in-out infinite;border-color:rgba(232,193,122,0.5);background:rgba(232,193,122,0.06)}
+@keyframes sphereBtnPulse{0%,100%{border-color:rgba(232,193,122,0.3);box-shadow:0 0 0 0 rgba(232,193,122,0)}50%{border-color:rgba(232,193,122,0.7);box-shadow:0 0 0 4px rgba(232,193,122,0.12)}}
 .s-pip{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
 .s-info{flex:1;min-width:0}
 .s-name{font-size:.78rem;font-weight:500;color:var(--td);display:flex;align-items:center;gap:5px;transition:color 3s}
@@ -1607,8 +1609,10 @@ function buildNav(){
     const a=avg(s.id);
     let badge='',bc='';
     if(a<4){badge='!';bc='bc';}else if(a<6){badge='~';bc='bw';}else if(a<8){badge='✓';bc='bg';}else{badge='★';bc='bb';}
+    const isUnrated = s.sub.every(sub=>state[s.id][sub.k]===5);
+    const isFirstUnrated = !sphereHintDismissed && SPHERES.filter(sp=>sp.sub.every(sub=>state[sp.id][sub.k]===5))[0]===s;
     const btn=document.createElement('button');
-    btn.className='sphere-btn'+(s.id===active.id?' active':'');
+    btn.className='sphere-btn'+(s.id===active.id?' active':'')+(isFirstUnrated?' sphere-pulse':'');
     btn.innerHTML=`<div class="s-pip" style="background:#E08A4E;box-shadow:0 0 5px #E08A4E88"></div>
       <div class="s-info">
         <span class="s-name"><span>${s.name}</span><span class="badge ${bc}">${badge}</span></span>
@@ -1624,11 +1628,11 @@ function buildNav(){
       active=s;buildNav();buildDetail();drawWheel();
     };
     nav.appendChild(btn);
-    if(s===SPHERES[0] && !sphereHintDismissed){
+    if(isFirstUnrated){
       const hint=document.createElement('div');
       hint.id='sphereClickHint';
-      hint.style.cssText='font-size:.72rem;font-weight:700;color:var(--ac);padding:6px 12px 10px;text-align:center;background:rgba(40,120,200,.08);border:1px solid rgba(40,120,200,.2);border-radius:10px;margin:4px 8px 0;animation:hintPulse 2.5s ease-in-out infinite;transition:all 3s';
-      hint.textContent='👆 Клікни на сферу щоб оцінити';
+      hint.style.cssText='font-size:.73rem;font-weight:700;color:#E8C17A;padding:8px 12px;display:flex;align-items:center;gap:6px;background:rgba(232,193,122,0.08);border:1px solid rgba(232,193,122,0.25);border-radius:10px;margin:4px 6px 0;animation:hintPulse 2.5s ease-in-out infinite';
+      hint.innerHTML='<span style="font-size:1rem">☝️</span><span>Натисни на сферу — постав бал</span>';
       nav.appendChild(hint);
     }
   });
@@ -1664,6 +1668,20 @@ function showSavedToast(){
 }
 
 /* ── DETAIL ── */
+function getNextSphere(){
+  const idx=SPHERES.indexOf(active);
+  // Спочатку шукаємо не-оцінені після поточної
+  for(let i=idx+1;i<SPHERES.length;i++){
+    if(SPHERES[i].sub.every(sub=>state[SPHERES[i].id][sub.k]===5)) return SPHERES[i];
+  }
+  // Потім з початку
+  for(let i=0;i<idx;i++){
+    if(SPHERES[i].sub.every(sub=>state[SPHERES[i].id][sub.k]===5)) return SPHERES[i];
+  }
+  // Всі оцінені — просто наступна по порядку
+  return idx+1<SPHERES.length?SPHERES[idx+1]:null;
+}
+
 function buildDetail(){
   const s=active,a=avg(s.id),sd=sDesc(a);
   const box=document.getElementById('detailBox');
@@ -1711,8 +1729,27 @@ function buildDetail(){
       box.querySelector('.det-score').nextElementSibling&&(box.querySelector('.det-score').parentElement.previousElementSibling.lastElementChild.textContent=`${sDesc(newA).label} — ${sDesc(newA).desc.substring(0,62)}…`);
       buildNav();updateResults();drawWheel();updateConstellation(SPHERES.map(s=>avg(s.id)));
       showSavedToast();
+      // Показуємо кнопку "Наступна сфера" після першого руху повзунка
+      const nb=document.getElementById('nextSphereBtn');
+      if(nb) nb.style.display='flex';
     });
   });
+
+  // Кнопка "Наступна сфера" — прихована, з'являється після першого руху повзунка
+  const nextWrap=document.createElement('div');
+  nextWrap.id='nextSphereBtn';
+  nextWrap.style.cssText='display:none;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 14px;background:rgba(232,193,122,0.08);border:1.5px solid rgba(232,193,122,0.25);border-radius:12px;cursor:pointer;transition:all .2s';
+  nextWrap.onmouseover=function(){this.style.background='rgba(232,193,122,0.14)';};
+  nextWrap.onmouseout=function(){this.style.background='rgba(232,193,122,0.08)';};
+  nextWrap.onclick=function(){
+    const next=getNextSphere();
+    if(next){active=next;buildNav();buildDetail();drawWheel();}
+  };
+  const _nextSph=getNextSphere();
+  const _nextLabel=_nextSph?_nextSph.name:'AI-аналіз';
+  const _nextIcon=_nextSph?'→':'✦';
+  nextWrap.innerHTML=`<span style="font-size:.72rem;font-weight:700;color:#E8C17A">Наступна сфера: <strong>${_nextLabel}</strong></span><span style="font-size:.9rem;color:#E8C17A">${_nextIcon}</span>`;
+  list.appendChild(nextWrap);
 
   // Duplicate CTA button under sliders
   const dupBtn = document.createElement('div');
