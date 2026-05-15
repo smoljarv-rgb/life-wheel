@@ -569,6 +569,16 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   text-decoration:none;transition:color .2s;
 }
 .nav-links a:hover{color:var(--fog)}
+.nav-mobile{
+  display:none;gap:14px;flex:1;
+}
+.nav-mobile a{
+  font-family:'Inter Tight',sans-serif;
+  font-size:13px;color:var(--muted);
+  text-decoration:none;transition:color .2s;
+  white-space:nowrap;
+}
+.nav-mobile a:hover{color:var(--fog)}
 .nav-pro{
   font-family:'Inter Tight',sans-serif;
   font-size:12px;font-weight:600;
@@ -908,6 +918,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   #howItWorks,#testimonialSection,#bottomCta{padding-left:16px;padding-right:16px}
   .hero-stats{gap:8px}
   .nav-links{display:none}
+  .nav-mobile{display:flex}
   .constellation-wrap{margin-top:20px}
 }
 </style>
@@ -940,6 +951,10 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
       <a href="/">Колесо Життя</a>
       <a href="/blog">Блог</a>
       <a href="/account" id="accountBtn">Кабінет</a>
+    </div>
+    <div class="nav-mobile">
+      <a href="/blog">Блог</a>
+      <a href="/account">Кабінет</a>
     </div>
     <a href="/pricing" class="nav-pro" id="pricingBtn">✦ PRO</a>
   </div>
