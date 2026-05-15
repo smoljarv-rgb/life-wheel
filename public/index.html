@@ -1223,7 +1223,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
     <div class="wheel-card glass">
       <canvas id="wheel" width="480" height="480" style="display:none"></canvas>
       <svg id="constellation-svg" viewBox="-30 -30 460 460" xmlns="http://www.w3.org/2000/svg"
-        style="width:100%;display:block;margin:0 auto;touch-action:none;cursor:default">
+        style="width:100%;display:block;margin:0 auto;cursor:default">
         <defs>
           <radialGradient id="consGrad" cx="50%" cy="50%" r="50%">
             <stop offset="0%"   stop-color="rgba(224,138,78,0.14)"/>
@@ -1861,6 +1861,7 @@ function updateConstellation(scores){
       const hit=document.createElementNS('http://www.w3.org/2000/svg','circle');
       hit.setAttribute('r','18');hit.setAttribute('fill','rgba(0,0,0,0)');
       hit.setAttribute('pointer-events','all');hit.setAttribute('cursor','grab');
+      hit.style.touchAction='none';
       hit.id='dot-hit-'+i;dotsG.appendChild(hit);
       const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
       dot.setAttribute('r','6');dot.setAttribute('fill','#F4EFE6');
