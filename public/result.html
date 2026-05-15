@@ -888,11 +888,16 @@ body::after{
 .score-denom{color:var(--ink3)}
 .hdr-msg{color:var(--ink2)}
 .hdr-msg strong{color:var(--fog)}
-.chip{font-family:'Inter Tight',system-ui,sans-serif;font-size:13px;font-weight:600;border-radius:100px;border:1.5px solid currentColor}
-.chip::before{display:none}
-.chip-g{color:var(--green)}
-.chip-r{color:var(--red)}
-.chip-y{color:var(--orange)}
+.chip{display:none}
+.stat-row{display:flex;align-items:center;justify-content:center;margin-top:18px;background:rgba(244,239,230,.04);border:1px solid rgba(244,239,230,.08);border-radius:14px;padding:14px 0}
+.stat-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;transition:opacity .3s}
+.stat-item.zero{opacity:.25}
+.stat-num{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:30px;font-weight:400;line-height:1}
+.stat-lbl{font-family:'Inter Tight',system-ui,sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:rgba(244,239,230,.5)}
+.stat-sep{width:1px;height:38px;background:rgba(244,239,230,.1);flex-shrink:0}
+.stat-g .stat-num{color:var(--green)}
+.stat-y .stat-num{color:var(--orange)}
+.stat-r .stat-num{color:var(--red)}
 .card{background:var(--paper2);border:1px solid var(--line);border-radius:12px;box-shadow:none}
 .card:hover{transform:none;box-shadow:none;border-color:var(--ember)}
 .card::before{display:none}
@@ -1115,13 +1120,10 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
     <div class="hdr-grid">
       <div>
         <div class="score-big" id="scoreBig">—<span class="score-denom">/10</span></div>
-        <div class="hdr-msg" id="hdrMsg" style="text-align:center;padding:20px 0">
-          <div style="font-size:15px;color:var(--ink2);font-family:'Inter Tight',system-ui,sans-serif;margin-bottom:4px">🧠 AI аналізує твої результати...</div>
-          <div style="font-size:13px;color:var(--ink3);font-family:'Inter Tight',system-ui,sans-serif">Це займе 30–60 секунд</div>
-        </div>
-        <div class="chips" id="hdrChips"></div>
-        <div style="margin-top:20px">
-          <button onclick="goScreen('spheres')" style="padding:13px 28px;border-radius:999px;background:#E08A4E;color:#0E1B2C;border:none;font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;letter-spacing:.01em">Читати аналіз сфер →</button>
+        <div class="hdr-msg" id="hdrMsg" style="text-align:center;padding:16px 0 0"></div>
+        <div id="hdrChips"></div>
+        <div style="margin-top:22px;display:flex;justify-content:center">
+          <button onclick="goScreen('spheres')" style="padding:13px 32px;border-radius:999px;background:var(--ember);color:#0E1B2C;border:none;font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;letter-spacing:.01em;box-shadow:0 4px 18px rgba(224,138,78,.30)">Читати аналіз сфер →</button>
         </div>
       </div>
       <div class="hdr-wheel">
@@ -1423,7 +1425,7 @@ function renderResult(data){
     :strong===0
     ?`Всі сфери в середньому діапазоні — AI покаже де найбільший потенціал зростання.`
     :`<strong>${strong} з 12 сфер</strong> на рівні 7+. Відмінний результат — AI покаже як утримати баланс.`;
-  document.getElementById('hdrChips').innerHTML=`<span class="chip chip-g">${strong} сильних</span><span class="chip chip-r">${weak} критичних</span><span class="chip chip-y">${mid} середніх</span>`;
+  document.getElementById('hdrChips').innerHTML=`<div class="stat-row"><div class="stat-item stat-g${strong===0?' zero':''}"><span class="stat-num">${strong}</span><span class="stat-lbl">сильних</span></div><div class="stat-sep"></div><div class="stat-item stat-y${mid===0?' zero':''}"><span class="stat-num">${mid}</span><span class="stat-lbl">середніх</span></div><div class="stat-sep"></div><div class="stat-item stat-r${weak===0?' zero':''}"><span class="stat-num">${weak}</span><span class="stat-lbl">критичних</span></div></div>`;
 
   renderWheel(scores);
 
