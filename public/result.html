@@ -785,6 +785,7 @@ body::after{
   white-space:nowrap;
 }
 .mob-tab.on{background:var(--ember);color:#0E1B2C;box-shadow:0 2px 8px rgba(224,138,78,.3)}
+.mob-tab-arrow{color:rgba(244,239,230,0.25);font-size:11px;flex-shrink:0;align-self:center}
 
 @media(max-width:580px){
   #resultMobileNav{display:flex}
@@ -1070,9 +1071,11 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
     </div>
   </div>
   <div class="result-mob-tabs">
-    <button class="mob-tab on" onclick="goScreen('snap')">Результат</button>
-    <button class="mob-tab" onclick="goScreen('spheres')">Аналіз</button>
-    <button class="mob-tab" onclick="goScreen('plan')">Мій план</button>
+    <button class="mob-tab on" onclick="goScreen('snap')">① Результат</button>
+    <span class="mob-tab-arrow">→</span>
+    <button class="mob-tab" onclick="goScreen('spheres')">② Аналіз</button>
+    <span class="mob-tab-arrow">→</span>
+    <button class="mob-tab" onclick="goScreen('plan')">③ План</button>
   </div>
 </nav>
 
