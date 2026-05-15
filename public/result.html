@@ -756,11 +756,11 @@ body::after{
   background:rgba(14,27,44,0.92);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-bottom:1px solid rgba(244,239,230,0.10);
-  height:52px;
+  flex-direction:column;
 }
 .result-nav-inner{
-  display:flex;align-items:center;gap:0;
-  padding:0 16px;height:52px;
+  display:flex;align-items:center;
+  padding:0 16px;height:48px;
 }
 .result-nav-logo{
   font-family:'Instrument Serif',Georgia,serif;
@@ -774,10 +774,22 @@ body::after{
   text-decoration:none;white-space:nowrap;transition:color .2s;
 }
 .result-nav-links a:hover{color:var(--fog)}
+/* Tab row inside mobile nav */
+.result-mob-tabs{display:flex;gap:3px;padding:0 8px 8px}
+.mob-tab{
+  flex:1;padding:7px 4px;
+  font-family:'Inter Tight',system-ui,sans-serif;
+  font-size:13px;font-weight:600;color:rgba(244,239,230,0.5);
+  background:rgba(244,239,230,0.05);border:none;
+  border-radius:8px;cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+.mob-tab.on{background:var(--ember);color:#0E1B2C;box-shadow:0 2px 8px rgba(224,138,78,.3)}
 
 @media(max-width:580px){
   #resultMobileNav{display:flex}
   #hdrNavLinks{display:none}
+  .tabs{display:none}
   .hdr-grid{grid-template-columns:1fr}
   .hdr-wheel{display:none}
   .snap-grid{grid-template-columns:repeat(3,1fr)}
@@ -1053,10 +1065,14 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
   <div class="result-nav-inner">
     <span class="result-nav-logo">Koleso Live</span>
     <div class="result-nav-links">
-      <a href="/blog">Блог</a>
       <a href="/account">Кабінет</a>
       <a href="/">← Головна</a>
     </div>
+  </div>
+  <div class="result-mob-tabs">
+    <button class="mob-tab on" onclick="goScreen('snap')">Результат</button>
+    <button class="mob-tab" onclick="goScreen('spheres')">Аналіз</button>
+    <button class="mob-tab" onclick="goScreen('plan')">Мій план</button>
   </div>
 </nav>
 
@@ -1753,9 +1769,11 @@ function renderRadar(scores){
 function goScreen(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('sc-'+id).classList.add('on');
   const map={snap:0,spheres:1,plan:2};
   document.querySelectorAll('.tab')[map[id]].classList.add('on');
+  document.querySelectorAll('.mob-tab')[map[id]].classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
