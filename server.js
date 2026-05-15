@@ -2309,6 +2309,10 @@ app.get('/api/email-sequence/process', async (req, res) => {
   }
 });
 
+app.get('/result', function(req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'result.html'));
+});
+
 app.get('/result/:slug', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'result.html'));
 });
