@@ -657,35 +657,34 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   margin-left:auto;
   margin-right:auto;
   position:relative;
+  animation:consPulse 3.5s ease-in-out infinite;
+}
+@keyframes consPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(224,138,78,0)}
+  50%{box-shadow:0 0 28px 6px rgba(224,138,78,0.18)}
 }
 .constellation-wrap:hover{
-  border-color:rgba(224,138,78,0.35);
-  background:rgba(224,138,78,0.03);
+  border-color:rgba(224,138,78,0.45);
+  background:rgba(224,138,78,0.04);
+  animation:none;
+  box-shadow:0 0 32px 8px rgba(224,138,78,0.22);
 }
 .constellation-wrap::after{
-  content:"▶ Почати оцінку";
+  content:"Натисни щоб побудувати своє →";
   position:absolute;
-  bottom:16px;right:20px;
-  font-family:monospace;font-size:9px;
-  letter-spacing:.12em;text-transform:uppercase;
-  color:var(--ember);opacity:0;
+  bottom:14px;left:50%;transform:translateX(-50%);
+  font-family:'Inter Tight',sans-serif;font-size:.68rem;font-weight:600;
+  letter-spacing:.04em;white-space:nowrap;
+  color:var(--ember);opacity:0.55;
   transition:opacity .25s;
 }
 .constellation-wrap:hover::after{opacity:1}
-.constellation-meta{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:12px;
-}
-.constellation-meta span{
-  font-family:monospace;font-size:9px;
-  letter-spacing:.15em;text-transform:uppercase;
-  color:var(--muted);
-}
 .constellation-svg{
   display:block;
   width:100%;
   height:auto;
   margin:0 auto;
+  padding-bottom:24px;
 }
 
 /* ═══════════════════════════════════════════
@@ -970,10 +969,6 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
   <div class="constellation-wrap" role="button" tabindex="0"
     title="Натисни щоб почати оцінку"
     onclick="closeModal()">
-        <div class="constellation-meta">
-          <span>Сузір'я · Приклад</span>
-          <span>6.4 / 10</span>
-        </div>
         <svg class="constellation-svg" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
           <!--
             Центр: cx=180, cy=180
