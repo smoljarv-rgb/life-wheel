@@ -657,18 +657,21 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   margin-left:auto;
   margin-right:auto;
   position:relative;
-  animation:consPulse 3.5s ease-in-out infinite;
-}
-@keyframes consPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(224,138,78,0)}
-  50%{box-shadow:0 0 28px 6px rgba(224,138,78,0.18)}
 }
 .constellation-wrap:hover{
-  border-color:rgba(224,138,78,0.45);
-  background:rgba(224,138,78,0.04);
-  animation:none;
-  box-shadow:0 0 32px 8px rgba(224,138,78,0.22);
+  border-color:rgba(224,138,78,0.35);
+  background:rgba(224,138,78,0.03);
 }
+@keyframes heroPolyPulse{
+  0%,100%{stroke-opacity:.55;filter:drop-shadow(0 0 0px #E08A4E)}
+  50%{stroke-opacity:1;filter:drop-shadow(0 0 10px rgba(224,138,78,0.85))}
+}
+@keyframes heroDotPulse{
+  0%,100%{opacity:.7}
+  50%{opacity:1;filter:drop-shadow(0 0 5px #E08A4E)}
+}
+.hero-cons-polygon{animation:heroPolyPulse 3.5s ease-in-out infinite}
+.hero-cons-dots{animation:heroDotPulse 3.5s ease-in-out infinite}
 .constellation-wrap::after{
   content:"Натисни щоб побудувати своє →";
   position:absolute;
@@ -1025,7 +1028,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           <circle cx="180" cy="180" r="128" fill="none" stroke="rgba(244,239,230,0.14)" stroke-dasharray="3 7"/>
 
           <!-- Полігон — заповнена площа балів -->
-          <polygon
+          <polygon class="hero-cons-polygon"
             points="180,52 244,74 292,130 292,200 250,254 205,280 155,280 110,250 72,200 68,130 116,76 180,56"
             fill="rgba(224,138,78,0.30)"
             stroke="#E08A4E"
@@ -1034,7 +1037,7 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
             stroke-linejoin="round"/>
 
           <!-- 12 вузлів -->
-          <g fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5">
+          <g class="hero-cons-dots" fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5">
             <circle cx="180" cy="52"  r="5"/>
             <circle cx="244" cy="74"  r="5"/>
             <circle cx="292" cy="130" r="5"/>
