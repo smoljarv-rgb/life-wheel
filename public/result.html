@@ -967,6 +967,11 @@ body::after{
 #analysisSticky .as-pulse{background:var(--ember)}
 #analysisSticky .as-bar{background:rgba(244,239,230,.1)}
 #analysisSticky .as-fill{background:var(--ember)}
+#portraitSticky{display:none;position:fixed;bottom:0;left:0;right:0;z-index:302;background:rgba(14,27,44,0.97);border-top:1.5px solid rgba(224,138,78,0.4);padding:12px 16px;box-shadow:0 -6px 24px rgba(0,0,0,.55);font-family:'Inter Tight',sans-serif;align-items:center;gap:12px;backdrop-filter:blur(8px)}
+#portraitSticky.show{display:flex}
+#portraitSticky .ps-dot{width:10px;height:10px;flex-shrink:0;border-radius:50%;background:var(--ember);animation:asPulse 1s ease-in-out infinite}
+#portraitStickyBtn{background:#E08A4E;color:#0E1B2C;border:none;border-radius:999px;padding:11px 22px;font-family:'Inter Tight',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.02em;animation:portraitBtnPulse 2.2s ease-in-out infinite;flex-shrink:0}
+@keyframes portraitBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,138,78,0)}50%{box-shadow:0 0 0 8px rgba(224,138,78,0.28),0 0 22px rgba(224,138,78,0.45)}}
 .sph-loader{border:2px solid rgba(244,239,230,.15);border-top-color:var(--ember)}
 .analysisProgress-wrap{background:var(--paper2);border:1px solid var(--line);border-radius:10px}
 #progressFill{background:var(--ember)}
@@ -2265,7 +2270,13 @@ async function startStreamingAnalysis(slug) {
   history.replaceState({}, '', window.location.pathname);
 }
 
+function hidePortraitSticky(){
+  var s=document.getElementById('portraitSticky');
+  if(s) s.classList.remove('show');
+}
+
 function renderPortraitBlock(portrait){
+  hidePortraitSticky();
   var el = document.getElementById('portraitBlock');
   if(!el || !portrait) return;
   var isPro = localStorage.getItem('lw_premium') === '1' && new Date(localStorage.getItem('lw_premium_expires') || 0) > new Date();
@@ -2338,21 +2349,20 @@ function initPortraitBlock(slug){
     localStorage.setItem('lw_portrait_'+slug, JSON.stringify(resultData.analysis.overall_portrait));
     return;
   }
-  // Показуємо кнопку якщо проаналізовано хоча б 3 сфери
+  // Показуємо sticky CTA на всіх вкладках якщо проаналізовано хоча б 3 сфери
   var analyzedCount = ((resultData.analysis&&resultData.analysis.advice)||[]).length;
   if(analyzedCount < 3) return;
-  el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px 16px">'
-    + '<div class="portrait-type">🧠 AI-портрет особистості</div>'
-    + '<div style="color:var(--ink2);font-size:.9rem;line-height:1.6;margin:10px 0 16px">Ми проаналізували твої 12 сфер. Отримай персональний психологічний портрет від AI-коуча.</div>'
-    + '<button onclick="startPortraitGen()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-family:Inter Tight,sans-serif;font-size:1rem;cursor:pointer">🤖 Згенерувати мій портрет</button>'
-    + '</div>';
-  el.style.display = 'block';
+  var sticky = document.getElementById('portraitSticky');
+  if(sticky) sticky.classList.add('show');
 }
 async function generateOverallPortrait(slug, scores, sphereResults){
+  hidePortraitSticky();
   var el = document.getElementById('portraitBlock');
   if(el){
     el.innerHTML = '<div class="portrait-block" style="text-align:center;padding:20px"><div class="portrait-loading">🤖 AI будує твій особистісний портрет...</div></div>';
     el.style.display = 'block';
+    // Перемикаємось на вкладку 1 де показується портрет
+    goScreen('snap');
   }
   try{
     var r = await fetch('/api/portrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:slug,scores:scores,sphereResults:sphereResults})});
@@ -2573,6 +2583,16 @@ loadResult().then(function(){
     <div class="as-bar"><div class="as-fill" id="analysisStickyFill"></div></div>
   </div>
   <div style="font-size:13px;opacity:.7;flex-shrink:0" id="analysisStickyPct">0%</div>
+</div>
+
+<!-- STICKY PORTRAIT CTA -->
+<div id="portraitSticky">
+  <div class="ps-dot"></div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:.85rem;font-weight:700;color:var(--fog);line-height:1.3">🧠 Готово до генерації</div>
+    <div style="font-size:.72rem;color:var(--ink3);margin-top:2px">Персональний AI-портрет на основі твоїх 12 сфер</div>
+  </div>
+  <button id="portraitStickyBtn" onclick="startPortraitGen()">Згенерувати →</button>
 </div>
 
 <!-- STICKY MOBILE PRO BAR -->
