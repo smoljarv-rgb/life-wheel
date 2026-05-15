@@ -1270,7 +1270,10 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
           font-family="monospace" font-size="9"
           letter-spacing="5" fill="rgba(244,239,230,0.35)">KOLESO</text>
       </svg>
-      <div style="text-align:center;margin-top:6px"><div class="wheel-hint">👆 Перетягни точку · Або використай повзунки нижче</div></div>
+      <div style="text-align:center;margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
+        <div class="wheel-hint" style="font-size:.72rem">⬡ Точка на колесі &rarr; <strong>швидка</strong> оцінка сфери</div>
+        <div class="wheel-hint" style="font-size:.72rem;background:rgba(232,193,122,.10);border-color:rgba(232,193,122,.3);color:var(--cta,#E8C17A)">🎯 Повзунки під сферою &rarr; <strong>точний</strong> аналіз підкритеріїв</div>
+      </div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
     <!-- Посилання на останній результат -->
@@ -1293,6 +1296,17 @@ src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
       <div class="total-big" id="totalBig">—</div>
       <div class="total-lbl">середній бал / 10</div>
       <div id="rankList"></div>
+      <!-- Accuracy indicator -->
+      <div id="accuracyBlock" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:.65rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em">Точність аналізу</span>
+          <span id="accuracyPct" style="font-size:.65rem;font-weight:700;color:var(--ember)">0%</span>
+        </div>
+        <div style="height:5px;border-radius:999px;background:rgba(244,239,230,0.08);overflow:hidden">
+          <div id="accuracyBar" style="height:100%;border-radius:999px;width:0%;background:#E08A4E;transition:width .5s,background .5s"></div>
+        </div>
+        <div id="accuracyLabel" style="font-size:.62rem;color:var(--tl);margin-top:5px;transition:color 3s">Груба оцінка &mdash; налаштуй повзунки для точного аналізу</div>
+      </div>
     </div>
 
     <!-- print header (hidden on screen) -->
@@ -1721,8 +1735,50 @@ function buildDetail(){
 }
 
 /* ── RESULTS ── */
+function updateAccuracy(){
+  // Сфера "точна" якщо її підкритерії мають різні значення (не всі рівні між собою)
+  const precise=SPHERES.filter(s=>{
+    const vals=s.sub.map(sub=>state[s.id][sub.k]);
+    return vals.some(v=>v!==vals[0]);
+  }).length;
+  const pct=Math.round(precise/SPHERES.length*100);
+  const bar=document.getElementById('accuracyBar');
+  const lbl=document.getElementById('accuracyLabel');
+  const num=document.getElementById('accuracyPct');
+  if(!bar)return;
+  bar.style.width=pct+'%';
+  num.textContent=pct+'%';
+  if(pct===0){
+    bar.style.background='#E08A4E';
+    num.style.color='#E08A4E';
+    lbl.textContent='Груба оцінка — налаштуй повзунки для точного аналізу';
+    lbl.style.color='';
+  } else if(pct<40){
+    bar.style.background='#E08A4E';
+    num.style.color='#E08A4E';
+    lbl.textContent='Початкова точність — продовжуй налаштовувати підкритерії';
+    lbl.style.color='';
+  } else if(pct<75){
+    bar.style.background='#E8C17A';
+    num.style.color='#E8C17A';
+    lbl.textContent='Середня точність — ще кілька сфер і аналіз стане детальним';
+    lbl.style.color='#E8C17A';
+  } else if(pct<100){
+    bar.style.background='#6cbf6c';
+    num.style.color='#6cbf6c';
+    lbl.textContent='Висока точність — AI отримає детальний профіль';
+    lbl.style.color='#6cbf6c';
+  } else {
+    bar.style.background='#4aa84a';
+    num.style.color='#4aa84a';
+    lbl.textContent='✓ Детальний аналіз — всі сфери точно оцінені';
+    lbl.style.color='#4aa84a';
+  }
+}
+
 function updateResults(){
   updateMood();
+  updateAccuracy();
   const sorted=[...SPHERES].sort((a,b)=>avg(b.id)-avg(a.id));
   document.getElementById('rankList').innerHTML=sorted.map(s=>{
     const a=avg(s.id);
