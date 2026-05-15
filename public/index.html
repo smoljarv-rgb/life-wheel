@@ -2756,6 +2756,14 @@ function _parseAIText(text){
   return JSON.parse(clean.slice(objStart,objEnd+1));
 }
 
+function getAuthEmail(){
+  try{
+    var raw=localStorage.getItem('sb-dzvvxysjovczgepxueby-auth-token');
+    if(raw){var s=JSON.parse(raw);if(s&&s.user&&s.user.email)return s.user.email;}
+  }catch(e){}
+  return localStorage.getItem('lw_premium_email')||'';
+}
+
 async function runAnalysis(){
   // If paywall disabled in admin — always allow
   if(siteConfig.paywall_enabled===false) isPremiumUnlocked=true;
@@ -2784,7 +2792,7 @@ async function runAnalysis(){
 
   // Зберігаємо результат і одразу переходимо на result.html
   try{
-    const _saveEmail = localStorage.getItem('lw_premium_email') || '';
+    const _saveEmail = getAuthEmail();
     const saveRes=await fetch('/api/results/save',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -3141,7 +3149,7 @@ function renderAdvice(parsed){
   }catch(e){ console.error('Snapshot error:', e); }
 
   // Зберігаємо результат в Supabase
-  var _saveEmail2 = localStorage.getItem('lw_premium_email') || '';
+  var _saveEmail2 = getAuthEmail();
 	fetch('/api/results/save', {
 	  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },

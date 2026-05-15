@@ -460,8 +460,8 @@ async function init(){
   sb.auth.onAuthStateChange(function(event, session){
     if(event === 'SIGNED_IN' && session){
       currentUser = session.user;
-      // Зберігаємо email в таблицю subscribers (якщо ще немає)
       saveSubscriberEmail(session.user.email);
+      linkLocalResults(session.user.email);
       showAccount();
     } else if(event === 'SIGNED_OUT'){
       currentUser = null;
@@ -717,6 +717,30 @@ async function saveSubscriberEmail(email){
     // Ігноруємо 409 (дублікат) — це нормально
   } catch(e) {
     console.warn('Не вдалось зберегти email підписника:', e);
+  }
+}
+
+async function linkLocalResults(email){
+  if(!email) return;
+  var slugs = new Set();
+  // Зі збережених результатів у localStorage
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.startsWith('lw_result_')) slugs.add(k.replace('lw_result_',''));
+    }
+  }catch(e){}
+  // І окремо lw_last_result
+  try{ var ls=localStorage.getItem('lw_last_result'); if(ls) slugs.add(ls); }catch(e){}
+  // Прив'язуємо кожен slug до email (сервер пропускає вже прив'язані)
+  for(var slug of slugs){
+    try{
+      await fetch('/api/results/link-email',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({slug:slug,email:email})
+      });
+    }catch(e){}
   }
 }
 
