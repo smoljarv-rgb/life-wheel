@@ -99,6 +99,8 @@ function trackEvent(action,category,label){
   }catch(e){}
 }
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -923,23 +925,6 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 }
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '2489163444869889');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
 </head>
 <body>
 
@@ -4356,3 +4341,62 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
 </div>
 
 <div class="sphere-saved-toast" id="sphereSavedToast">✓ Збережено</div>
+
+<!-- EXIT INTENT POPUP -->
+<style>
+#exit-popup{display:none;position:fixed;inset:0;z-index:2100;background:rgba(10,20,40,.78);backdrop-filter:blur(7px);align-items:center;justify-content:center;padding:20px}
+#exit-popup.show{display:flex}
+#exit-box{background:#152538;border:1px solid rgba(244,239,230,.15);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5);font-family:'Inter Tight',sans-serif}
+#exit-box h3{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.65rem;color:#F4EFE6;margin-bottom:8px;font-weight:400;line-height:1.15}
+#exit-box h3 em{font-style:italic;color:#E08A4E}
+#exit-box p{font-size:.82rem;color:rgba(244,239,230,.65);line-height:1.65;margin-bottom:22px}
+.exit-cta{display:block;width:100%;padding:14px;background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;letter-spacing:.03em;transition:opacity .2s;margin-bottom:10px}
+.exit-cta:hover{opacity:.9}
+.exit-skip{background:none;border:none;cursor:pointer;font-size:.7rem;color:rgba(244,239,230,.32);font-family:'Inter Tight',sans-serif;transition:color .2s}
+.exit-skip:hover{color:rgba(244,239,230,.6)}
+</style>
+<div id="exit-popup">
+  <div id="exit-box">
+    <div style="font-size:2.2rem;margin-bottom:12px">🎯</div>
+    <h3>Зачекай <em>секунду</em></h3>
+    <p>Отримай безкоштовний AI-аналіз балансу своїх 12 сфер — знайди де насправді губиться твоя енергія</p>
+    <button class="exit-cta" onclick="document.getElementById('exit-popup').classList.remove('show');closeModal()">Почати безкоштовно →</button>
+    <button class="exit-skip" onclick="document.getElementById('exit-popup').classList.remove('show');sessionStorage.setItem('exit-closed','1')">Ні, дякую</button>
+  </div>
+</div>
+
+<!-- DEFERRED SCRIPTS: FB Pixel + GA4 scroll tracking -->
+<script>
+(function(){
+  // Exit intent (desktop only)
+  if(window.innerWidth > 768){
+    document.addEventListener('mouseleave', function(e){
+      if(e.clientY <= 0 && !sessionStorage.getItem('exit-shown') && !sessionStorage.getItem('exit-closed')){
+        sessionStorage.setItem('exit-shown','1');
+        document.getElementById('exit-popup').classList.add('show');
+        if(window.gtag) gtag('event','exit_intent_shown',{event_category:'engagement'});
+      }
+    });
+  }
+  // GA4 scroll milestones
+  var fired={};
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    if(h<=0)return;
+    var pct=window.scrollY/h;
+    [0.5,0.9].forEach(function(m){
+      if(pct>=m&&!fired[m]){
+        fired[m]=true;
+        if(window.gtag) gtag('event','scroll_depth',{event_category:'engagement',event_label:Math.round(m*100)+'%'});
+      }
+    });
+  },{passive:true});
+})();
+</script>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2489163444869889');fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
