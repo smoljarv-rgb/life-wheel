@@ -997,7 +997,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 }
 
 /* ── ЕКСПРЕС ТЕСТ ── */
-#express-overlay{position:fixed;inset:0;background:var(--ink,#0E1B2C);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;overflow-y:auto}
+#express-overlay{position:fixed;inset:0;background:var(--ink,#0E1B2C);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;overflow-y:auto;transition:opacity 0.6s ease}
 #express-overlay.hidden{display:none}
 .exp-wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:0}
 .exp-logo{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:18px;color:rgba(244,239,230,0.65);margin-bottom:6px}
@@ -1012,7 +1012,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .exp-h1 em{color:#E08A4E}
 .exp-sub{font-size:13px;color:rgba(244,239,230,0.55);line-height:1.6;margin-bottom:24px}
 .exp-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.exp-option{background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:14px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .2s,background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.exp-option{background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:14px;padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .2s,background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
 .exp-option:active{transform:scale(0.98)}
 .exp-option.selected{border-color:rgba(224,138,78,0.5);background:rgba(224,138,78,0.08)}
 .exp-radio{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(244,239,230,0.22);flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center}
@@ -1062,7 +1062,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 </head>
 <body>
 
-<div id="express-overlay">
+<div id="express-overlay" class="hidden">
   <div class="exp-wrap">
     <div class="exp-logo">koleso</div>
     <div class="exp-kicker" id="exp-kicker">ЗНАЙДИ ДЕ ГУБИТЬСЯ ЕНЕРГІЯ</div>
@@ -1107,15 +1107,19 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
       <div class="exp-options" id="exp-opts1">
         <div class="exp-option" onclick="expSelect(1,2,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Постійна втома</div><div class="exp-opt-sub">Не відновлююсь навіть після сну</div></div>
+          <div><div class="exp-opt-title">Повне виснаження</div><div class="exp-opt-sub">Немає сил навіть вранці після сну</div></div>
         </div>
-        <div class="exp-option" onclick="expSelect(1,5,this)">
+        <div class="exp-option" onclick="expSelect(1,4,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Середньо</div><div class="exp-opt-sub">Буває добре і погано по черзі</div></div>
+          <div><div class="exp-opt-title">Хронічна втома</div><div class="exp-opt-sub">Відновлююсь лише після тривалого відпочинку</div></div>
         </div>
-        <div class="exp-option" onclick="expSelect(1,8,this)">
+        <div class="exp-option" onclick="expSelect(1,7,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Добре</div><div class="exp-opt-sub">Є енергія на більшість справ</div></div>
+          <div><div class="exp-opt-title">Нормально</div><div class="exp-opt-sub">Є енергія на повсякденні справи</div></div>
+        </div>
+        <div class="exp-option" onclick="expSelect(1,9,this)">
+          <div class="exp-radio"></div>
+          <div><div class="exp-opt-title">Відмінно</div><div class="exp-opt-sub">Стабільна енергія і гарне самопочуття</div></div>
         </div>
       </div>
       <button class="exp-btn" id="exp-btn1" onclick="expNext(2)">Далі →</button>
@@ -1128,15 +1132,19 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
       <div class="exp-options" id="exp-opts2">
         <div class="exp-option" onclick="expSelect(2,2,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Немає сенсу і мотивації</div><div class="exp-opt-sub">Роблю але не розумію навіщо</div></div>
+          <div><div class="exp-opt-title">Повна демотивація</div><div class="exp-opt-sub">Роблю лише щоб виживати, без сенсу</div></div>
         </div>
-        <div class="exp-option" onclick="expSelect(2,5,this)">
+        <div class="exp-option" onclick="expSelect(2,4,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Нормально але без вогню</div><div class="exp-opt-sub">Є стабільність але не захоплює</div></div>
+          <div><div class="exp-opt-title">Є стабільність, але без вогню</div><div class="exp-opt-sub">Нормально, але натхнення нема</div></div>
         </div>
-        <div class="exp-option" onclick="expSelect(2,8,this)">
+        <div class="exp-option" onclick="expSelect(2,7,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Захоплено і з сенсом</div><div class="exp-opt-sub">Знаю навіщо і отримую задоволення</div></div>
+          <div><div class="exp-opt-title">Є мотивація і розвиток</div><div class="exp-opt-sub">Рухаюсь вперед, відчуваю зростання</div></div>
+        </div>
+        <div class="exp-option" onclick="expSelect(2,9,this)">
+          <div class="exp-radio"></div>
+          <div><div class="exp-opt-title">Драйв і сенс</div><div class="exp-opt-sub">Захоплено роблю те що люблю</div></div>
         </div>
       </div>
       <button class="exp-btn" id="exp-btn2" onclick="expNext(3)">Далі →</button>
@@ -1149,15 +1157,19 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
       <div class="exp-options" id="exp-opts3">
         <div class="exp-option" onclick="expSelect(3,2,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Самотньо і ізольовано</div><div class="exp-opt-sub">Нема кому поділитись — тримаю в собі</div></div>
+          <div><div class="exp-opt-title">Ізоляція</div><div class="exp-opt-sub">Нема кому поділитись — тримаю в собі</div></div>
         </div>
-        <div class="exp-option" onclick="expSelect(3,5,this)">
+        <div class="exp-option" onclick="expSelect(3,4,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Є люди але поверхнево</div><div class="exp-opt-sub">Спілкуємось але без глибини</div></div>
+          <div><div class="exp-opt-title">Є люди, але поверхнево</div><div class="exp-opt-sub">Спілкуємось, але без глибини</div></div>
         </div>
-        <div class="exp-option" onclick="expSelect(3,8,this)">
+        <div class="exp-option" onclick="expSelect(3,7,this)">
           <div class="exp-radio"></div>
-          <div><div class="exp-opt-title">Є підтримка і близькість</div><div class="exp-opt-sub">Є люди яким довіряю</div></div>
+          <div><div class="exp-opt-title">Є близькість і довіра</div><div class="exp-opt-sub">Є люди яким можу довіряти</div></div>
+        </div>
+        <div class="exp-option" onclick="expSelect(3,9,this)">
+          <div class="exp-radio"></div>
+          <div><div class="exp-opt-title">Насичені стосунки</div><div class="exp-opt-sub">Відчуваю підтримку і справжній зв'язок</div></div>
         </div>
       </div>
       <button class="exp-btn" id="exp-btn3" onclick="expShowResult()">Побачити результат →</button>
@@ -4668,54 +4680,61 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
     return'#7EC598';
   }
 
+  function expWeakest(a1,a2,a3){
+    var names=["Здоров'я","Кар'єра","Стосунки"];
+    var vals=[a1,a2,a3];
+    return names[vals.indexOf(Math.min(a1,a2,a3))];
+  }
   function expGetNarr(a1,a2,a3){
-    if(a1<=3&&a2<=3&&a3<=3)
-      return"Твоє сузір'я показує глибоке виснаження у всіх трьох напрямках. Це не слабкість — це сигнал. Повний аналіз покаже з чого починати.";
-    if(a1<=3&&a2<=3)
-      return"Здоров'я і Кар'єра падають разом — класична ознака вигорання. Тіло не відновлюється бо немає сенсу рухатись далі. Звідти і починаємо.";
-    if(a1<=3)
-      return"Твій корінь — Здоров'я і Відпочинок. Тіло дає сигнал який ти ігноруєш. Поки це не виправлено — інші сфери не ростуть.";
-    if(a2<=3)
-      return"Твій корінь — Кар'єра і Сенс. Ти робиш але не розумієш навіщо. Це виснажує більше ніж будь-яка фізична праця.";
-    if(a3<=3)
-      return"Твій корінь — Стосунки. Ізоляція тихо підриває все інше. Навіть якщо зовні все виглядає нормально.";
-    if((a1+a2+a3)/3>=7)
-      return"Твоє сузір'я стабільне. Є баланс у ключових сферах. Повний аналіз 12 сфер покаже де є прихований потенціал для росту.";
-    return"Твоє сузір'я нерівне — є сильні і слабкі точки. AI бачить де найбільше втрачається енергія і що виправити першим.";
+    var w=expWeakest(a1,a2,a3);
+    var avg=(a1+a2+a3)/3;
+    var minVal=Math.min(a1,a2,a3);
+    if(avg>=7.5)
+      return"Три ключові сфери в балансі. Повний аналіз 12 сфер знайде де є прихований потенціал — те що стримує зростання непомітно.";
+    if(minVal<=2)
+      return"Сфера «"+w+"» — твоя критична точка ("+minVal+"/10). Саме звідси губиться левова частка енергії. Без цього фундаменту інші сфери не ростуть.";
+    if(minVal<=4)
+      return"Сфера «"+w+"» помітно відстає від інших ("+minVal+"/10). Одна слабка сфера тягне вниз решту. AI знайде конкретну причину і що виправити першим.";
+    return"«"+w+"» — найслабший вузол у твоєму балансі ("+minVal+"/10). Невелике зусилля тут дасть непропорційно великий ефект на все інше.";
   }
 
   function expBuildConst(scores){
-    var CX=100,CY=100,R_MIN=12,R_MAX=54;
-    var all=[
-      scores[0],scores[0]*0.9,scores[1],
-      scores[1]*0.85,scores[2],scores[2]*0.9,
-      scores[0]*0.8,scores[2]*0.85,scores[1]*0.75,
-      scores[0]*0.7,scores[2]*0.8
-    ];
-    function ang(i){return(-90+i*(360/11))*Math.PI/180}
+    var CX=100,CY=100,R_MIN=8,R_MAX=76;
+    var labels=["Здоров'я","Кар'єра","Стосунки"];
+    var angles=[-90,30,150];
+    function rad(d){return d*Math.PI/180}
     function rng(v){return R_MIN+(R_MAX-R_MIN)*((Math.max(1,Math.min(10,v))-1)/9)}
     var spG=document.getElementById('exp-spokes');
     if(!spG)return;
     spG.innerHTML='';
-    all.forEach(function(v,i){
-      var a=ang(i);
+    angles.forEach(function(deg,i){
+      var a=rad(deg);
       var l=document.createElementNS('http://www.w3.org/2000/svg','line');
       l.setAttribute('x1',CX);l.setAttribute('y1',CY);
       l.setAttribute('x2',(CX+Math.cos(a)*R_MAX).toFixed(1));
       l.setAttribute('y2',(CY+Math.sin(a)*R_MAX).toFixed(1));
-      l.setAttribute('stroke','rgba(244,239,230,0.07)');
-      l.setAttribute('stroke-width','0.6');
+      l.setAttribute('stroke','rgba(244,239,230,0.18)');
+      l.setAttribute('stroke-width','0.8');
       spG.appendChild(l);
+      var lx=(CX+Math.cos(a)*(R_MAX+18)).toFixed(1);
+      var ly=(CY+Math.sin(a)*(R_MAX+18)).toFixed(1);
+      var t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',lx);t.setAttribute('y',ly);
+      t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('font-family',"'Inter Tight',system-ui,sans-serif");
+      t.setAttribute('font-size','7.5');t.setAttribute('fill','rgba(244,239,230,0.5)');
+      t.textContent=labels[i];
+      spG.appendChild(t);
     });
-    var pts=all.map(function(v,i){
-      var a=ang(i),r=rng(v);
+    var pts=scores.map(function(v,i){
+      var a=rad(angles[i]),r=rng(v);
       return{x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r};
     });
     var poly=document.getElementById('exp-poly');
     if(poly){
       poly.setAttribute('d','M '+pts.map(function(p){return p.x.toFixed(1)+' '+p.y.toFixed(1)}).join(' L ')+' Z');
-      poly.style.strokeDasharray='2000';
-      poly.style.strokeDashoffset='2000';
+      poly.style.strokeDasharray='500';
+      poly.style.strokeDashoffset='500';
       poly.style.animation='none';
       void poly.offsetWidth;
       poly.style.animation='expDrawPoly 1.2s 0.4s ease forwards';
@@ -4724,13 +4743,13 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
     if(!dotsG)return;
     dotsG.innerHTML='';
     pts.forEach(function(p,i){
-      var color=expGetColor(all[i]);
+      var color=expGetColor(scores[i]);
       var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
       c.setAttribute('cx',p.x.toFixed(1));c.setAttribute('cy',p.y.toFixed(1));
-      c.setAttribute('r','4.5');c.setAttribute('fill','#F4EFE6');
-      c.setAttribute('stroke',color);c.setAttribute('stroke-width','1.4');
+      c.setAttribute('r','5');c.setAttribute('fill','#F4EFE6');
+      c.setAttribute('stroke',color);c.setAttribute('stroke-width','1.5');
       c.classList.add('exp-dot-appear');
-      c.style.animationDelay=(0.5+i*0.06)+'s';
+      c.style.animationDelay=(0.8+i*0.15)+'s';
       dotsG.appendChild(c);
     });
   }
@@ -4786,12 +4805,27 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
 
   window.expSkip=function(){
     var overlay=document.getElementById('express-overlay');
+    var a1=expAnswers[1]||5,a2=expAnswers[2]||5,a3=expAnswers[3]||5;
+    // Pre-populate 3 spheres so full test starts with express answers
+    var map=[{id:'health',val:a1},{id:'career',val:a2},{id:'love',val:a3}];
+    map.forEach(function(m){
+      var s=SPHERES.find(function(x){return x.id===m.id;});
+      if(s)s.sub.forEach(function(sub){state[m.id][sub.k]=m.val;});
+    });
+    // Open on the weakest sphere
+    var minVal=Math.min(a1,a2,a3);
+    var weakId=minVal===a1?'health':minVal===a2?'career':'love';
+    var weakSph=SPHERES.find(function(x){return x.id===weakId;});
+    if(weakSph)active=weakSph;
+    try{localStorage.setItem('exp_done','1');}catch(e){}
     if(overlay){
       overlay.style.opacity='0';
-      overlay.style.transition='opacity 0.4s ease';
-      setTimeout(function(){overlay.classList.add('hidden');},400);
+      setTimeout(function(){
+        overlay.classList.add('hidden');
+        buildNav();buildDetail();drawWheel();
+      },420);
     }
-    if(window.gtag)gtag('event','express_to_full',{event_category:'express_test'});
+    if(window.gtag)gtag('event','express_to_full',{event_category:'express_test',event_label:weakId});
   };
 
   function expShowScreen(id){
@@ -4799,6 +4833,19 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
     var next=document.getElementById(id);
     if(next)next.classList.add('active');
   }
+
+  // Show overlay after 3s delay — only if not completed before
+  try{
+    if(!localStorage.getItem('exp_done')){
+      setTimeout(function(){
+        var ov=document.getElementById('express-overlay');
+        if(!ov)return;
+        ov.style.opacity='0';
+        ov.classList.remove('hidden');
+        requestAnimationFrame(function(){requestAnimationFrame(function(){ov.style.opacity='1';});});
+      },3000);
+    }
+  }catch(e){}
 })();
 </script>
 
