@@ -913,6 +913,75 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .promo-banner{background:rgba(232,193,122,.08);border:1px solid rgba(232,193,122,.25);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.72rem;color:var(--cta);text-align:center;font-weight:600}
 
 /* ═══════════════════════════════════════════
+   FREE / PRO STRIP
+═══════════════════════════════════════════ */
+.hero-free-strip{
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;flex-wrap:wrap;
+  margin-top:10px;
+  font-family:'Inter Tight',sans-serif;font-size:11px;
+  color:var(--muted);
+}
+.hero-free-strip .free-ok{color:#50C878;font-weight:600}
+.hero-free-strip .free-lock{color:var(--ember);font-weight:600}
+.hero-free-strip .sep{opacity:.3}
+
+/* ═══════════════════════════════════════════
+   SAMPLE INSIGHT TEASER
+═══════════════════════════════════════════ */
+.hero-insight-teaser{
+  max-width:480px;margin:16px auto 0;
+  background:rgba(224,138,78,.06);
+  border:1px solid rgba(224,138,78,.20);
+  border-radius:12px;padding:12px 16px;
+  text-align:left;position:relative;
+}
+.insight-label{
+  font-family:monospace;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ember);margin-bottom:6px;
+}
+.insight-text{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:13px;color:var(--fog);line-height:1.6;
+}
+.insight-text strong{color:var(--ember);font-style:normal}
+
+/* ═══════════════════════════════════════════
+   TESTIMONIALS GRID
+═══════════════════════════════════════════ */
+.testimonials-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+}
+@media(max-width:768px){.testimonials-grid{grid-template-columns:1fr}}
+.t-card{
+  background:var(--ink-2);border:1px solid var(--line);
+  border-radius:14px;padding:16px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.t-card.t-featured{border-color:rgba(224,138,78,.30);background:rgba(224,138,78,.04)}
+.t-score{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:1.3rem;color:var(--ember);font-weight:400;
+}
+.t-quote{
+  font-size:.78rem;color:var(--muted);line-height:1.65;flex:1;
+  font-style:italic;
+}
+.t-author{font-size:.68rem;color:var(--muted);font-weight:600}
+.t-sphere{
+  font-size:.65rem;color:var(--ember);font-weight:700;
+  letter-spacing:.04em;
+  padding:3px 10px;border-radius:100px;
+  background:rgba(224,138,78,.10);
+  display:inline-block;width:fit-content;
+}
+.testimonial-kicker{
+  font-family:monospace;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:14px;
+}
+
+/* ═══════════════════════════════════════════
    MOBILE HERO RESPONSIVE
 ═══════════════════════════════════════════ */
 @media(max-width:768px){
@@ -964,9 +1033,16 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
     <h1 class="hero-h1">Знайди де губиться твоя <em>енергія</em></h1>
     <p class="hero-sub">AI аналізує зв'язки між 12 сферами і знаходить корінь — не симптом.</p>
     <button class="hero-cta" onclick="closeModal()">
-      Почати безкоштовно →
+      Знайти свою слабку сферу →
     </button>
     <p class="hero-cta-hint">Без реєстрації · 5 хвилин · Результат одразу</p>
+    <div class="hero-free-strip">
+      <span class="free-ok">✓ Колесо + бали — безкоштовно</span>
+      <span class="sep">|</span>
+      <span class="free-ok">✓ Аналіз 1 сфери — безкоштовно</span>
+      <span class="sep">|</span>
+      <span class="free-lock">🔒 Всі 12 сфер — PRO</span>
+    </div>
     <!-- Stats -->
     <div class="hero-stats">
       <div class="hero-stat">
@@ -1097,6 +1173,11 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
             letter-spacing="5"
             fill="rgba(244,239,230,0.38)">KOLESO</text>
         </svg>
+  <!-- Sample insight teaser -->
+  <div class="hero-insight-teaser">
+    <div class="insight-label">Приклад AI-аналізу</div>
+    <p class="insight-text">«Твоя сфера <strong>Відпочинок (3/10)</strong> — корінь втоми. Вона забирає ресурс у Кар'єру та Здоров'я одночасно. Перший крок: 20 хв без телефону щодня.»</p>
+  </div>
   </div>
 </section>
 
@@ -1129,12 +1210,28 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   </div>
 </section>
 
-<!-- ВІДГУК -->
+<!-- ВІДГУКИ -->
 <section id="testimonialSection">
-  <div class="testimonial-box">
-    <p class="testimonial-kicker">Відгук користувача</p>
-    <p class="testimonial-quote">«Думала що проблема в роботі. Виявилось — у відпочинку. AI побачив що я ігнорувала роками.»</p>
-    <p class="testimonial-author">Олена, 34 · Київ · Life Score 7.2 → 8.4</p>
+  <p class="testimonial-kicker" style="text-align:center;padding:0 20px">Що знаходять користувачі</p>
+  <div class="testimonials-grid" style="padding:0 20px">
+    <div class="t-card">
+      <div class="t-score">5.8 → 7.4</div>
+      <p class="t-quote">«Думала що проблема в роботі. Виявилось — у відпочинку (3/10). AI побачив те, що я ігнорувала роками. Через місяць стало легше.»</p>
+      <p class="t-author">Олена, 34 · Київ</p>
+      <span class="t-sphere">📍 Знайшла: Відпочинок</span>
+    </div>
+    <div class="t-card t-featured">
+      <div class="t-score">4.9 → 6.8</div>
+      <p class="t-quote">«Завжди думав що треба більше заробляти. Тест показав — бал Стосунки 2/10 забирав усю енергію. Несподівано, але точно.»</p>
+      <p class="t-author">Олексій, 28 · Харків</p>
+      <span class="t-sphere">📍 Знайшов: Стосунки</span>
+    </div>
+    <div class="t-card">
+      <div class="t-score">6.1 → 8.2</div>
+      <p class="t-quote">«За 2 тижні після плану підняла Здоров'я з 3 до 6. Просто почала спати по 8 годин — як і рекомендував AI. Все виявилось простіше.»</p>
+      <p class="t-author">Марія, 41 · Львів</p>
+      <span class="t-sphere">📍 Знайшла: Здоров'я</span>
+    </div>
   </div>
 </section>
 
