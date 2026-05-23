@@ -4867,7 +4867,10 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         ov.classList.remove('hidden');
         document.documentElement.classList.add('exp-open');
         document.body.classList.add('exp-open');
-        requestAnimationFrame(function(){requestAnimationFrame(function(){ov.style.opacity='1';});});
+        requestAnimationFrame(function(){requestAnimationFrame(function(){
+          ov.style.opacity='1';
+          if(window.gtag)gtag('event','express_view',{event_category:'express_test'});
+        });});
       },1000);
     }
   }catch(e){}
