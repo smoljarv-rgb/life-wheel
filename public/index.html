@@ -4599,7 +4599,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         <div style="font-size:.62rem;font-weight:700;color:var(--td);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;transition:color 3s">Підтримка</div>
         <a href="mailto:support@koleso.live" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">✉️ Написати нам</a>
         <a href="tel:+380678366608" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;border-bottom:1px solid var(--sb);transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">📞 Зателефонувати</a>
-        <a href="javascript:void(0)" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">↑ Нагору</a>
+        <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" style="display:block;font-size:.72rem;color:var(--tm);text-decoration:none;padding:4px 0;cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--tm)'">↑ Нагору</a>
       </div>
 
       <!-- Колонка 4: Правові -->
@@ -4635,7 +4635,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   <div class="cookie-txt">
     🍪 Ми використовуємо cookies для аналітики та покращення досвіду. 
     Продовжуючи користуватись сайтом, ви погоджуєтесь з нашою 
-    <a onclick="showPrivacyPolicy()">Політикою конфіденційності</a>.
+    <a href="/privacy" onclick="showPrivacyPolicy();return false;">Політикою конфіденційності</a>.
   </div>
   <div class="cookie-btns">
     <button class="cookie-decline" onclick="declineCookies()">Відхилити</button>
