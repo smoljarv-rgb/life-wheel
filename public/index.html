@@ -103,15 +103,9 @@ function trackEvent(action,category,label){
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional"></noscript>
 <style>
-/* Fallback font з метриками близькими до Instrument Serif — мінімізує CLS при font-swap */
-@font-face{
-  font-family:'Instrument Serif Fallback';
-  src:local('Georgia'),local('Times New Roman');
-  ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%
-}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 /* ═══════════════════════════════════════════
@@ -624,7 +618,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   color:var(--ember);margin-bottom:12px;
 }
 .hero-h1{
-  font-family:'Instrument Serif','Instrument Serif Fallback',serif;
+  font-family:'Instrument Serif',serif;
   font-style:italic;
   font-size:clamp(32px,6vw,56px);
   color:var(--fog);line-height:1.1;
@@ -2102,7 +2096,7 @@ function buildDetail(){
   // Read live state every time buildDetail runs
   const _fa = !freeAnalysisUsed && (siteConfig.paywall_enabled!==false);
   const _b = document.createElement('button');
-  _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:Inter Tight,sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
+  _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
   _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Запустити AI-аналіз';
   _b.onclick = showPicker;
   _b.onmouseover = function(){this.style.transform='translateY(-2px)';};
@@ -2204,7 +2198,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
     // Позначки шкали (2,4,6,8,10)
     if(i%2===0){
       const rx=cx+r+5,ry=cy-4;
-      ct.font='700 9px Inter Tight,sans-serif';
+      ct.font="700 9px 'Inter Tight',sans-serif";
       ct.fillStyle='rgba(255,255,255,.95)';ct.textAlign='left';ct.textBaseline='middle';
       ct.fillText(i,rx+1,ry+1);
       ct.fillStyle='rgba(30,80,170,.8)';ct.fillText(i,rx,ry);
@@ -2244,7 +2238,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
     ct.rotate(ma+Math.PI/2+(flip?Math.PI:0));
     ct.textAlign='center';ct.textBaseline='middle';
     const fs=isAct?14:12.5;
-    ct.font=`700 ${fs}px Inter Tight,sans-serif`;
+    ct.font=`700 ${fs}px 'Inter Tight',sans-serif`;
     // Білий контур
     ct.lineJoin='round';ct.miterLimit=3;
     ct.strokeStyle='rgba(255,255,255,1)';ct.lineWidth=6;
@@ -2256,7 +2250,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
 
     // Бал всередині сектора
     const scoreR=Math.max(minr+20,r-22);
-    ct.font=`700 ${isAct?11:10}px Inter Tight,sans-serif`;
+    ct.font=`700 ${isAct?11:10}px 'Inter Tight',sans-serif`;
     ct.strokeStyle='rgba(255,255,255,1)';ct.lineWidth=5;ct.lineJoin='round';
     ct.textAlign='center';ct.textBaseline='middle';
     ct.strokeText(a.toFixed(1),cx+scoreR*Math.cos(ma),cy+scoreR*Math.sin(ma));
@@ -3072,7 +3066,7 @@ function _renderModalActions(){
 
   const startBtn=document.createElement('button');
   startBtn.id='modalStartBtn';
-  startBtn.style.cssText='flex:1;min-width:160px;padding:14px 18px;background:'+btnBg+';color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:Inter Tight,sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s';
+  startBtn.style.cssText='flex:1;min-width:160px;padding:14px 18px;background:'+btnBg+';color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s';
   startBtn.innerHTML=btnLabel;
   startBtn.onclick=_startFromModal;
   startBtn.onmouseover=function(){this.style.transform='translateY(-2px)';};
@@ -3080,7 +3074,7 @@ function _renderModalActions(){
   row.appendChild(startBtn);
 
   const cancelBtn=document.createElement('button');
-  cancelBtn.style.cssText='padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter Tight,sans-serif;transition:all .3s';
+  cancelBtn.style.cssText='padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:all .3s';
   cancelBtn.textContent='Скасувати';
   cancelBtn.onclick=function(){const m=document.getElementById('preAnalysisModal');if(m)m.remove();};
   cancelBtn.onmouseover=function(){this.style.borderColor='var(--ac)';this.style.color='var(--ac)';};
@@ -3275,7 +3269,7 @@ async function runAnalysis(){
   if(btn) btn.style.display='none';
 
   // Показуємо індикатор завантаження
-  if(area) area.innerHTML='<div style="padding:20px;text-align:center;font-family:Inter Tight,sans-serif;color:var(--t2)"><div style="font-size:1.5rem;margin-bottom:10px">⏳</div><div>Зберігаємо результат...</div></div>';
+  if(area) area.innerHTML='<div style="padding:20px;text-align:center;font-family:'Inter Tight',sans-serif;color:var(--t2)"><div style="font-size:1.5rem;margin-bottom:10px">⏳</div><div>Зберігаємо результат...</div></div>';
 
   // Збираємо бали
   const allScoresSnapshot={};
@@ -3312,7 +3306,7 @@ async function runAnalysis(){
     }
   }catch(e){
     console.error('Save error:',e);
-    if(area) area.innerHTML='<div style="padding:14px;background:#fff5f5;border-radius:10px;font-family:Inter Tight,sans-serif;color:#c03030">Помилка збереження. Спробуй ще раз.</div>';
+    if(area) area.innerHTML='<div style="padding:14px;background:#fff5f5;border-radius:10px;font-family:'Inter Tight',sans-serif;color:#c03030">Помилка збереження. Спробуй ще раз.</div>';
     if(btn){ btn.style.display=''; btn.innerHTML='↩ Спробувати знову'; btn.onclick=showPicker; }
   }
 }
@@ -3678,7 +3672,7 @@ function renderAdvice(parsed){
 			window.location.href = '/result/' + saved.slug + analyzing;
 			return;
 			// Показуємо блок під колесом і після плану зростання
-			const _blockHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Inter Tight,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+			const _blockHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:'Inter Tight',sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
 			const resultBlock = document.getElementById('fullResultBlock');
 			if(resultBlock){
 			  resultBlock.style.display = 'block';
@@ -3699,7 +3693,7 @@ function renderAdvice(parsed){
     if(rb && rb.innerHTML.trim()===''){
       rb.style.display='block';
       const slug=window._lastResultSlug||'';
-      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Inter Tight,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:'Inter Tight',sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
     }
   }
 
@@ -3712,7 +3706,7 @@ function renderAdvice(parsed){
     const rb = document.getElementById('fullResultBlock');
     if(rb && window._lastResultUrl && rb.innerHTML.trim()===''){
       rb.style.display='block';
-      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Inter Tight,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:'Inter Tight',sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
     }
   }, 3000);
 
@@ -3775,7 +3769,7 @@ function _pdfProgress(pct, label){
   if(!bar){
     const overlay=document.createElement('div');
     overlay.id='pdfOverlay';
-    overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(10,20,40,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Inter Tight,sans-serif';
+    overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(10,20,40,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif';
     overlay.innerHTML=`
       <div style="background:rgba(18,35,70,.98);border:1.5px solid rgba(100,160,240,.3);border-radius:18px;padding:28px 36px;min-width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
         <div style="font-size:2rem;margin-bottom:10px">📄</div>
@@ -4068,7 +4062,7 @@ function shareResult(avgScore){
   // Build share menu
   const menu=document.createElement('div');
   menu.id='shareMenu';
-  menu.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9000;background:rgba(18,28,50,.97);backdrop-filter:blur(14px);border:1.5px solid rgba(100,160,240,.25);border-radius:16px;padding:16px 18px;min-width:280px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:Inter Tight,sans-serif';
+  menu.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9000;background:rgba(18,28,50,.97);backdrop-filter:blur(14px);border:1.5px solid rgba(100,160,240,.25);border-radius:16px;padding:16px 18px;min-width:280px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:'Inter Tight',sans-serif';
   menu.innerHTML=`
     <div style="font-size:.72rem;color:#8aabcc;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;text-align:center">Поділитись результатом</div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
@@ -4097,7 +4091,7 @@ function shareResult(avgScore){
         <span style="font-size:.65rem;color:#c0d8f0">Facebook</span>
       </a>
       <button onclick="saveToGoogleDrive('${avgScore}')"
-        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(100,160,240,.15);cursor:pointer;transition:background .2s;font-family:Inter Tight,sans-serif"
+        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(100,160,240,.15);cursor:pointer;transition:background .2s;font-family:'Inter Tight',sans-serif"
         onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
         <svg width="28" height="28" viewBox="0 0 24 24"><path d="M4.5 19L1.5 14L7.5 4H13.5L7.5 14L4.5 19Z" fill="#0F9D58"/><path d="M19.5 19H13.5L10.5 14H16.5L19.5 19Z" fill="#4285F4"/><path d="M16.5 4L22.5 14L19.5 19L13.5 9L16.5 4Z" fill="#FFBB00"/></svg>
         <span style="font-size:.65rem;color:#c0d8f0">Google Drive</span>
@@ -4109,7 +4103,7 @@ function shareResult(avgScore){
         <span style="font-size:.65rem;color:#c0d8f0" id="copyBtnTxt">Копіювати</span>
       </button>
     </div>
-    <button onclick="document.getElementById('shareMenu').remove()" style="width:100%;margin-top:12px;padding:7px;background:transparent;color:#6a8aaa;border:1px solid rgba(100,160,240,.2);border-radius:8px;font-size:.68rem;cursor:pointer;font-family:Inter Tight,sans-serif">Закрити</button>
+    <button onclick="document.getElementById('shareMenu').remove()" style="width:100%;margin-top:12px;padding:7px;background:transparent;color:#6a8aaa;border:1px solid rgba(100,160,240,.2);border-radius:8px;font-size:.68rem;cursor:pointer;font-family:'Inter Tight',sans-serif">Закрити</button>
   `;
   document.body.appendChild(menu);
 
@@ -4232,7 +4226,7 @@ function saveToGoogleDrive(avgScore){
   const overlay=document.createElement('div');
   overlay.id='driveInstructionOverlay';
   overlay.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px';
-  let overlayHTML='<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:Inter Tight,sans-serif">';
+  let overlayHTML='<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:'Inter Tight',sans-serif">';
   overlayHTML+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">';
   overlayHTML+='<div><div style="font-size:1rem;font-weight:800;color:#1a2e48">Зберегти PDF у Google Drive</div>';
   overlayHTML+='<div style="font-size:.68rem;color:#8aabcc">3 прості кроки</div></div></div>';
@@ -4250,8 +4244,8 @@ function saveToGoogleDrive(avgScore){
   overlayHTML+='<div><div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Завантаж у Google Drive</div>';
   overlayHTML+='<div style="font-size:.68rem;color:#5a7090;line-height:1.5">Drive відкриється автоматично. Натисни <b>+ Новий → Завантажити файл</b></div></div></div></div>';
   overlayHTML+='<div style="display:flex;gap:8px">';
-  overlayHTML+='<button onclick="document.getElementById(\'driveInstructionOverlay\').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:Inter Tight,sans-serif">Скасувати</button>';
-  overlayHTML+='<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:Inter Tight,sans-serif">Відкрити PDF та Drive</button>';
+  overlayHTML+='<button onclick="document.getElementById(\'driveInstructionOverlay\').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:'Inter Tight',sans-serif">Скасувати</button>';
+  overlayHTML+='<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif">Відкрити PDF та Drive</button>';
   overlayHTML+='</div></div>';
   overlay.innerHTML=overlayHTML;
   document.body.appendChild(overlay);
@@ -4279,7 +4273,7 @@ function copyShareText(text){
       // Show welcome back banner
       setTimeout(()=>{
         const banner=document.createElement('div');
-        banner.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a3a6a,#2878c8);color:#fff;border-radius:12px;padding:14px 20px;font-family:Inter Tight,sans-serif;font-size:.78rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:340px;text-align:center;line-height:1.6';
+        banner.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a3a6a,#2878c8);color:#fff;border-radius:12px;padding:14px 20px;font-family:'Inter Tight',sans-serif;font-size:.78rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:340px;text-align:center;line-height:1.6';
         banner.innerHTML=`🎉 <strong>Ласкаво повернувся!</strong><br>
           ${daysPassed} днів тому твій бал був <strong>${r.avg}/10</strong><br>
           Пройди тест знову щоб побачити прогрес<br>
@@ -4402,14 +4396,14 @@ function showPromoEmailForm(plan, code) {
     '<p style="font-size:.8rem;color:#5a7090;margin-bottom:16px">Введи email щоб активувати доступ з будь-якого пристрою.</p>' +
     '<input type="email" id="promoEmailInput" placeholder="email@example.com" ' +
     'style="width:100%;padding:10px 14px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:10px;' +
-    'color:#1a2e48;font-size:.85rem;outline:none;font-family:Inter Tight,sans-serif;margin-bottom:10px">' +
+    'color:#1a2e48;font-size:.85rem;outline:none;font-family:'Inter Tight',sans-serif;margin-bottom:10px">' +
     '<div id="promoEmailMsg" style="font-size:.72rem;margin-bottom:10px;display:none"></div>' +
     '<button onclick="activatePromoSubscription()" ' +
     'style="width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#1e8449);border:none;' +
-    'border-radius:12px;color:#fff;font-family:Inter Tight,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer">' +
+    'border-radius:12px;color:#fff;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer">' +
     '&#x2705; Активувати безкоштовно</button>' +
     '<button onclick="closePaywall()" style="width:100%;margin-top:8px;padding:10px;background:transparent;' +
-    'border:none;color:#8aabcc;font-family:Inter Tight,sans-serif;font-size:.75rem;cursor:pointer">&#x23F3; Пізніше</button>';
+    'border:none;color:#8aabcc;font-family:'Inter Tight',sans-serif;font-size:.75rem;cursor:pointer">&#x23F3; Пізніше</button>';
 }
 
 function activatePromoSubscription() {
