@@ -87,8 +87,7 @@
   ]
 }
 </script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-S9Y88THBWZ"></script>
+<!-- GA4 stub — actual script injected after load to avoid blocking FCP/LCP -->
 <script>
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
@@ -4837,8 +4836,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
     if(!localStorage.getItem('exp_done')){
       var ov=document.getElementById('express-overlay');
       if(ov && !ov.classList.contains('hidden')){
-        _expScrollY=window.scrollY||0;
-        document.body.style.top='-'+_expScrollY+'px';
+        document.body.style.top='0px';
         document.documentElement.classList.add('exp-open');
         document.body.classList.add('exp-open');
         if(window.gtag)gtag('event','express_view',{event_category:'express_test'});
@@ -4872,15 +4870,16 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
 </div>
 
 <!-- DEFERRED SCRIPTS: FB Pixel + GA4 scroll tracking -->
+<!-- Exit intent, scroll tracking, and all third-party scripts deferred to after load -->
 <script>
-(function(){
-  // Exit intent (desktop only)
-  if(window.innerWidth > 768){
-    document.addEventListener('mouseleave', function(e){
-      if(e.clientY <= 0 && !sessionStorage.getItem('exit-shown') && !sessionStorage.getItem('exit-closed')){
+window.addEventListener('load',function(){
+  // Exit intent (desktop only) — deferred to avoid innerWidth reflow during LCP
+  if(window.innerWidth>768){
+    document.addEventListener('mouseleave',function(e){
+      if(e.clientY<=0&&!sessionStorage.getItem('exit-shown')&&!sessionStorage.getItem('exit-closed')){
         sessionStorage.setItem('exit-shown','1');
         document.getElementById('exit-popup').classList.add('show');
-        if(window.gtag) gtag('event','exit_intent_shown',{event_category:'engagement'});
+        if(window.gtag)gtag('event','exit_intent_shown',{event_category:'engagement'});
       }
     });
   }
@@ -4893,16 +4892,14 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
     [0.5,0.9].forEach(function(m){
       if(pct>=m&&!fired[m]){
         fired[m]=true;
-        if(window.gtag) gtag('event','scroll_depth',{event_category:'engagement',event_label:Math.round(m*100)+'%'});
+        if(window.gtag)gtag('event','scroll_depth',{event_category:'engagement',event_label:Math.round(m*100)+'%'});
       }
     });
   },{passive:true});
-})();
-</script>
-<!-- Third-party scripts: delayed 3s after load to keep outside TBT window -->
-<script>
-window.addEventListener('load',function(){
+  // Third-party scripts: 3s delay keeps them outside TBT window
   setTimeout(function(){
+    // GA4 (injected here to avoid blocking FCP/LCP)
+    var gt=document.createElement('script');gt.async=1;gt.src='https://www.googletagmanager.com/gtag/js?id=G-S9Y88THBWZ';document.head.appendChild(gt);
     // Clarity
     (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wxl5jmpw30");
     // Meta Pixel
