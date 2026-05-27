@@ -691,15 +691,15 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   background:rgba(224,138,78,0.03);
 }
 @keyframes heroPolyPulse{
-  0%,100%{stroke-opacity:.55}
-  50%{stroke-opacity:1}
+  0%,100%{opacity:.55}
+  50%{opacity:1}
 }
 @keyframes heroDotPulse{
   0%,100%{opacity:.7}
-  50%{opacity:1;filter:drop-shadow(0 0 5px #E08A4E)}
+  50%{opacity:1}
 }
-.hero-cons-polygon{animation:heroPolyPulse 3.5s ease-in-out infinite}
-.hero-cons-dots{animation:heroDotPulse 3.5s ease-in-out infinite}
+.hero-cons-polygon{animation:heroPolyPulse 3.5s ease-in-out infinite;will-change:opacity}
+.hero-cons-dots{animation:heroDotPulse 3.5s ease-in-out infinite;will-change:opacity}
 .constellation-wrap::after{
   content:"👆 Клікни на будь-яку точку — почни прямо тут";
   position:absolute;
@@ -711,8 +711,8 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   will-change:transform;
 }
 @keyframes heroRipple{
-  0%{r:7;opacity:.55;stroke-width:1.5}
-  100%{r:22;opacity:0;stroke-width:.5}
+  0%{opacity:.55;transform:scale(1)}
+  100%{opacity:0;transform:scale(3.14)}
 }
 .constellation-svg{
   display:block;
@@ -1207,10 +1207,6 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 (function(){try{
   if(localStorage.getItem('exp_done')){
     document.getElementById('express-overlay').classList.add('hidden');
-  }else{
-    document.documentElement.classList.add('exp-open');
-    document.body.classList.add('exp-open');
-    document.body.style.top='0px';
   }
 }catch(e){}}());
 </script>
@@ -1345,7 +1341,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
           <!-- 12 вузлів — кожен клікабельний -->
           <g class="hero-cons-dots">
-            <g onclick="event.stopPropagation();startWithSphere('love')"    style="cursor:pointer"><circle cx="180" cy="52"  r="20" fill="transparent"/><circle cx="180" cy="52"  r="7" fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5"/><circle cx="180" cy="52"  r="7" fill="none" stroke="#E08A4E" style="animation:heroRipple 2.2s ease-out infinite"/></g>
+            <g onclick="event.stopPropagation();startWithSphere('love')"    style="cursor:pointer"><circle cx="180" cy="52"  r="20" fill="transparent"/><circle cx="180" cy="52"  r="7" fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5"/><circle cx="180" cy="52"  r="7" fill="none" stroke="#E08A4E" style="animation:heroRipple 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center"/></g>
             <g onclick="event.stopPropagation();startWithSphere('family')"  style="cursor:pointer"><circle cx="244" cy="74"  r="20" fill="transparent"/><circle cx="244" cy="74"  r="7" fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5"/><circle cx="244" cy="74"  r="7" fill="none" stroke="#E08A4E" style="animation:heroRipple 2.2s ease-out .3s infinite"/></g>
             <g onclick="event.stopPropagation();startWithSphere('friends')" style="cursor:pointer"><circle cx="292" cy="130" r="20" fill="transparent"/><circle cx="292" cy="130" r="7" fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5"/></g>
             <g onclick="event.stopPropagation();startWithSphere('career')"  style="cursor:pointer"><circle cx="292" cy="200" r="20" fill="transparent"/><circle cx="292" cy="200" r="7" fill="#F4EFE6" stroke="#E08A4E" stroke-width="1.5"/></g>
@@ -4837,11 +4833,14 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   }
 
   var _expScrollY=0;
-  // Overlay shown from HTML immediately — just track the view event
   try{
     if(!localStorage.getItem('exp_done')){
       var ov=document.getElementById('express-overlay');
       if(ov && !ov.classList.contains('hidden')){
+        _expScrollY=window.scrollY||0;
+        document.body.style.top='-'+_expScrollY+'px';
+        document.documentElement.classList.add('exp-open');
+        document.body.classList.add('exp-open');
         if(window.gtag)gtag('event','express_view',{event_category:'express_test'});
       }
     }
