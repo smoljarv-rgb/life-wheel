@@ -186,7 +186,7 @@ body::after{
 .center-col{display:flex;flex-direction:column;align-items:center;padding:8px 10px;gap:8px;}
 .wheel-card{width:100%;max-width:620px;padding:12px;position:relative;background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:22px}
 canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-shadow(0 4px 22px rgba(0,0,0,.45));}
-.wheel-hint{font-size:.8rem;font-weight:700;color:var(--ac);text-align:center;margin-top:10px;padding:8px 18px;background:rgba(40,120,200,.12);border-radius:24px;border:2px solid rgba(40,120,200,.3);display:inline-block;transition:all 3s;animation:hintPulse 2.5s ease-in-out infinite;letter-spacing:.01em;will-change:transform}
+.wheel-hint{font-size:.8rem;font-weight:700;color:var(--ac);text-align:center;margin-top:10px;padding:8px 18px;background:rgba(40,120,200,.12);border-radius:24px;border:2px solid rgba(40,120,200,.3);display:inline-block;transition:background 3s,color 3s,border-color 3s,opacity 3s;animation:hintPulse 2.5s ease-in-out infinite;letter-spacing:.01em;will-change:transform}
 .detail-box{width:100%;max-width:500px;padding:10px 12px}
 .det-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--sb);transition:border-color 3s}
 .det-stripe{width:5px;height:48px;border-radius:4px;flex-shrink:0;box-shadow:0 0 12px currentColor}
@@ -222,10 +222,10 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 
 /* ── BUTTONS ROW ── */
 .btn-row{display:flex;gap:8px;margin-bottom:2px}
-.btn-advice{flex:1;border:none;background:#E8C17A;color:#0E1B2C;font-family:'Inter Tight',sans-serif;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:15px 10px;cursor:pointer;border-radius:999px;transition:all .3s;font-weight:700;box-shadow:0 8px 24px rgba(232,193,122,.30);position:relative;overflow:hidden}
+.btn-advice{flex:1;border:none;background:#E8C17A;color:#0E1B2C;font-family:'Inter Tight',sans-serif;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:15px 10px;cursor:pointer;border-radius:999px;transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;font-weight:700;box-shadow:0 8px 24px rgba(232,193,122,.30);position:relative;overflow:hidden}
 .btn-advice:hover:not(:disabled){box-shadow:0 10px 28px rgba(232,193,122,.45);transform:translateY(-2px)}
 .btn-advice:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-.btn-print{flex:0 0 auto;border:1.5px solid var(--sb);background:var(--sf2);color:var(--tm);font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-print{flex:0 0 auto;border:1.5px solid var(--sb);background:var(--sf2);color:var(--tm);font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .btn-print:hover{background:var(--sf);box-shadow:0 4px 18px var(--sh);transform:translateY(-1px)}
 .btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -238,7 +238,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .paywall-features li::before{content:"✓";color:var(--ember);font-weight:800}
 .pay-btn{width:100%;padding:13px;background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;letter-spacing:.04em;transition:opacity .2s}
 .pay-btn:hover{opacity:.9}
-.pay-btn-free{width:100%;padding:9px;background:transparent;color:#8aabcc;border:1px solid #d0e4f8;border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Inter Tight',sans-serif;margin-top:8px;transition:all .2s}
+.pay-btn-free{width:100%;padding:9px;background:transparent;color:#8aabcc;border:1px solid #d0e4f8;border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Inter Tight',sans-serif;margin-top:8px;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s}
 .pay-btn-free:hover{color:#5a80aa;border-color:#b0cce8}
 .email-capture{background:linear-gradient(135deg,#f0f8ff,#e8f4ff);border:1.5px solid #c0ddf8;border-radius:12px;padding:16px;margin-top:12px}
 .email-capture h3{font-size:.8rem;font-weight:700;color:#1a3060;margin-bottom:6px}
@@ -255,7 +255,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .cookie-btns{display:flex;gap:8px;flex-shrink:0}
 .cookie-accept{padding:8px 20px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:opacity .2s}
 .cookie-accept:hover{opacity:.9}
-.cookie-decline{padding:8px 14px;background:transparent;color:#8aabcc;border:1px solid rgba(100,160,240,.3);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:all .2s}
+.cookie-decline{padding:8px 14px;background:transparent;color:#8aabcc;border:1px solid rgba(100,160,240,.3);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s}
 .cookie-decline:hover{color:#c0d8f0;border-color:rgba(100,160,240,.5)}
 .placeholder-txt{font-size:.73rem;color:var(--tl);font-style:italic;line-height:1.65;text-align:center;padding:10px 0;transition:color 3s}
 
@@ -264,12 +264,12 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .picker-title{font-size:.88rem;font-weight:800;color:var(--td);margin-bottom:6px;transition:color 3s}
 .picker-sub{font-size:.74rem;color:var(--tm);margin-bottom:10px;line-height:1.5;transition:color 3s}
 .picker-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.picker-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid transparent;font-size:.62rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--sf2);color:var(--tm);user-select:none}
+.picker-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid transparent;font-size:.62rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s;background:var(--sf2);color:var(--tm);user-select:none}
 .picker-chip.selected{color:white;transform:translateY(-1px);box-shadow:0 3px 10px var(--sh)}
 .picker-chip .chip-score{font-size:.58rem;opacity:.8}
 .picker-chip .chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .picker-actions{display:flex;gap:7px;align-items:center}
-.btn-analyze{flex:1;border:1.5px solid var(--sb);background:var(--ac);color:white;font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:700}
+.btn-analyze{flex:1;border:1.5px solid var(--sb);background:var(--ac);color:white;font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;font-weight:700}
 .btn-analyze:hover:not(:disabled){opacity:.9;transform:translateY(-1px);box-shadow:0 4px 18px var(--sh)}
 .btn-analyze:disabled{opacity:.45;cursor:not-allowed}
 .picker-hint{font-size:.6rem;color:var(--tl);transition:color 3s}
@@ -286,7 +286,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 /* ══════════════════════════════════════
    ADVICE TABLE STYLES
 ══════════════════════════════════════ */
-.adv-overview{font-family:'Instrument Serif',serif;font-style:italic;font-size:.95rem;color:var(--tm);line-height:1.7;padding:14px 16px;border-left:4px solid var(--ac);border-radius:0 12px 12px 0;background:linear-gradient(135deg,var(--sf2),rgba(40,120,200,.05));margin-bottom:12px;transition:all 3s;box-shadow:0 2px 12px var(--sh)}
+.adv-overview{font-family:'Instrument Serif',serif;font-style:italic;font-size:.95rem;color:var(--tm);line-height:1.7;padding:14px 16px;border-left:4px solid var(--ac);border-radius:0 12px 12px 0;background:linear-gradient(135deg,var(--sf2),rgba(40,120,200,.05));margin-bottom:12px;transition:background 3s,color 3s,border-color 3s,opacity 3s;box-shadow:0 2px 12px var(--sh)}
 
 .adv-table-wrap{overflow-x:auto;margin-bottom:10px}
 .adv-table{width:100%;border-collapse:collapse;font-size:.7rem;min-width:600px}
@@ -299,7 +299,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .adv-table .col-prio{text-align:center;white-space:nowrap}
 
 /* ── ALGORITHM BLOCK ── */
-.algo-block{background:var(--sf2);border:1.5px solid var(--sb);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:all 3s;box-shadow:0 4px 18px var(--sh)}
+.algo-block{background:var(--sf2);border:1.5px solid var(--sb);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:background 3s,color 3s,border-color 3s,opacity 3s;box-shadow:0 4px 18px var(--sh)}
 .algo-block:hover{box-shadow:0 6px 24px var(--sh);border-color:rgba(40,120,200,.35)}
 .algo-title{font-family:'Instrument Serif',serif;font-size:1.08rem;font-weight:600;color:var(--td);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color 3s}
 .algo-phases{display:flex;flex-direction:column;gap:0}
@@ -320,7 +320,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .algo-to10{font-size:.68rem;color:var(--ac);font-weight:600;margin-top:3px;transition:color 3s}
 @keyframes resultPulse{0%,100%{box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15)}50%{box-shadow:0 8px 40px rgba(40,120,200,.7),0 2px 12px rgba(0,0,0,.2)}}
 
-.roadmap-card{padding:14px 16px;border-radius:10px;border-left:3px solid var(--ac2);background:var(--sf2);transition:all 3s;font-size:.72rem;color:var(--tm);line-height:1.6}
+.roadmap-card{padding:14px 16px;border-radius:10px;border-left:3px solid var(--ac2);background:var(--sf2);transition:background 3s,color 3s,border-color 3s,opacity 3s;font-size:.72rem;color:var(--tm);line-height:1.6}
 .roadmap-card strong{color:var(--td);font-weight:700;display:block;margin-bottom:5px;font-size:.76rem;transition:color 3s}
 
 /* ══════════════════════════════════════
@@ -340,11 +340,11 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .step-list li{display:flex;gap:10px;align-items:flex-start;font-size:.77rem;color:var(--tm);line-height:1.6;transition:color 3s}
 .step-num{width:22px;height:22px;border-radius:50%;background:var(--ac);color:white;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background 3s}
 .score-scale{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
-.score-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:var(--sf2);border:1px solid var(--sb);transition:all 3s}
+.score-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:var(--sf2);border:1px solid var(--sb);transition:background 3s,color 3s,border-color 3s,opacity 3s}
 .score-num{font-family:'Instrument Serif',serif;font-size:1.3rem;font-weight:600;line-height:1;flex-shrink:0}
 .score-txt{font-size:.67rem;color:var(--tm);line-height:1.4;transition:color 3s}
 .score-txt strong{display:block;font-size:.7rem;color:var(--td);font-weight:600;margin-bottom:1px;transition:color 3s}
-.btn-start{width:100%;margin-top:22px;background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;font-family:'Inter Tight',sans-serif;font-size:.78rem;letter-spacing:.04em;padding:16px 32px;cursor:pointer;font-weight:700;box-shadow:0 6px 20px rgba(232,193,122,.25);transition:all .3s}
+.btn-start{width:100%;margin-top:22px;background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;font-family:'Inter Tight',sans-serif;font-size:.78rem;letter-spacing:.04em;padding:16px 32px;cursor:pointer;font-weight:700;box-shadow:0 6px 20px rgba(232,193,122,.25);transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s}
 .btn-start:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(232,193,122,.40)}
 
 /* ══════════════════════════════════════
@@ -533,7 +533,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
     font-family:'Inter Tight',sans-serif;font-size:.82rem;font-weight:700;
     letter-spacing:.04em;cursor:pointer;
     background:#E8C17A;color:#0E1B2C;
-    box-shadow:0 8px 24px rgba(232,193,122,.3);transition:all .3s
+    box-shadow:0 8px 24px rgba(232,193,122,.3);transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s
   }
 }
 
@@ -589,7 +589,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   border:1px solid rgba(108,77,254,0.30);
   border-radius:999px;
   padding:6px 14px;
-  transition:all .2s;
+  transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s;
   white-space:nowrap;
 }
 .nav-pro:hover{background:rgba(108,77,254,0.20)}
@@ -637,7 +637,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   font-size:14px;font-weight:700;
   letter-spacing:.04em;
   cursor:pointer;
-  transition:all .3s;
+  transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;
   box-shadow:0 8px 24px rgba(232,193,122,.25);
   display:block;width:100%;max-width:320px;
   margin:0 auto;
@@ -816,7 +816,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   font-family:'Inter Tight',sans-serif;
   font-size:14px;font-weight:700;
   letter-spacing:.04em;cursor:pointer;
-  transition:all .3s;
+  transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;
   box-shadow:0 8px 24px rgba(232,193,122,.25);
   display:inline-block;
 }
@@ -898,7 +898,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .email-submit{padding:8px 14px;background:var(--ember);color:#0E1B2C;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;white-space:nowrap}
 
 /* Btn print */
-.btn-print{border:1px solid var(--line);background:var(--ink-3);color:var(--muted);font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto}
+.btn-print{border:1px solid var(--line);background:var(--ink-3);color:var(--muted);font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto}
 .btn-print:hover{background:var(--ink-2);box-shadow:0 4px 18px var(--sh);transform:translateY(-1px)}
 .btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -1032,7 +1032,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 .exp-option{background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:14px;padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .2s,background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
 .exp-option:active{transform:scale(0.98)}
 .exp-option.selected{border-color:rgba(224,138,78,0.5);background:rgba(224,138,78,0.08)}
-.exp-radio{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(244,239,230,0.22);flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.exp-radio{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(244,239,230,0.22);flex-shrink:0;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s;display:flex;align-items:center;justify-content:center}
 .exp-option.selected .exp-radio{background:#E08A4E;border-color:#E08A4E}
 .exp-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:#0E1B2C;opacity:0;transition:opacity .2s}
 .exp-option.selected .exp-radio::after{opacity:1}
@@ -1481,17 +1481,17 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
     <!-- How it works — 3 steps horizontal -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px">
-      <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:all 3s">
+      <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:background 3s,color 3s,border-color 3s,opacity 3s">
         <div style="font-size:1.5rem;margin-bottom:8px">📊</div>
         <div style="font-size:.78rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Оціни</div>
         <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">Постав бал кожній сфері від 1 до 10</div>
       </div>
-      <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:all 3s">
+      <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:background 3s,color 3s,border-color 3s,opacity 3s">
         <div style="font-size:1.5rem;margin-bottom:8px">🧠</div>
         <div style="font-size:.78rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">AI аналізує</div>
         <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">AI знаходить де справжня проблема</div>
       </div>
-      <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:all 3s">
+      <div style="text-align:center;padding:14px 10px;background:var(--sf2);border-radius:12px;border:1.5px solid var(--sb);transition:background 3s,color 3s,border-color 3s,opacity 3s">
         <div style="font-size:1.5rem;margin-bottom:8px">📈</div>
         <div style="font-size:.78rem;font-weight:800;color:var(--td);margin-bottom:4px;transition:color 3s">Отримай план</div>
         <div style="font-size:.64rem;color:var(--tm);line-height:1.5;transition:color 3s">Персональний план дій на 7 днів</div>
@@ -1499,7 +1499,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
     </div>
 
     <!-- Free badge -->
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(135deg,rgba(32,112,64,.1),rgba(32,112,64,.06));border:1.5px solid rgba(32,112,64,.25);border-radius:12px;margin-bottom:20px;transition:all 3s">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(135deg,rgba(32,112,64,.1),rgba(32,112,64,.06));border:1.5px solid rgba(32,112,64,.25);border-radius:12px;margin-bottom:20px;transition:background 3s,color 3s,border-color 3s,opacity 3s">
       <span style="font-size:1.3rem">🎁</span>
       <div>
         <div style="font-size:.75rem;font-weight:800;color:#207040;margin-bottom:2px">Перший аналіз безкоштовно</div>
@@ -1604,7 +1604,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
     <div class="detail-box glass" id="detailBox"></div>
     <!-- Посилання на останній результат -->
     <div id="lastResultLink" style="display:none;width:100%;max-width:500px;margin-top:10px;text-align:center">
-      <a id="lastResultAnchor" href="#" style="display:inline-flex;align-items:center;gap:6px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:600;color:var(--tm);text-decoration:none;padding:8px 18px;border:1.5px solid var(--sb);border-radius:20px;transition:all .2s;background:var(--sf)" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
+      <a id="lastResultAnchor" href="#" style="display:inline-flex;align-items:center;gap:6px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:600;color:var(--tm);text-decoration:none;padding:8px 18px;border:1.5px solid var(--sb);border-radius:20px;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s;background:var(--sf)" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
         📋 Мій останній результат →
       </a>
     </div>
@@ -2035,7 +2035,7 @@ function buildDetail(){
       <div class="det-score-lbl">середній бал</div>
     </div>
   </div>
-  <div style="margin:6px 0 8px;padding:9px 13px;background:linear-gradient(135deg,rgba(40,120,200,.12),rgba(40,120,200,.06));border:1.5px solid rgba(40,120,200,.25);border-radius:10px;display:flex;align-items:center;gap:8px;transition:all 3s">
+  <div style="margin:6px 0 8px;padding:9px 13px;background:linear-gradient(135deg,rgba(40,120,200,.12),rgba(40,120,200,.06));border:1.5px solid rgba(40,120,200,.25);border-radius:10px;display:flex;align-items:center;gap:8px;transition:background 3s,color 3s,border-color 3s,opacity 3s">
     <span style="font-size:1.2rem">👆</span>
     <div>
       <div style="font-size:.78rem;font-weight:700;color:var(--ac);transition:color 3s">Пересувай повзунок для оцінки</div>
@@ -2077,7 +2077,7 @@ function buildDetail(){
   // Кнопка "Наступна сфера" — прихована, з'являється після першого руху повзунка
   const nextWrap=document.createElement('div');
   nextWrap.id='nextSphereBtn';
-  nextWrap.style.cssText='display:none;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 14px;background:rgba(232,193,122,0.08);border:1.5px solid rgba(232,193,122,0.25);border-radius:12px;cursor:pointer;transition:all .2s';
+  nextWrap.style.cssText='display:none;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 14px;background:rgba(232,193,122,0.08);border:1.5px solid rgba(232,193,122,0.25);border-radius:12px;cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s';
   nextWrap.onmouseover=function(){this.style.background='rgba(232,193,122,0.14)';};
   nextWrap.onmouseout=function(){this.style.background='rgba(232,193,122,0.08)';};
   nextWrap.onclick=function(){
@@ -2097,7 +2097,7 @@ function buildDetail(){
   // Read live state every time buildDetail runs
   const _fa = !freeAnalysisUsed && (siteConfig.paywall_enabled!==false);
   const _b = document.createElement('button');
-  _b.style.cssText = `width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:${_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)'};box-shadow:0 6px 20px ${_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)'}`;
+  _b.style.cssText = `width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:${_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)'};box-shadow:0 6px 20px ${_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)'}`;
   _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Запустити AI-аналіз';
   _b.onclick = showPicker;
   _b.onmouseover = function(){this.style.transform='translateY(-2px)';};
@@ -2495,7 +2495,7 @@ function renderSocialProofFromCfg(){
   var active = reviews.filter(function(r){ return r.active !== false; });
   if(active.length > 0){
     spReviews.innerHTML = active.map(function(r){
-      return '<div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:all 3s">' +
+      return '<div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:background 3s,color 3s,border-color 3s,opacity 3s">' +
         '<div style="font-size:.62rem;color:#e8a020;margin-bottom:3px">★★★★★</div>' +
         '<div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«' + r.text + '»</div>' +
         '<div style="font-size:.63rem;color:var(--tl);margin-top:5px;font-weight:600;transition:color 3s">— ' + r.author + ' · ' + r.location + '</div>' +
@@ -2518,7 +2518,7 @@ function renderSocialProofOnSite(reviews){
     return;
   }
   container.innerHTML = active.map(r => `
-    <div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;transition:all 3s">
+    <div style="background:var(--sf);border:1px solid var(--sb);border-radius:10px;padding:12px 14px;transition:background 3s,color 3s,border-color 3s,opacity 3s">
       <div style="font-size:.62rem;color:#e8a020;margin-bottom:3px">★★★★★</div>
       <div style="font-size:.75rem;line-height:1.6;color:var(--td);font-style:italic;transition:color 3s">«${r.text}»</div>
       <div style="font-size:.63rem;color:var(--tl);margin-top:6px;font-weight:600;transition:color 3s">— ${r.author} · ${r.location}</div>
@@ -2538,7 +2538,7 @@ function showAd(slot, elId){
     }
     const isNative=ad.type==='native'||ad.type==='affiliate';
     if(isNative){
-      el.innerHTML=`<div style="padding:12px 14px;background:var(--sf2);border:1.5px solid var(--sb);border-radius:12px;font-size:.75rem;transition:all 3s">
+      el.innerHTML=`<div style="padding:12px 14px;background:var(--sf2);border:1.5px solid var(--sb);border-radius:12px;font-size:.75rem;transition:background 3s,color 3s,border-color 3s,opacity 3s">
         <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tl);margin-bottom:5px;transition:color 3s">💡 Рекомендація</div>
         ${ad.title?'<div style="font-weight:700;color:var(--td);margin-bottom:3px;transition:color 3s">'+ad.title+'</div>':''}
         ${ad.text?'<div style="color:var(--tm);line-height:1.5;transition:color 3s">'+ad.text+'</div>':''}
@@ -2546,9 +2546,9 @@ function showAd(slot, elId){
       </div>`;
     } else {
       // Banner
-      el.innerHTML=`<div style="border-radius:12px;overflow:hidden;border:1px solid var(--sb);transition:all 3s">
+      el.innerHTML=`<div style="border-radius:12px;overflow:hidden;border:1px solid var(--sb);transition:background 3s,color 3s,border-color 3s,opacity 3s">
         ${ad.image?'<a href="'+(ad.url||'#')+'" target="_blank" rel="noopener"><img src="'+ad.image+'" style="width:100%;display:block;max-height:120px;object-fit:cover" alt="'+ad.title+'"></a>':''}
-        ${(ad.title||ad.text)?`<div style="padding:10px 12px;background:var(--sf2);transition:all 3s">
+        ${(ad.title||ad.text)?`<div style="padding:10px 12px;background:var(--sf2);transition:background 3s,color 3s,border-color 3s,opacity 3s">
           ${ad.title?'<div style="font-size:.75rem;font-weight:700;color:var(--td);transition:color 3s">'+ad.title+'</div>':''}
           ${ad.text?'<div style="font-size:.68rem;color:var(--tm);margin-top:2px;transition:color 3s">'+ad.text+'</div>':''}
           ${ad.url?'<a href="'+ad.url+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;padding:4px 10px;background:var(--ac);color:#fff;border-radius:6px;font-size:.65rem;font-weight:700;text-decoration:none">Детальніше →</a>':''}
@@ -2636,7 +2636,7 @@ function showPaywall(){
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
 
           <!-- Одноразовий звіт -->
-          <div onclick="paywallPay('report')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f0f8ff;border:1.5px solid #b0d4f0;border-radius:12px;cursor:pointer;transition:all .2s"
+          <div onclick="paywallPay('report')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f0f8ff;border:1.5px solid #b0d4f0;border-radius:12px;cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s"
             onmouseover="this.style.borderColor='#2878c8';this.style.background='#e4f2ff'"
             onmouseout="this.style.borderColor='#b0d4f0';this.style.background='#f0f8ff'">
             <div>
@@ -2647,7 +2647,7 @@ function showPaywall(){
           </div>
 
           <!-- Місячний PRO — виділений -->
-          <div onclick="paywallPay('monthly')" style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;cursor:pointer;position:relative;transition:all .2s"
+          <div onclick="paywallPay('monthly')" style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:linear-gradient(135deg,#1a3a6a,#2878c8);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;cursor:pointer;position:relative;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s"
             onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 8px 24px rgba(40,120,200,.4)'"
             onmouseout="this.style.transform='';this.style.boxShadow=''">
             <div style="position:absolute;top:-9px;left:14px;background:#f5a623;color:#111;font-size:.58rem;font-weight:800;padding:2px 9px;border-radius:100px;letter-spacing:.04em">⭐ НАЙПОПУЛЯРНІШИЙ</div>
@@ -2659,7 +2659,7 @@ function showPaywall(){
           </div>
 
           <!-- Річний PRO -->
-          <div onclick="paywallPay('yearly')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8f0ff;border:1.5px solid #c8a8e8;border-radius:12px;cursor:pointer;transition:all .2s"
+          <div onclick="paywallPay('yearly')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8f0ff;border:1.5px solid #c8a8e8;border-radius:12px;cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s"
             onmouseover="this.style.borderColor='#8040c0';this.style.background='#f0e4ff'"
             onmouseout="this.style.borderColor='#c8a8e8';this.style.background='#f8f0ff'">
             <div>
@@ -3002,7 +3002,7 @@ function showPreAnalysisModal(){
       <div style="font-size:.72rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;transition:color 3s">📊 Твій поточний стан</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:18px">
         ${tipCards.map(t=>`
-        <div style="background:var(--sf);border-radius:12px;padding:12px 14px;border-left:3px solid ${t.color};transition:all 3s">
+        <div style="background:var(--sf);border-radius:12px;padding:12px 14px;border-left:3px solid ${t.color};transition:background 3s,color 3s,border-color 3s,opacity 3s">
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
             <span style="font-size:1.1rem">${t.icon}</span>
             <span style="font-size:.75rem;font-weight:800;color:${t.color}">${t.title}</span>
@@ -3067,7 +3067,7 @@ function _renderModalActions(){
 
   const startBtn=document.createElement('button');
   startBtn.id='modalStartBtn';
-  startBtn.style.cssText=`flex:1;min-width:160px;padding:14px 18px;background:${btnBg};color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s`;
+  startBtn.style.cssText=`flex:1;min-width:160px;padding:14px 18px;background:${btnBg};color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s`;
   startBtn.innerHTML=btnLabel;
   startBtn.onclick=_startFromModal;
   startBtn.onmouseover=function(){this.style.transform='translateY(-2px)';};
@@ -3075,7 +3075,7 @@ function _renderModalActions(){
   row.appendChild(startBtn);
 
   const cancelBtn=document.createElement('button');
-  cancelBtn.style.cssText=`padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:all .3s`;
+  cancelBtn.style.cssText=`padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:opacity .3s,transform .3s,box-shadow .3s,background .3s,color .3s,border-color .3s`;
   cancelBtn.textContent='Скасувати';
   cancelBtn.onclick=function(){const m=document.getElementById('preAnalysisModal');if(m)m.remove();};
   cancelBtn.onmouseover=function(){this.style.borderColor='var(--ac)';this.style.color='var(--ac)';};
@@ -3093,7 +3093,7 @@ function _renderModalActions(){
   if(_lastSlug){
     var lastLink=document.createElement('div');
     lastLink.style.cssText='text-align:center;margin-top:10px';
-    lastLink.innerHTML='<a href="/result/'+_lastSlug+'" style="font-size:.7rem;color:var(--tm);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border:1px solid var(--sb);border-radius:20px;transition:all .2s" onmouseover="this.style.borderColor=\'var(--ac)\';this.style.color=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--sb)\';this.style.color=\'var(--tm)\'">📋 Переглянути мій останній результат →</a>';
+    lastLink.innerHTML='<a href="/result/'+_lastSlug+'" style="font-size:.7rem;color:var(--tm);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border:1px solid var(--sb);border-radius:20px;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s" onmouseover="this.style.borderColor=\'var(--ac)\';this.style.color=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--sb)\';this.style.color=\'var(--tm)\'">📋 Переглянути мій останній результат →</a>';
     area.appendChild(lastLink);
   }
 }
@@ -3114,7 +3114,7 @@ function _renderModalChips(){
     const isSel=selectedSpheres.has(s.id);
     const scoreColor=s.score<4?'#c03030':s.score<6?'#c07010':s.score<8?'#207040':'#1860a0';
     return `<div onclick="_toggleModalSphere('${s.id}')" id="mchip_${s.id}"
-      style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:2px solid ${isSel?s.color:'rgba(160,190,220,.3)'};background:${isSel?s.color+'22':'var(--sf2)'};cursor:pointer;transition:all .2s;user-select:none">
+      style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:2px solid ${isSel?s.color:'rgba(160,190,220,.3)'};background:${isSel?s.color+'22':'var(--sf2)'};cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s;user-select:none">
       <div style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0"></div>
       <span style="font-size:.72rem;font-weight:${isSel?'800':'600'};color:${isSel?s.color:'var(--tm)'};transition:color .2s">${s.name}</span>
       <span style="font-size:.62rem;font-weight:700;color:${scoreColor}">${s.score}</span>
@@ -3398,7 +3398,7 @@ function renderAdvice(parsed){
     }catch(e){}
 
     return `
-    <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:13px;padding:11px 13px;transition:all 3s">
+    <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:13px;padding:11px 13px;transition:background 3s,color 3s,border-color 3s,opacity 3s">
 
       <!-- Row 1: rank + name + score + delta -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -3452,7 +3452,7 @@ function renderAdvice(parsed){
     const color=colorMap[a.sphere]||'#4080c0';
     const sc=parseFloat(a.score)||5;
     return `<button onclick="document.getElementById('algo_${ai}').scrollIntoView({behavior:'smooth',block:'start'})"
-      style="padding:5px 11px;background:${color}22;color:${color};border:1.5px solid ${color}55;border-radius:20px;font-size:.65rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter Tight',sans-serif;transition:all .2s"
+      style="padding:5px 11px;background:${color}22;color:${color};border:1.5px solid ${color}55;border-radius:20px;font-size:.65rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter Tight',sans-serif;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s"
       onmouseover="this.style.background='${color}44'" onmouseout="this.style.background='${color}22'">
       ${a.sphere} ${sc}/10
     </button>`;
@@ -3462,7 +3462,7 @@ function renderAdvice(parsed){
   <div class="algo-title" style="font-size:1.1rem;margin-bottom:12px">📅 Щоденний алгоритм — покроковий план по днях</div>
 
   <!-- Sticky sphere nav -->
-  <div style="position:sticky;top:0;z-index:10;background:var(--sf2);backdrop-filter:blur(12px);padding:8px 0 10px;margin-bottom:14px;border-bottom:1px solid var(--sb);transition:all 3s">
+  <div style="position:sticky;top:0;z-index:10;background:var(--sf2);backdrop-filter:blur(12px);padding:8px 0 10px;margin-bottom:14px;border-bottom:1px solid var(--sb);transition:background 3s,color 3s,border-color 3s,opacity 3s">
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <span style="font-size:.62rem;color:var(--tl);white-space:nowrap;transition:color 3s">Перейти:</span>
       ${sphereNavItems}
@@ -3481,7 +3481,7 @@ function renderAdvice(parsed){
     const bodyId=`algo_body_${ai}`;
 
     algoHTML+=`
-    <div id="${cardId}" style="background:var(--sf2);border:1.5px solid ${color}55;border-radius:14px;overflow:hidden;transition:all 3s">
+    <div id="${cardId}" style="background:var(--sf2);border:1.5px solid ${color}55;border-radius:14px;overflow:hidden;transition:background 3s,color 3s,border-color 3s,opacity 3s">
 
       <!-- Accordion header — always visible -->
       <div onclick="toggleAlgo('${bodyId}','${cardId}','${color}')"
@@ -3499,7 +3499,7 @@ function renderAdvice(parsed){
       <!-- Accordion body -->
       <div id="${bodyId}" style="padding:0 14px 14px;display:${ai===0?'block':'none'}">
         ${a.priority_reason?`<div style="font-size:.68rem;color:var(--tm);font-style:italic;margin-bottom:8px;padding:7px 10px;background:${color}0a;border-radius:8px;border-left:3px solid ${color};line-height:1.6">${a.priority_reason}</div>`:''}
-        ${a.science?`<div style="font-size:.65rem;color:#5a7090;margin-bottom:12px;padding:7px 10px;background:rgba(90,112,144,.07);border-radius:8px;border-left:3px solid rgba(90,112,144,.4);line-height:1.55;transition:all 3s">🔬 <em>${a.science}</em></div>`:''}
+        ${a.science?`<div style="font-size:.65rem;color:#5a7090;margin-bottom:12px;padding:7px 10px;background:rgba(90,112,144,.07);border-radius:8px;border-left:3px solid rgba(90,112,144,.4);line-height:1.55;transition:background 3s,color 3s,border-color 3s,opacity 3s">🔬 <em>${a.science}</em></div>`:''}
 
         <!-- Progress bar for checklist completion -->
         <div id="prog_wrap_${ai}" style="margin-bottom:10px;padding:8px 12px;background:${color}0a;border-radius:10px;border:1px solid ${color}22">
@@ -3513,7 +3513,7 @@ function renderAdvice(parsed){
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           ${days.map((d,di)=>`
-          <div style="background:${di%2?color+'08':'var(--sf)'};border-radius:9px;padding:10px 12px;border-left:3px solid ${color};transition:all 3s">
+          <div style="background:${di%2?color+'08':'var(--sf)'};border-radius:9px;padding:10px 12px;border-left:3px solid ${color};transition:background 3s,color 3s,border-color 3s,opacity 3s">
             <!-- Header: day + title + duration -->
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
               <span style="font-size:.65rem;font-weight:800;color:#fff;background:${color};padding:2px 8px;border-radius:12px;white-space:nowrap">${d.day}</span>
@@ -3543,12 +3543,12 @@ function renderAdvice(parsed){
             ${d.how_to?`
             <div style="margin-bottom:7px">
               <div style="font-size:.54rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${color};margin-bottom:4px">💡 Як виконувати</div>
-              <div style="font-size:.69rem;color:var(--tm);line-height:1.65;padding:8px 11px;background:${color}0d;border-radius:9px;border-left:3px solid ${color}55;transition:all 3s">${d.how_to}</div>
+              <div style="font-size:.69rem;color:var(--tm);line-height:1.65;padding:8px 11px;background:${color}0d;border-radius:9px;border-left:3px solid ${color}55;transition:background 3s,color 3s,border-color 3s,opacity 3s">${d.how_to}</div>
             </div>`:''}
 
             <!-- Technique -->
             ${d.technique?`
-            <div style="margin-bottom:7px;padding:9px 11px;background:linear-gradient(135deg,rgba(100,60,200,.08),rgba(100,60,200,.03));border:1.5px solid rgba(100,60,200,.2);border-radius:9px;transition:all 3s">
+            <div style="margin-bottom:7px;padding:9px 11px;background:linear-gradient(135deg,rgba(100,60,200,.08),rgba(100,60,200,.03));border:1.5px solid rgba(100,60,200,.2);border-radius:9px;transition:background 3s,color 3s,border-color 3s,opacity 3s">
               <div style="font-size:.54rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6a3cc8;margin-bottom:4px">🧠 Техніка удосконалення</div>
               <div style="font-size:.69rem;color:var(--tm);line-height:1.65;transition:color 3s">${d.technique}</div>
             </div>`:''}
@@ -3560,14 +3560,14 @@ function renderAdvice(parsed){
 
         ${a.week2_habit?`<div style="font-size:.65rem;color:var(--tm);margin-top:10px;padding:6px 10px;background:${color}0d;border-radius:7px;border-left:2px solid ${color}66;line-height:1.5">🔄 <strong style="color:${color}">Тижні 2–4:</strong> ${a.week2_habit}</div>`:''}
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          ${a.month_goal?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid ${color};line-height:1.5;transition:all 3s"><strong style="color:${color};display:block;margin-bottom:2px">📌 Ціль 30 днів</strong>${a.month_goal}</div>`:''}
-          ${a.to_10?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid var(--ac);line-height:1.5;transition:all 3s"><strong style="color:var(--ac);display:block;margin-bottom:2px">🎯 До 10/10</strong>${a.to_10}</div>`:''}
+          ${a.month_goal?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid ${color};line-height:1.5;transition:background 3s,color 3s,border-color 3s,opacity 3s"><strong style="color:${color};display:block;margin-bottom:2px">📌 Ціль 30 днів</strong>${a.month_goal}</div>`:''}
+          ${a.to_10?`<div style="flex:1;min-width:120px;font-size:.63rem;background:var(--sf);border-radius:7px;padding:6px 9px;border-left:2px solid var(--ac);line-height:1.5;transition:background 3s,color 3s,border-color 3s,opacity 3s"><strong style="color:var(--ac);display:block;margin-bottom:2px">🎯 До 10/10</strong>${a.to_10}</div>`:''}
         </div>
 
         <!-- Next sphere button -->
         ${ai < parsed.advice.length-1 ? `<div style="text-align:right;margin-top:12px">
           <button onclick="toggleAlgo('algo_body_${ai+1}','algo_${ai+1}','${colorMap[parsed.advice[ai+1].sphere]||'#4080c0'}',true)"
-            style="padding:6px 14px;background:transparent;border:1.5px solid var(--sb);border-radius:8px;font-size:.68rem;color:var(--tm);cursor:pointer;font-family:'Inter Tight',sans-serif;transition:all .2s"
+            style="padding:6px 14px;background:transparent;border:1.5px solid var(--sb);border-radius:8px;font-size:.68rem;color:var(--tm);cursor:pointer;font-family:'Inter Tight',sans-serif;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s"
             onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'"
             onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
             Наступна сфера: ${parsed.advice[ai+1].sphere} →
@@ -3735,13 +3735,13 @@ function renderAdvice(parsed){
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div style="background:var(--sf);border:1.5px solid var(--sb);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s" onclick="triggerPayment('report','uah')"
+          <div style="background:var(--sf);border:1.5px solid var(--sb);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s" onclick="triggerPayment('report','uah')"
             onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)'">
             <div style="font-size:.6rem;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Одноразовий звіт</div>
             <div style="font-size:1.4rem;font-weight:800;color:var(--td)">99 ₴</div>
             <div style="font-size:.6rem;color:var(--tl);margin-top:2px">Повний звіт зараз</div>
           </div>
-          <div style="background:linear-gradient(135deg,#1a3a6a,#2878c8);border:1.5px solid rgba(40,120,200,.4);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s" onclick="triggerPayment('monthly','uah')"
+          <div style="background:linear-gradient(135deg,#1a3a6a,#2878c8);border:1.5px solid rgba(40,120,200,.4);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s" onclick="triggerPayment('monthly','uah')"
             onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
             <div style="font-size:.6rem;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">⭐ Місячний PRO</div>
             <div style="font-size:1.4rem;font-weight:800;color:#fff">249 ₴</div>
@@ -3749,7 +3749,7 @@ function renderAdvice(parsed){
           </div>
         </div>
 
-        <button onclick="triggerPayment('monthly','uah')" style="width:100%;padding:13px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:10px;font-family:'Inter Tight',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .2s;margin-bottom:8px"
+        <button onclick="triggerPayment('monthly','uah')" style="width:100%;padding:13px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:10px;font-family:'Inter Tight',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:opacity .2s,transform .2s,background .2s,color .2s,border-color .2s;margin-bottom:8px"
           onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 10px 28px rgba(40,120,200,.5)'"
           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(40,120,200,.4)'">
           🚀 Активувати PRO — 249 ₴/міс
@@ -4623,7 +4623,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <div style="font-size:.6rem;color:var(--tl);transition:color 3s">Безпечна оплата:</div>
-        <div style="background:var(--sf);border:1px solid var(--sb);border-radius:6px;padding:3px 10px;font-size:.62rem;font-weight:700;color:var(--tm);display:flex;align-items:center;gap:4px;transition:all 3s">🔒 WayForPay</div>
+        <div style="background:var(--sf);border:1px solid var(--sb);border-radius:6px;padding:3px 10px;font-size:.62rem;font-weight:700;color:var(--tm);display:flex;align-items:center;gap:4px;transition:background 3s,color 3s,border-color 3s,opacity 3s">🔒 WayForPay</div>
       </div>
     </div>
 
@@ -4875,10 +4875,6 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
 <!-- Exit intent, scroll tracking, and all third-party scripts deferred to after load -->
 <script>
 window.addEventListener('load',function(){
-  // Fonts deferred — display:optional means they never block first-visit rendering anyway
-  var fl=document.createElement('link');fl.rel='preconnect';fl.href='https://fonts.googleapis.com';document.head.appendChild(fl);
-  var fl2=document.createElement('link');fl2.rel='preconnect';fl2.href='https://fonts.gstatic.com';fl2.crossOrigin='';document.head.appendChild(fl2);
-  var fs=document.createElement('link');fs.rel='stylesheet';fs.href='https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional';document.head.appendChild(fs);
   // Exit intent (desktop only) — deferred to avoid innerWidth reflow during LCP
   if(window.innerWidth>768){
     document.addEventListener('mouseleave',function(e){
@@ -4902,16 +4898,27 @@ window.addEventListener('load',function(){
       }
     });
   },{passive:true});
-  // Third-party scripts: 3s delay keeps them outside TBT window
-  setTimeout(function(){
-    // GA4 (injected here to avoid blocking FCP/LCP)
+  // Third-party scripts: load on first user interaction to keep outside TBT window
+  var _3pLoaded=false;
+  function _load3p(){
+    if(_3pLoaded)return;
+    _3pLoaded=true;
+    ['click','scroll','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,_load3p,{passive:true});});
+    // Google Fonts — cached on return visits, optional means no CLS
+    var fl=document.createElement('link');fl.rel='preconnect';fl.href='https://fonts.googleapis.com';document.head.appendChild(fl);
+    var fl2=document.createElement('link');fl2.rel='preconnect';fl2.href='https://fonts.gstatic.com';fl2.crossOrigin='';document.head.appendChild(fl2);
+    var fs=document.createElement('link');fs.rel='stylesheet';fs.href='https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional';document.head.appendChild(fs);
+    // GA4
     var gt=document.createElement('script');gt.async=1;gt.src='https://www.googletagmanager.com/gtag/js?id=G-S9Y88THBWZ';document.head.appendChild(gt);
     // Clarity
     (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wxl5jmpw30");
     // Meta Pixel
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init','2489163444869889');fbq('track','PageView');
-  },3000);
+  }
+  ['click','scroll','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,_load3p,{passive:true,once:true});});
+  // Fallback: load after 4s even without interaction (handles slow readers)
+  setTimeout(_load3p,4000);
 });
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"/></noscript>
