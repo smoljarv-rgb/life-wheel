@@ -170,10 +170,10 @@ body::after{
 .sphere-btn:hover{background:var(--sf2);border-color:var(--sb);transform:translateX(2px)}
 .sphere-btn.active{background:var(--sf);border-color:var(--ac);box-shadow:0 3px 14px var(--sh);transform:translateX(4px)}
 .sphere-btn.active .s-name{color:var(--ac);font-weight:700}
-.sphere-btn.sphere-pulse{animation:sphereBtnPulse 1.8s ease-in-out infinite;border-color:rgba(232,193,122,0.6);background:rgba(232,193,122,0.09)}
+.sphere-btn.sphere-pulse{animation:sphereBtnPulse 1.8s ease-in-out infinite;border-color:rgba(232,193,122,0.6);background:rgba(232,193,122,0.09);will-change:transform}
 @keyframes sphereBtnPulse{
-  0%,100%{border-color:rgba(232,193,122,0.3);box-shadow:0 0 0 0 rgba(232,193,122,0);transform:translateX(0)}
-  50%{border-color:rgba(232,193,122,1);box-shadow:0 0 0 6px rgba(232,193,122,0.16),0 0 18px rgba(232,193,122,0.35);transform:translateX(4px)}
+  0%,100%{border-color:rgba(232,193,122,0.3);opacity:.8;transform:translateX(0)}
+  50%{border-color:rgba(232,193,122,1);opacity:1;transform:translateX(4px)}
 }
 .s-pip{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
 .s-info{flex:1;min-width:0}
@@ -282,8 +282,8 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 @keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 @keyframes spinRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes hintPulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
-@keyframes pulseCta{0%,100%{box-shadow:0 6px 20px rgba(40,120,200,.4)}50%{box-shadow:0 6px 28px rgba(40,120,200,.7),0 0 0 6px rgba(40,120,200,.15)}}
-.btn-advice:not(:disabled){animation:pulseCta 2.5s ease-in-out infinite}
+@keyframes pulseCta{0%,100%{transform:scale(1);opacity:.88}50%{transform:scale(1.02);opacity:1}}
+.btn-advice:not(:disabled){animation:pulseCta 2.5s ease-in-out infinite;will-change:transform}
 .btn-advice:not(:disabled):hover{animation:none}
 
 /* ══════════════════════════════════════
@@ -902,8 +902,8 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* Analysis animations */
-@keyframes pulseCta{0%,100%{box-shadow:0 6px 20px rgba(232,193,122,.3)}50%{box-shadow:0 6px 28px rgba(232,193,122,.6),0 0 0 6px rgba(232,193,122,.12)}}
-.btn-advice:not(:disabled){animation:pulseCta 2.5s ease-in-out infinite}
+@keyframes pulseCta{0%,100%{transform:scale(1);opacity:.88}50%{transform:scale(1.02);opacity:1}}
+.btn-advice:not(:disabled){animation:pulseCta 2.5s ease-in-out infinite;will-change:transform}
 .btn-advice:not(:disabled):hover{animation:none}
 
 /* Cookie banner */
@@ -1076,17 +1076,10 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 .exp-start-btn:active{transform:scale(0.97)}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
-<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "wxl5jmpw30");
-</script>
 </head>
 <body>
 
-<div id="express-overlay" class="hidden">
+<div id="express-overlay">
   <div class="exp-wrap">
     <div class="exp-logo">koleso</div>
     <div class="exp-kicker" id="exp-kicker">ПИТАННЯ 1 З 3</div>
@@ -1210,6 +1203,17 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
   </div>
 </div>
+<script>
+(function(){try{
+  if(localStorage.getItem('exp_done')){
+    document.getElementById('express-overlay').classList.add('hidden');
+  }else{
+    document.documentElement.classList.add('exp-open');
+    document.body.classList.add('exp-open');
+    document.body.style.top='0px';
+  }
+}catch(e){}}());
+</script>
 
 <!-- SITE NAV -->
 <nav id="siteNav">
@@ -4833,23 +4837,13 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   }
 
   var _expScrollY=0;
-  // Show overlay after 3s delay — only if not completed before
+  // Overlay shown from HTML immediately — just track the view event
   try{
     if(!localStorage.getItem('exp_done')){
-      setTimeout(function(){
-        var ov=document.getElementById('express-overlay');
-        if(!ov)return;
-        _expScrollY=window.scrollY||0;
-        document.body.style.top='-'+_expScrollY+'px';
-        ov.style.opacity='0';
-        ov.classList.remove('hidden');
-        document.documentElement.classList.add('exp-open');
-        document.body.classList.add('exp-open');
-        requestAnimationFrame(function(){requestAnimationFrame(function(){
-          ov.style.opacity='1';
-          if(window.gtag)gtag('event','express_view',{event_category:'express_test'});
-        });});
-      },1000);
+      var ov=document.getElementById('express-overlay');
+      if(ov && !ov.classList.contains('hidden')){
+        if(window.gtag)gtag('event','express_view',{event_category:'express_test'});
+      }
     }
   }catch(e){}
 })();
@@ -4906,13 +4900,16 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   },{passive:true});
 })();
 </script>
-<!-- Meta Pixel Code — delayed until after window.load -->
+<!-- Third-party scripts: delayed 3s after load to keep outside TBT window -->
 <script>
 window.addEventListener('load',function(){
   setTimeout(function(){
+    // Clarity
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wxl5jmpw30");
+    // Meta Pixel
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init','2489163444869889');fbq('track','PageView');
-  },1000);
+  },3000);
 });
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"/></noscript>
