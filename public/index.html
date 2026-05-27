@@ -2097,7 +2097,7 @@ function buildDetail(){
   // Read live state every time buildDetail runs
   const _fa = !freeAnalysisUsed && (siteConfig.paywall_enabled!==false);
   const _b = document.createElement('button');
-  _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
+  _b.style.cssText = `width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:${_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)'};box-shadow:0 6px 20px ${_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)'}`;
   _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Запустити AI-аналіз';
   _b.onclick = showPicker;
   _b.onmouseover = function(){this.style.transform='translateY(-2px)';};
