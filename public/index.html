@@ -106,6 +106,12 @@ function trackEvent(action,category,label){
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
+/* Fallback font з метриками близькими до Instrument Serif — мінімізує CLS при font-swap */
+@font-face{
+  font-family:'Instrument Serif Fallback';
+  src:local('Georgia'),local('Times New Roman');
+  ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 /* ═══════════════════════════════════════════
@@ -193,9 +199,9 @@ canvas#wheel{width:100%;height:auto;cursor:pointer;display:block;filter:drop-sha
 .detail-box{width:100%;max-width:500px;padding:10px 12px}
 .det-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--sb);transition:border-color 3s}
 .det-stripe{width:5px;height:48px;border-radius:4px;flex-shrink:0;box-shadow:0 0 12px currentColor}
-.det-name{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:400;color:var(--td);transition:color 3s}
+.det-name{font-family:'Instrument Serif',serif;font-size:1.55rem;font-weight:400;color:var(--td);transition:color 3s}
 .det-score-wrap{margin-left:auto;text-align:right}
-.det-score{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;line-height:1;transition:color 3s}
+.det-score{font-family:'Instrument Serif',serif;font-size:2.8rem;font-weight:600;line-height:1;transition:color 3s}
 .det-score-lbl{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tl);transition:color 3s}
 .sub-list{display:flex;flex-direction:column;gap:6px}
 .sub-item{display:flex;flex-direction:column;gap:5px;padding:10px 12px;background:var(--sf2);border-radius:10px;border:1px solid rgba(128,160,200,.1);transition:var(--trans)}
@@ -213,9 +219,9 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 
 /* ══ RIGHT ══ */
 .right-col{padding:6px 8px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
-.panel-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--td);letter-spacing:.04em;margin-bottom:9px;display:flex;align-items:center;gap:8px;transition:color 3s}
+.panel-title{font-family:'Instrument Serif',serif;font-size:.95rem;font-weight:600;color:var(--td);letter-spacing:.04em;margin-bottom:9px;display:flex;align-items:center;gap:8px;transition:color 3s}
 .panel-title::after{content:'';flex:1;height:1.5px;background:var(--sb);border-radius:1px;transition:background 3s}
-.total-big{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:var(--ac);line-height:1;transition:color 3s}
+.total-big{font-family:'Instrument Serif',serif;font-size:2.8rem;font-weight:300;color:var(--ac);line-height:1;transition:color 3s}
 .total-lbl{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tl);margin-bottom:12px;transition:color 3s}
 .rank-row{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:7px;cursor:pointer;transition:var(--trans)}
 .rank-row:hover{background:var(--sf2)}
@@ -228,7 +234,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .btn-advice{flex:1;border:none;background:#E8C17A;color:#0E1B2C;font-family:'Inter Tight',sans-serif;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:15px 10px;cursor:pointer;border-radius:999px;transition:all .3s;font-weight:700;box-shadow:0 8px 24px rgba(232,193,122,.30);position:relative;overflow:hidden}
 .btn-advice:hover:not(:disabled){box-shadow:0 10px 28px rgba(232,193,122,.45);transform:translateY(-2px)}
 .btn-advice:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-.btn-print{flex:0 0 auto;border:1.5px solid var(--sb);background:var(--sf2);color:var(--tm);font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-print{flex:0 0 auto;border:1.5px solid var(--sb);background:var(--sf2);color:var(--tm);font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .btn-print:hover{background:var(--sf);box-shadow:0 4px 18px var(--sh);transform:translateY(-1px)}
 .btn-print svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -241,24 +247,24 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .paywall-features li::before{content:"✓";color:var(--ember);font-weight:800}
 .pay-btn{width:100%;padding:13px;background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;letter-spacing:.04em;transition:opacity .2s}
 .pay-btn:hover{opacity:.9}
-.pay-btn-free{width:100%;padding:9px;background:transparent;color:#8aabcc;border:1px solid #d0e4f8;border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:8px;transition:all .2s}
+.pay-btn-free{width:100%;padding:9px;background:transparent;color:#8aabcc;border:1px solid #d0e4f8;border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Inter Tight',sans-serif;margin-top:8px;transition:all .2s}
 .pay-btn-free:hover{color:#5a80aa;border-color:#b0cce8}
 .email-capture{background:linear-gradient(135deg,#f0f8ff,#e8f4ff);border:1.5px solid #c0ddf8;border-radius:12px;padding:16px;margin-top:12px}
 .email-capture h3{font-size:.8rem;font-weight:700;color:#1a3060;margin-bottom:6px}
 .email-row{display:flex;gap:6px;margin-top:8px}
-.email-input{flex:1;padding:8px 10px;border:1.5px solid #c0ddf8;border-radius:8px;font-size:.72rem;font-family:'Nunito',sans-serif;color:#1a2e48;outline:none}
+.email-input{flex:1;padding:8px 10px;border:1.5px solid #c0ddf8;border-radius:8px;font-size:.72rem;font-family:'Inter Tight',sans-serif;color:#1a2e48;outline:none}
 .email-input:focus{border-color:#2878c8}
-.email-submit{padding:8px 14px;background:#2878c8;color:#fff;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
+.email-submit{padding:8px 14px;background:#2878c8;color:#fff;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;white-space:nowrap}
 .email-submit:hover{opacity:.9}
 .promo-banner{background:linear-gradient(135deg,#fff8e8,#fff3d8);border:1.5px solid #f0c060;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.72rem;color:#8a5010;text-align:center;font-weight:600}
-.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:900;background:rgba(18,28,50,.96);backdrop-filter:blur(12px);border-top:1.5px solid rgba(100,160,240,.25);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'Nunito',sans-serif;transform:translateY(100%);transition:transform .4s ease}
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:900;background:rgba(18,28,50,.96);backdrop-filter:blur(12px);border-top:1.5px solid rgba(100,160,240,.25);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'Inter Tight',sans-serif;transform:translateY(100%);transition:transform .4s ease}
 .cookie-banner.visible{transform:translateY(0)}
 .cookie-txt{flex:1;min-width:220px;font-size:.72rem;color:#c0d8f0;line-height:1.6}
 .cookie-txt a{color:#6ab4ff;text-decoration:underline;cursor:pointer}
 .cookie-btns{display:flex;gap:8px;flex-shrink:0}
-.cookie-accept{padding:8px 20px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:opacity .2s}
+.cookie-accept{padding:8px 20px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:opacity .2s}
 .cookie-accept:hover{opacity:.9}
-.cookie-decline{padding:8px 14px;background:transparent;color:#8aabcc;border:1px solid rgba(100,160,240,.3);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+.cookie-decline{padding:8px 14px;background:transparent;color:#8aabcc;border:1px solid rgba(100,160,240,.3);border-radius:8px;font-size:.72rem;cursor:pointer;font-family:'Inter Tight',sans-serif;transition:all .2s}
 .cookie-decline:hover{color:#c0d8f0;border-color:rgba(100,160,240,.5)}
 .placeholder-txt{font-size:.73rem;color:var(--tl);font-style:italic;line-height:1.65;text-align:center;padding:10px 0;transition:color 3s}
 
@@ -272,7 +278,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .picker-chip .chip-score{font-size:.58rem;opacity:.8}
 .picker-chip .chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .picker-actions{display:flex;gap:7px;align-items:center}
-.btn-analyze{flex:1;border:1.5px solid var(--sb);background:var(--ac);color:white;font-family:'Nunito',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:700}
+.btn-analyze{flex:1;border:1.5px solid var(--sb);background:var(--ac);color:white;font-family:'Inter Tight',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-radius:9px;transition:all .3s;font-weight:700}
 .btn-analyze:hover:not(:disabled){opacity:.9;transform:translateY(-1px);box-shadow:0 4px 18px var(--sh)}
 .btn-analyze:disabled{opacity:.45;cursor:not-allowed}
 .picker-hint{font-size:.6rem;color:var(--tl);transition:color 3s}
@@ -289,7 +295,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 /* ══════════════════════════════════════
    ADVICE TABLE STYLES
 ══════════════════════════════════════ */
-.adv-overview{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--tm);line-height:1.7;padding:14px 16px;border-left:4px solid var(--ac);border-radius:0 12px 12px 0;background:linear-gradient(135deg,var(--sf2),rgba(40,120,200,.05));margin-bottom:12px;transition:all 3s;box-shadow:0 2px 12px var(--sh)}
+.adv-overview{font-family:'Instrument Serif',serif;font-style:italic;font-size:.95rem;color:var(--tm);line-height:1.7;padding:14px 16px;border-left:4px solid var(--ac);border-radius:0 12px 12px 0;background:linear-gradient(135deg,var(--sf2),rgba(40,120,200,.05));margin-bottom:12px;transition:all 3s;box-shadow:0 2px 12px var(--sh)}
 
 .adv-table-wrap{overflow-x:auto;margin-bottom:10px}
 .adv-table{width:100%;border-collapse:collapse;font-size:.7rem;min-width:600px}
@@ -304,7 +310,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 /* ── ALGORITHM BLOCK ── */
 .algo-block{background:var(--sf2);border:1.5px solid var(--sb);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:all 3s;box-shadow:0 4px 18px var(--sh)}
 .algo-block:hover{box-shadow:0 6px 24px var(--sh);border-color:rgba(40,120,200,.35)}
-.algo-title{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:600;color:var(--td);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color 3s}
+.algo-title{font-family:'Instrument Serif',serif;font-size:1.08rem;font-weight:600;color:var(--td);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color 3s}
 .algo-phases{display:flex;flex-direction:column;gap:0}
 
 .algo-phase{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed rgba(128,160,200,.2);position:relative;transition:border-color 3s}
@@ -337,14 +343,14 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 .modal h2 em{font-style:italic;color:var(--ember)}
 .modal .tagline{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
 .modal-section{margin-bottom:20px}
-.modal-section h3{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--ac);margin-bottom:10px;transition:color 3s}
+.modal-section h3{font-family:'Instrument Serif',serif;font-size:1.1rem;font-weight:600;color:var(--ac);margin-bottom:10px;transition:color 3s}
 .modal-section p{font-size:.78rem;color:var(--tm);line-height:1.7;transition:color 3s}
 .step-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
 .step-list li{display:flex;gap:10px;align-items:flex-start;font-size:.77rem;color:var(--tm);line-height:1.6;transition:color 3s}
 .step-num{width:22px;height:22px;border-radius:50%;background:var(--ac);color:white;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background 3s}
 .score-scale{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
 .score-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:var(--sf2);border:1px solid var(--sb);transition:all 3s}
-.score-num{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;line-height:1;flex-shrink:0}
+.score-num{font-family:'Instrument Serif',serif;font-size:1.3rem;font-weight:600;line-height:1;flex-shrink:0}
 .score-txt{font-size:.67rem;color:var(--tm);line-height:1.4;transition:color 3s}
 .score-txt strong{display:block;font-size:.7rem;color:var(--td);font-weight:600;margin-bottom:1px;transition:color 3s}
 .btn-start{width:100%;margin-top:22px;background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;font-family:'Inter Tight',sans-serif;font-size:.78rem;letter-spacing:.04em;padding:16px 32px;cursor:pointer;font-weight:700;box-shadow:0 6px 20px rgba(232,193,122,.25);transition:all .3s}
@@ -618,7 +624,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   color:var(--ember);margin-bottom:12px;
 }
 .hero-h1{
-  font-family:'Instrument Serif',serif;
+  font-family:'Instrument Serif','Instrument Serif Fallback',serif;
   font-style:italic;
   font-size:clamp(32px,6vw,56px);
   color:var(--fog);line-height:1.1;
@@ -1603,7 +1609,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
     <div class="detail-box glass" id="detailBox"></div>
     <!-- Посилання на останній результат -->
     <div id="lastResultLink" style="display:none;width:100%;max-width:500px;margin-top:10px;text-align:center">
-      <a id="lastResultAnchor" href="#" style="display:inline-flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:600;color:var(--tm);text-decoration:none;padding:8px 18px;border:1.5px solid var(--sb);border-radius:20px;transition:all .2s;background:var(--sf)" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
+      <a id="lastResultAnchor" href="#" style="display:inline-flex;align-items:center;gap:6px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:600;color:var(--tm);text-decoration:none;padding:8px 18px;border:1.5px solid var(--sb);border-radius:20px;transition:all .2s;background:var(--sf)" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
         📋 Мій останній результат →
       </a>
     </div>
@@ -2096,7 +2102,7 @@ function buildDetail(){
   // Read live state every time buildDetail runs
   const _fa = !freeAnalysisUsed && (siteConfig.paywall_enabled!==false);
   const _b = document.createElement('button');
-  _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:Nunito,sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
+  _b.style.cssText = 'width:100%;padding:13px 10px;color:#fff;border:none;border-radius:11px;font-family:Inter Tight,sans-serif;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;background:'+(_fa?'linear-gradient(135deg,#207040,#158030)':'linear-gradient(135deg,#2878c8,#1a58a8)')+';box-shadow:0 6px 20px '+(_fa?'rgba(32,112,64,.4)':'rgba(40,120,200,.4)');
   _b.textContent = _fa ? '🆓 Спробувати безкоштовно' : '✦ Запустити AI-аналіз';
   _b.onclick = showPicker;
   _b.onmouseover = function(){this.style.transform='translateY(-2px)';};
@@ -2198,7 +2204,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
     // Позначки шкали (2,4,6,8,10)
     if(i%2===0){
       const rx=cx+r+5,ry=cy-4;
-      ct.font='700 9px Nunito,sans-serif';
+      ct.font='700 9px Inter Tight,sans-serif';
       ct.fillStyle='rgba(255,255,255,.95)';ct.textAlign='left';ct.textBaseline='middle';
       ct.fillText(i,rx+1,ry+1);
       ct.fillStyle='rgba(30,80,170,.8)';ct.fillText(i,rx,ry);
@@ -2238,7 +2244,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
     ct.rotate(ma+Math.PI/2+(flip?Math.PI:0));
     ct.textAlign='center';ct.textBaseline='middle';
     const fs=isAct?14:12.5;
-    ct.font=`700 ${fs}px Nunito,sans-serif`;
+    ct.font=`700 ${fs}px Inter Tight,sans-serif`;
     // Білий контур
     ct.lineJoin='round';ct.miterLimit=3;
     ct.strokeStyle='rgba(255,255,255,1)';ct.lineWidth=6;
@@ -2250,7 +2256,7 @@ function drawWheelOnCtx(c,cx,cy,maxr,minr,sl,activeId){
 
     // Бал всередині сектора
     const scoreR=Math.max(minr+20,r-22);
-    ct.font=`700 ${isAct?11:10}px Nunito,sans-serif`;
+    ct.font=`700 ${isAct?11:10}px Inter Tight,sans-serif`;
     ct.strokeStyle='rgba(255,255,255,1)';ct.lineWidth=5;ct.lineJoin='round';
     ct.textAlign='center';ct.textBaseline='middle';
     ct.strokeText(a.toFixed(1),cx+scoreR*Math.cos(ma),cy+scoreR*Math.sin(ma));
@@ -2673,8 +2679,8 @@ function showPaywall(){
         </div>
 
         <div style="display:flex;gap:8px;margin-bottom:10px">
-          <input type="text" id="promoInput" placeholder="Промокод (якщо є)" style="flex:1;padding:8px 12px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:8px;color:#1a2e48;font-size:.72rem;outline:none;font-family:'Nunito',sans-serif">
-          <button onclick="applyPromo()" style="padding:8px 14px;background:#e8f0f8;color:#2878c8;border:1px solid #c0d8f0;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700">Застосувати</button>
+          <input type="text" id="promoInput" placeholder="Промокод (якщо є)" style="flex:1;padding:8px 12px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:8px;color:#1a2e48;font-size:.72rem;outline:none;font-family:'Inter Tight',sans-serif">
+          <button onclick="applyPromo()" style="padding:8px 14px;background:#e8f0f8;color:#2878c8;border:1px solid #c0d8f0;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:'Inter Tight',sans-serif;font-weight:700">Застосувати</button>
         </div>
         <div id="promoMsg" style="font-size:.68rem;margin-bottom:8px;display:none"></div>
 
@@ -2704,10 +2710,10 @@ function updatePaywallAction(){
         <div style="font-size:.7rem;opacity:.85;margin-bottom:10px">Залиш email — повідомимо одразу як відкриється доступ</div>
         <div style="display:flex;gap:6px">
           <input type="email" id="paywallEmailMain" placeholder="твій@email.com"
-            style="flex:1;padding:9px 12px;border-radius:8px;border:none;font-size:.75rem;font-family:'Nunito',sans-serif;outline:none"
+            style="flex:1;padding:9px 12px;border-radius:8px;border:none;font-size:.75rem;font-family:'Inter Tight',sans-serif;outline:none"
             onkeydown="if(event.key==='Enter')submitPaywallEmailMain()">
           <button onclick="submitPaywallEmailMain()"
-            style="padding:9px 16px;background:#fff;color:#1a3a6a;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap">
+            style="padding:9px 16px;background:#fff;color:#1a3a6a;border:none;border-radius:8px;font-family:'Inter Tight',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap">
             Сповістити
           </button>
         </div>
@@ -2988,7 +2994,7 @@ function showPreAnalysisModal(){
   modal.style.cssText='position:fixed;inset:0;background:rgba(10,20,40,.75);backdrop-filter:blur(8px);z-index:2100;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeInOv .25s ease';
 
   modal.innerHTML=`
-  <div style="background:var(--sf2);border-radius:20px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.45);font-family:'Nunito',sans-serif;transition:background 3s">
+  <div style="background:var(--sf2);border-radius:20px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.45);font-family:'Inter Tight',sans-serif;transition:background 3s">
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#16478a,#2878c8);color:#fff;padding:22px 24px 18px;border-radius:20px 20px 0 0;position:relative">
       <button onclick="document.getElementById('preAnalysisModal').remove()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">✕</button>
@@ -3066,7 +3072,7 @@ function _renderModalActions(){
 
   const startBtn=document.createElement('button');
   startBtn.id='modalStartBtn';
-  startBtn.style.cssText='flex:1;min-width:160px;padding:14px 18px;background:'+btnBg+';color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s';
+  startBtn.style.cssText='flex:1;min-width:160px;padding:14px 18px;background:'+btnBg+';color:#fff;border:none;border-radius:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:Inter Tight,sans-serif;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .3s';
   startBtn.innerHTML=btnLabel;
   startBtn.onclick=_startFromModal;
   startBtn.onmouseover=function(){this.style.transform='translateY(-2px)';};
@@ -3074,7 +3080,7 @@ function _renderModalActions(){
   row.appendChild(startBtn);
 
   const cancelBtn=document.createElement('button');
-  cancelBtn.style.cssText='padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:Nunito,sans-serif;transition:all .3s';
+  cancelBtn.style.cssText='padding:14px 18px;background:var(--sf);border:1.5px solid var(--sb);color:var(--tm);border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter Tight,sans-serif;transition:all .3s';
   cancelBtn.textContent='Скасувати';
   cancelBtn.onclick=function(){const m=document.getElementById('preAnalysisModal');if(m)m.remove();};
   cancelBtn.onmouseover=function(){this.style.borderColor='var(--ac)';this.style.color='var(--ac)';};
@@ -3269,7 +3275,7 @@ async function runAnalysis(){
   if(btn) btn.style.display='none';
 
   // Показуємо індикатор завантаження
-  if(area) area.innerHTML='<div style="padding:20px;text-align:center;font-family:Nunito,sans-serif;color:var(--t2)"><div style="font-size:1.5rem;margin-bottom:10px">⏳</div><div>Зберігаємо результат...</div></div>';
+  if(area) area.innerHTML='<div style="padding:20px;text-align:center;font-family:Inter Tight,sans-serif;color:var(--t2)"><div style="font-size:1.5rem;margin-bottom:10px">⏳</div><div>Зберігаємо результат...</div></div>';
 
   // Збираємо бали
   const allScoresSnapshot={};
@@ -3306,7 +3312,7 @@ async function runAnalysis(){
     }
   }catch(e){
     console.error('Save error:',e);
-    if(area) area.innerHTML='<div style="padding:14px;background:#fff5f5;border-radius:10px;font-family:Nunito,sans-serif;color:#c03030">Помилка збереження. Спробуй ще раз.</div>';
+    if(area) area.innerHTML='<div style="padding:14px;background:#fff5f5;border-radius:10px;font-family:Inter Tight,sans-serif;color:#c03030">Помилка збереження. Спробуй ще раз.</div>';
     if(btn){ btn.style.display=''; btn.innerHTML='↩ Спробувати знову'; btn.onclick=showPicker; }
   }
 }
@@ -3343,15 +3349,15 @@ function renderAdvice(parsed){
   <!-- ═══ DASHBOARD STATS ROW ═══ -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
     <div style="text-align:center;padding:10px 6px;background:linear-gradient(135deg,rgba(40,120,200,.1),rgba(40,120,200,.05));border:1.5px solid rgba(40,120,200,.2);border-radius:12px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--ac);line-height:1">${totalAvg}</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:1.8rem;font-weight:600;color:var(--ac);line-height:1">${totalAvg}</div>
       <div style="font-size:.55rem;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;transition:color 3s">Загальний бал</div>
     </div>
     <div style="text-align:center;padding:10px 6px;background:linear-gradient(135deg,rgba(200,50,50,.08),rgba(200,50,50,.04));border:1.5px solid rgba(200,50,50,.18);border-radius:12px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:#c03030;line-height:1">${critCount}</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:1.8rem;font-weight:600;color:#c03030;line-height:1">${critCount}</div>
       <div style="font-size:.55rem;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;transition:color 3s">Критичних сфер</div>
     </div>
     <div style="text-align:center;padding:10px 6px;background:linear-gradient(135deg,rgba(32,112,64,.1),rgba(32,112,64,.05));border:1.5px solid rgba(32,112,64,.2);border-radius:12px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:#207040;line-height:1">${strongCount}</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:1.8rem;font-weight:600;color:#207040;line-height:1">${strongCount}</div>
       <div style="font-size:.55rem;color:var(--tl);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;transition:color 3s">Сильних сфер</div>
     </div>
   </div>
@@ -3404,7 +3410,7 @@ function renderAdvice(parsed){
         <div style="font-size:.72rem;flex-shrink:0;width:24px;text-align:center">${rankLabel}</div>
         <div style="font-weight:700;color:var(--td);flex:1;font-size:.78rem;transition:color 3s">${a.sphere}</div>
         <div style="display:flex;align-items:baseline;gap:2px">
-          <span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:${scCol};line-height:1">${sc}</span>
+          <span style="font-family:'Instrument Serif',serif;font-size:1.4rem;font-weight:600;color:${scCol};line-height:1">${sc}</span>
           <span style="font-size:.52rem;color:var(--tl);transition:color 3s">/10</span>
           ${prevHtml}
         </div>
@@ -3451,7 +3457,7 @@ function renderAdvice(parsed){
     const color=colorMap[a.sphere]||'#4080c0';
     const sc=parseFloat(a.score)||5;
     return `<button onclick="document.getElementById('algo_${ai}').scrollIntoView({behavior:'smooth',block:'start'})"
-      style="padding:5px 11px;background:${color}22;color:${color};border:1.5px solid ${color}55;border-radius:20px;font-size:.65rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;transition:all .2s"
+      style="padding:5px 11px;background:${color}22;color:${color};border:1.5px solid ${color}55;border-radius:20px;font-size:.65rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter Tight',sans-serif;transition:all .2s"
       onmouseover="this.style.background='${color}44'" onmouseout="this.style.background='${color}22'">
       ${a.sphere} ${sc}/10
     </button>`;
@@ -3566,7 +3572,7 @@ function renderAdvice(parsed){
         <!-- Next sphere button -->
         ${ai < parsed.advice.length-1 ? `<div style="text-align:right;margin-top:12px">
           <button onclick="toggleAlgo('algo_body_${ai+1}','algo_${ai+1}','${colorMap[parsed.advice[ai+1].sphere]||'#4080c0'}',true)"
-            style="padding:6px 14px;background:transparent;border:1.5px solid var(--sb);border-radius:8px;font-size:.68rem;color:var(--tm);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s"
+            style="padding:6px 14px;background:transparent;border:1.5px solid var(--sb);border-radius:8px;font-size:.68rem;color:var(--tm);cursor:pointer;font-family:'Inter Tight',sans-serif;transition:all .2s"
             onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'"
             onmouseout="this.style.borderColor='var(--sb)';this.style.color='var(--tm)'">
             Наступна сфера: ${parsed.advice[ai+1].sphere} →
@@ -3590,10 +3596,10 @@ function renderAdvice(parsed){
       За 30 днів практики більшість людей зростають на <strong>1.5–2.5 бали</strong>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-      <button onclick="setReturnReminder('${returnDateStr}','${avgNow}')" style="padding:9px 18px;background:#fff;color:#1a3a6a;border:none;border-radius:9px;font-size:.73rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">
+      <button onclick="setReturnReminder('${returnDateStr}','${avgNow}')" style="padding:9px 18px;background:#fff;color:#1a3a6a;border:none;border-radius:9px;font-size:.73rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif">
         🔔 Нагадати через 30 днів
       </button>
-      <button onclick="shareResult('${avgNow}')" style="padding:9px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:9px;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">
+      <button onclick="shareResult('${avgNow}')" style="padding:9px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:9px;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Inter Tight',sans-serif">
         📤 Поділитись результатом
       </button>
     </div>
@@ -3672,7 +3678,7 @@ function renderAdvice(parsed){
 			window.location.href = '/result/' + saved.slug + analyzing;
 			return;
 			// Показуємо блок під колесом і після плану зростання
-			const _blockHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Nunito,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+			const _blockHTML = `<a href="/result/${saved.slug}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Inter Tight,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
 			const resultBlock = document.getElementById('fullResultBlock');
 			if(resultBlock){
 			  resultBlock.style.display = 'block';
@@ -3693,7 +3699,7 @@ function renderAdvice(parsed){
     if(rb && rb.innerHTML.trim()===''){
       rb.style.display='block';
       const slug=window._lastResultSlug||'';
-      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Nunito,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Inter Tight,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
     }
   }
 
@@ -3706,7 +3712,7 @@ function renderAdvice(parsed){
     const rb = document.getElementById('fullResultBlock');
     if(rb && window._lastResultUrl && rb.innerHTML.trim()===''){
       rb.style.display='block';
-      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Nunito,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
+      rb.innerHTML=`<a href="${window._lastResultUrl}" target="_blank" style="display:block;text-decoration:none;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#1a3a6a 0%,#2878c8 60%,#1a58a8 100%);box-shadow:0 8px 32px rgba(40,120,200,.45),0 2px 8px rgba(0,0,0,.15);animation:resultPulse 2.5s ease-in-out infinite;"><div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div><div style="padding:16px 18px 12px;position:relative"><div style="font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px">✦ Готово</div><div style="font-size:.92rem;font-weight:800;color:#fff;margin-bottom:2px">Твій повний звіт готовий</div><div style="font-size:.64rem;color:rgba(255,255,255,.65)">Heatmap · Сфери · План на 30 днів · Порівняння</div></div><div style="padding:0 18px 16px;position:relative"><div style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#fff;color:#1a3a6a;font-weight:800;border-radius:10px;font-size:.8rem;font-family:Inter Tight,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)">Відкрити звіт →</div></div></a>`;
     }
   }, 3000);
 
@@ -3748,7 +3754,7 @@ function renderAdvice(parsed){
           </div>
         </div>
 
-        <button onclick="triggerPayment('monthly','uah')" style="width:100%;padding:13px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .2s;margin-bottom:8px"
+        <button onclick="triggerPayment('monthly','uah')" style="width:100%;padding:13px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:10px;font-family:'Inter Tight',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(40,120,200,.4);transition:all .2s;margin-bottom:8px"
           onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 10px 28px rgba(40,120,200,.5)'"
           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(40,120,200,.4)'">
           🚀 Активувати PRO — 249 ₴/міс
@@ -3769,7 +3775,7 @@ function _pdfProgress(pct, label){
   if(!bar){
     const overlay=document.createElement('div');
     overlay.id='pdfOverlay';
-    overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(10,20,40,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Nunito,sans-serif';
+    overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(10,20,40,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Inter Tight,sans-serif';
     overlay.innerHTML=`
       <div style="background:rgba(18,35,70,.98);border:1.5px solid rgba(100,160,240,.3);border-radius:18px;padding:28px 36px;min-width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
         <div style="font-size:2rem;margin-bottom:10px">📄</div>
@@ -4062,7 +4068,7 @@ function shareResult(avgScore){
   // Build share menu
   const menu=document.createElement('div');
   menu.id='shareMenu';
-  menu.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9000;background:rgba(18,28,50,.97);backdrop-filter:blur(14px);border:1.5px solid rgba(100,160,240,.25);border-radius:16px;padding:16px 18px;min-width:280px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:Nunito,sans-serif';
+  menu.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9000;background:rgba(18,28,50,.97);backdrop-filter:blur(14px);border:1.5px solid rgba(100,160,240,.25);border-radius:16px;padding:16px 18px;min-width:280px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:Inter Tight,sans-serif';
   menu.innerHTML=`
     <div style="font-size:.72rem;color:#8aabcc;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;text-align:center">Поділитись результатом</div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
@@ -4091,7 +4097,7 @@ function shareResult(avgScore){
         <span style="font-size:.65rem;color:#c0d8f0">Facebook</span>
       </a>
       <button onclick="saveToGoogleDrive('${avgScore}')"
-        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(100,160,240,.15);cursor:pointer;transition:background .2s;font-family:Nunito,sans-serif"
+        style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(100,160,240,.15);cursor:pointer;transition:background .2s;font-family:Inter Tight,sans-serif"
         onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
         <svg width="28" height="28" viewBox="0 0 24 24"><path d="M4.5 19L1.5 14L7.5 4H13.5L7.5 14L4.5 19Z" fill="#0F9D58"/><path d="M19.5 19H13.5L10.5 14H16.5L19.5 19Z" fill="#4285F4"/><path d="M16.5 4L22.5 14L19.5 19L13.5 9L16.5 4Z" fill="#FFBB00"/></svg>
         <span style="font-size:.65rem;color:#c0d8f0">Google Drive</span>
@@ -4103,7 +4109,7 @@ function shareResult(avgScore){
         <span style="font-size:.65rem;color:#c0d8f0" id="copyBtnTxt">Копіювати</span>
       </button>
     </div>
-    <button onclick="document.getElementById('shareMenu').remove()" style="width:100%;margin-top:12px;padding:7px;background:transparent;color:#6a8aaa;border:1px solid rgba(100,160,240,.2);border-radius:8px;font-size:.68rem;cursor:pointer;font-family:Nunito,sans-serif">Закрити</button>
+    <button onclick="document.getElementById('shareMenu').remove()" style="width:100%;margin-top:12px;padding:7px;background:transparent;color:#6a8aaa;border:1px solid rgba(100,160,240,.2);border-radius:8px;font-size:.68rem;cursor:pointer;font-family:Inter Tight,sans-serif">Закрити</button>
   `;
   document.body.appendChild(menu);
 
@@ -4226,7 +4232,7 @@ function saveToGoogleDrive(avgScore){
   const overlay=document.createElement('div');
   overlay.id='driveInstructionOverlay';
   overlay.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px';
-  let overlayHTML='<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:Nunito,sans-serif">';
+  let overlayHTML='<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:Inter Tight,sans-serif">';
   overlayHTML+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">';
   overlayHTML+='<div><div style="font-size:1rem;font-weight:800;color:#1a2e48">Зберегти PDF у Google Drive</div>';
   overlayHTML+='<div style="font-size:.68rem;color:#8aabcc">3 прості кроки</div></div></div>';
@@ -4244,8 +4250,8 @@ function saveToGoogleDrive(avgScore){
   overlayHTML+='<div><div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Завантаж у Google Drive</div>';
   overlayHTML+='<div style="font-size:.68rem;color:#5a7090;line-height:1.5">Drive відкриється автоматично. Натисни <b>+ Новий → Завантажити файл</b></div></div></div></div>';
   overlayHTML+='<div style="display:flex;gap:8px">';
-  overlayHTML+='<button onclick="document.getElementById(\'driveInstructionOverlay\').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:Nunito,sans-serif">Скасувати</button>';
-  overlayHTML+='<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif">Відкрити PDF та Drive</button>';
+  overlayHTML+='<button onclick="document.getElementById(\'driveInstructionOverlay\').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:Inter Tight,sans-serif">Скасувати</button>';
+  overlayHTML+='<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:Inter Tight,sans-serif">Відкрити PDF та Drive</button>';
   overlayHTML+='</div></div>';
   overlay.innerHTML=overlayHTML;
   document.body.appendChild(overlay);
@@ -4273,7 +4279,7 @@ function copyShareText(text){
       // Show welcome back banner
       setTimeout(()=>{
         const banner=document.createElement('div');
-        banner.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a3a6a,#2878c8);color:#fff;border-radius:12px;padding:14px 20px;font-family:Nunito,sans-serif;font-size:.78rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:340px;text-align:center;line-height:1.6';
+        banner.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a3a6a,#2878c8);color:#fff;border-radius:12px;padding:14px 20px;font-family:Inter Tight,sans-serif;font-size:.78rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:340px;text-align:center;line-height:1.6';
         banner.innerHTML=`🎉 <strong>Ласкаво повернувся!</strong><br>
           ${daysPassed} днів тому твій бал був <strong>${r.avg}/10</strong><br>
           Пройди тест знову щоб побачити прогрес<br>
@@ -4396,14 +4402,14 @@ function showPromoEmailForm(plan, code) {
     '<p style="font-size:.8rem;color:#5a7090;margin-bottom:16px">Введи email щоб активувати доступ з будь-якого пристрою.</p>' +
     '<input type="email" id="promoEmailInput" placeholder="email@example.com" ' +
     'style="width:100%;padding:10px 14px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:10px;' +
-    'color:#1a2e48;font-size:.85rem;outline:none;font-family:Nunito,sans-serif;margin-bottom:10px">' +
+    'color:#1a2e48;font-size:.85rem;outline:none;font-family:Inter Tight,sans-serif;margin-bottom:10px">' +
     '<div id="promoEmailMsg" style="font-size:.72rem;margin-bottom:10px;display:none"></div>' +
     '<button onclick="activatePromoSubscription()" ' +
     'style="width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#1e8449);border:none;' +
-    'border-radius:12px;color:#fff;font-family:Nunito,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer">' +
+    'border-radius:12px;color:#fff;font-family:Inter Tight,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer">' +
     '&#x2705; Активувати безкоштовно</button>' +
     '<button onclick="closePaywall()" style="width:100%;margin-top:8px;padding:10px;background:transparent;' +
-    'border:none;color:#8aabcc;font-family:Nunito,sans-serif;font-size:.75rem;cursor:pointer">&#x23F3; Пізніше</button>';
+    'border:none;color:#8aabcc;font-family:Inter Tight,sans-serif;font-size:.75rem;cursor:pointer">&#x23F3; Пізніше</button>';
 }
 
 function activatePromoSubscription() {
@@ -4906,10 +4912,14 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   },{passive:true});
 })();
 </script>
-<!-- Meta Pixel Code -->
+<!-- Meta Pixel Code — delayed until after window.load -->
 <script>
-!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init','2489163444869889');fbq('track','PageView');
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init','2489163444869889');fbq('track','PageView');
+  },1000);
+});
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2489163444869889&ev=PageView&noscript=1"/></noscript>
 <!-- End Meta Pixel Code -->
