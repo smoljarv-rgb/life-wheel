@@ -100,9 +100,7 @@ function trackEvent(action,category,label){
   }catch(e){}
 }
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional" onload="this.onload=null;this.rel='stylesheet'">
+<!-- Fonts deferred to window.load — display:optional means they never affect first-visit text anyway -->
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional"></noscript>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -727,6 +725,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 #howItWorks{
   max-width:1100px;margin:0 auto;
   padding:32px 20px;
+  content-visibility:auto;contain-intrinsic-size:0 400px;
 }
 .section-kicker{
   font-family:monospace;font-size:10px;
@@ -776,6 +775,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 #testimonialSection{
   max-width:1100px;margin:0 auto;
   padding:8px 20px 32px;
+  content-visibility:auto;contain-intrinsic-size:0 350px;
 }
 .testimonial-box{
   background:rgba(224,138,78,0.06);
@@ -807,6 +807,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
   max-width:1100px;margin:0 auto;
   padding:8px 20px 48px;
   text-align:center;
+  content-visibility:auto;contain-intrinsic-size:0 200px;
 }
 .bottom-cta-btn{
   background:#E8C17A;color:#0E1B2C;
@@ -838,6 +839,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 #siteFooter{
   background:var(--ink-2)!important;
   border-top:1px solid var(--line)!important;
+  content-visibility:auto;contain-intrinsic-size:0 450px;
 }
 
 /* Panel title font */
@@ -4873,6 +4875,10 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
 <!-- Exit intent, scroll tracking, and all third-party scripts deferred to after load -->
 <script>
 window.addEventListener('load',function(){
+  // Fonts deferred — display:optional means they never block first-visit rendering anyway
+  var fl=document.createElement('link');fl.rel='preconnect';fl.href='https://fonts.googleapis.com';document.head.appendChild(fl);
+  var fl2=document.createElement('link');fl2.rel='preconnect';fl2.href='https://fonts.gstatic.com';fl2.crossOrigin='';document.head.appendChild(fl2);
+  var fs=document.createElement('link');fs.rel='stylesheet';fs.href='https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional';document.head.appendChild(fs);
   // Exit intent (desktop only) — deferred to avoid innerWidth reflow during LCP
   if(window.innerWidth>768){
     document.addEventListener('mouseleave',function(e){
