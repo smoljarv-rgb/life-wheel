@@ -9,6 +9,17 @@ window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-S9Y88THBWZ');
+function trackEvent(action,category,label){
+  try{
+    if(window.gtag) gtag('event',action,{event_category:category,event_label:label});
+    if(window.clarity) clarity('event',action);
+  }catch(e){}
+}
+</script>
+<script>
+window.addEventListener('load',function(){
+  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wxl5jmpw30");
+});
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Твій результат — Koleso.live</title>
@@ -1514,7 +1525,7 @@ function renderSpheres(data){
         <div class="upgrade-card-feat"><span>✦</span>Порівняння з 1 200+ людьми</div>
         <div class="upgrade-card-feat"><span>✦</span>PDF-звіт + трекінг прогресу</div>
       </div>
-      <a href="/pricing" class="btn-upgrade">Розкрити всі ${lockedCount} сфер →</a>
+      <a href="/pricing" class="btn-upgrade" onclick="trackEvent('upgrade_click','monetization','result_page')">Розкрити всі ${lockedCount} сфер →</a>
       <div class="upgrade-count">від 99 ₴ · миттєвий доступ · 14 днів гарантія повернення</div>
     </div>`:'';
 

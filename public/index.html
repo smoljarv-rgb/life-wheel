@@ -96,6 +96,7 @@ gtag('config','G-S9Y88THBWZ');
 function trackEvent(action,category,label){
   try{
     if(window.gtag) gtag('event',action,{event_category:category,event_label:label});
+    if(window.clarity) clarity('event',action);
     fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:action,data:{category,label}})}).catch(function(){});
   }catch(e){}
 }
@@ -1788,6 +1789,7 @@ function startWithSphere(id){
 }
 
 function closeModal(){
+  trackEvent('test_started','engagement','homepage');
   const m=document.getElementById('modalOverlay');
   m.style.display='none';
   m.style.pointerEvents='none';
@@ -3262,6 +3264,7 @@ async function runAnalysis(){
   if(!isPremiumUnlocked){ showPaywall(); return; }
   isPremiumUnlocked=false;
   try{ sessionStorage.removeItem('premium_unlocked'); }catch(e){}
+  trackEvent('analysis_started','engagement',window._isFreeThisAnalysis?'free':'pro');
 
   const picker=document.getElementById('spherePicker');
   const area=document.getElementById('adviceArea');
@@ -4792,7 +4795,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
           if(val){val.textContent=v+'/10';val.style.color=color;}
         },900+i*150);
       });
-      if(window.gtag)gtag('event','express_result',{event_category:'express_test',event_label:avg.toFixed(1)});
+      trackEvent('express_result','express_test',avg.toFixed(1));
     },400);
   };
 
@@ -4824,7 +4827,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         if(_cta)_cta.classList.remove('visible');
       },420);
     }
-    if(window.gtag)gtag('event','express_to_full',{event_category:'express_test',event_label:weakId});
+    trackEvent('express_to_full','express_test',weakId);
   };
 
   function expShowScreen(id){
@@ -4841,7 +4844,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         document.body.style.top='0px';
         document.documentElement.classList.add('exp-open');
         document.body.classList.add('exp-open');
-        if(window.gtag)gtag('event','express_view',{event_category:'express_test'});
+        trackEvent('express_view','express_test','init');
       }
     }
   }catch(e){}
