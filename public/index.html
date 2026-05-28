@@ -4901,7 +4901,11 @@ window.addEventListener('load',function(){
       }
     });
   },{passive:true});
-  // Third-party scripts: load on first user interaction to keep outside TBT window
+  // Clarity — окремо, через 500ms після load (для точних даних сесій)
+  setTimeout(function(){
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wxl5jmpw30");
+  },500);
+  // GA4 + Meta Pixel — тільки на взаємодію (не впливають на INP/TBT)
   var _3pLoaded=false;
   function _load3p(){
     if(_3pLoaded)return;
@@ -4913,8 +4917,6 @@ window.addEventListener('load',function(){
     var fs=document.createElement('link');fs.rel='stylesheet';fs.href='https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional';document.head.appendChild(fs);
     // GA4
     var gt=document.createElement('script');gt.async=1;gt.src='https://www.googletagmanager.com/gtag/js?id=G-S9Y88THBWZ';document.head.appendChild(gt);
-    // Clarity
-    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wxl5jmpw30");
     // Meta Pixel
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init','2489163444869889');fbq('track','PageView');
