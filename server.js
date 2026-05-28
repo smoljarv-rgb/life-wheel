@@ -425,13 +425,14 @@ function saveDB(db) {
 //  RATE LIMITING
 // ══════════════════════════════════════════
 const rateMap = new Map();
-function rateLimit(ip, max, windowMs) {
+function rateLimit(ip, max, windowMs, key) {
   max = max || 20; windowMs = windowMs || 60000;
+  const mapKey = key ? ip + ':' + key : ip;
   const now = Date.now();
-  const entry = rateMap.get(ip) || { count: 0, start: now };
+  const entry = rateMap.get(mapKey) || { count: 0, start: now };
   if (now - entry.start > windowMs) { entry.count = 0; entry.start = now; }
   entry.count++;
-  rateMap.set(ip, entry);
+  rateMap.set(mapKey, entry);
   return entry.count <= max;
 }
 
@@ -518,6 +519,7 @@ app.get('/api/results/:slug', async (req, res) => {
 
 app.post('/api/subscribe', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+  if (!rateLimit(ip, 5, 300000, 'subscribe')) return res.status(429).json({ error: 'Забагато запитів.' });
   const { email, source, slug } = req.body;
   if (!email || !email.includes('@'))
     return res.status(400).json({ error: 'Invalid email' });
@@ -696,6 +698,8 @@ app.post('/api/payment', (req, res) => {
 });
 
 app.post('/api/promo', async (req, res) => {
+  const _ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+  if (!rateLimit(_ip, 10, 60000, 'promo')) return res.status(429).json({ valid: false, error: 'Забагато спроб. Спробуйте за хвилину.' });
   const { code } = req.body;
   try {
     // Читаємо промокоди з Supabase
@@ -812,7 +816,7 @@ app.get('/api/groq-key', (req, res) => {
 // ══════════════════════════════════════════
 app.post('/api/analyze', async function(req, res) {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
-  if (!rateLimit(ip)) return res.status(429).json({ error: 'Забагато запитів. Спробуйте за хвилину.' });
+  if (!rateLimit(ip, 15, 60000, 'analyze')) return res.status(429).json({ error: 'Забагато запитів. Спробуйте за хвилину.' });
 
   const { prompt, systemPrompt } = req.body;
   if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'Відсутній prompt' });
@@ -1181,7 +1185,7 @@ app.post('/api/results/update-advice', async (req, res) => {
 // ══════════════════════════════════════════
 app.post('/api/portrait', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
-  if (!rateLimit(ip, 20, 120000)) return res.status(429).json({ success: false, error: 'rate_limit' });
+  if (!rateLimit(ip, 20, 120000, 'portrait')) return res.status(429).json({ success: false, error: 'rate_limit' });
 
   const { slug, scores, sphereResults } = req.body;
   if (!slug || !scores) return res.status(400).json({ success: false, error: 'Missing data' });
@@ -1293,6 +1297,8 @@ app.post('/api/portrait', async (req, res) => {
 
 // ── Безкоштовна активація через 100% промокод ──
 app.post('/api/promo/activate', async (req, res) => {
+  const _ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+  if (!rateLimit(_ip, 5, 300000, 'promo_activate')) return res.status(429).json({ error: 'Забагато спроб. Спробуйте пізніше.' });
   const { code, email, plan } = req.body;
   if (!code || !email || !email.includes('@')) {
     return res.status(400).json({ error: 'Потрібен код і email' });
