@@ -2064,17 +2064,24 @@ function buildDetail(){
     inp.addEventListener('input',()=>{
       const val=+inp.value,sd3=sDesc(val);
       state[s.id][sub.k]=val;
+      // Lightweight: immediate feedback (text/color only)
       document.getElementById(`sv_${s.id}_${sub.k}`).textContent=`${val} — ${sd3.label}`;
       document.getElementById(`sv_${s.id}_${sub.k}`).style.color=sColor(val);
       document.getElementById(`sd_${s.id}_${sub.k}`).textContent=sd3.desc;
       const newA=avg(s.id);
       box.querySelector('.det-score').textContent=newA.toFixed(1);
       box.querySelector('.det-score').nextElementSibling&&(box.querySelector('.det-score').parentElement.previousElementSibling.lastElementChild.textContent=`${sDesc(newA).label} — ${sDesc(newA).desc.substring(0,62)}…`);
-      buildNav();updateResults();drawWheel();updateConstellation(SPHERES.map(s=>avg(s.id)));
       showSavedToast();
-      // Показуємо кнопку "Наступна сфера" після першого руху повзунка
       const nb=document.getElementById('nextSphereBtn');
       if(nb) nb.style.display='flex';
+      // Heavy: canvas + nav + results deferred to next animation frame (INP fix)
+      if(!_rafPending){
+        _rafPending=true;
+        requestAnimationFrame(()=>{
+          _rafPending=false;
+          buildNav();updateResults();drawWheel();updateConstellation(SPHERES.map(s=>avg(s.id)));
+        });
+      }
     });
   });
 
@@ -2378,7 +2385,8 @@ function initConstellationDrag(){
   svg.addEventListener('mousedown',_consStart);
   svg.addEventListener('touchstart',_consStart,{passive:false});
   document.addEventListener('mousemove',_consMove);
-  document.addEventListener('touchmove',_consMove,{passive:false});
+  // touchmove добавляється динамічно в _consStart і видаляється в _consEnd
+  // щоб {passive:false} не блокував scroll на всій сторінці весь час
   document.addEventListener('mouseup',_consEnd);
   document.addEventListener('touchend',_consEnd);
 }
@@ -2396,6 +2404,8 @@ function _consStart(e){
   const i=+m[1];
   const a=(i*30-90)*Math.PI/180;
   _consDrag={i,ax:Math.cos(a),ay:Math.sin(a)};
+  // Додаємо passive:false touchmove тільки на час drag — не блокує весь page scroll
+  document.addEventListener('touchmove',_consMove,{passive:false});
 }
 function _consMove(e){
   if(!_consDrag)return;
@@ -2422,7 +2432,10 @@ function _consMove(e){
   buildNav();updateResults();
 }
 function _consEnd(){
-  if(_consDrag){drawWheel();showSavedToast();_consDrag=null;}
+  if(_consDrag){
+    document.removeEventListener('touchmove',_consMove);
+    drawWheel();showSavedToast();_consDrag=null;
+  }
 }
 
 cv.addEventListener('click',e=>{
@@ -2439,6 +2452,7 @@ cv.addEventListener('click',e=>{
 ══════════════════════════════════════════════ */
 let lastParsed=null;
 let selectedSpheres=new Set();
+let _rafPending=false; // INP optimization: throttle heavy slider updates via RAF
 let isPremiumUnlocked=false; // true after payment or promo
 let paywallActivePromo = null; // { code, discount, free }
 let freeAnalysisUsed=false; // 1 free sphere analysis per session
