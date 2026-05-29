@@ -100,6 +100,8 @@ function trackEvent(action,category,label){
     fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:action,data:{category,label}})}).catch(function(){});
   }catch(e){}
 }
+// prevent "spheres is not defined" ReferenceError — was lowercase var in old analysis code
+var spheres;
 </script>
 <!-- Fonts deferred to window.load — display:optional means they never affect first-visit text anyway -->
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=optional"></noscript>
