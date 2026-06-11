@@ -100,6 +100,10 @@ function trackEvent(action,category,label){
     fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:action,data:{category,label}})}).catch(function(){});
   }catch(e){}
 }
+// Відстеження кроків воронки експрес-тесту в Clarity
+function trackKrok(nazvaPodiyi){
+  if(typeof clarity==='function') clarity('event',nazvaPodiyi);
+}
 // prevent "spheres is not defined" ReferenceError — was lowercase var in old analysis code
 var spheres;
 </script>
@@ -1141,7 +1145,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
         <div style="font-size:12px;color:rgba(244,239,230,0.45);
           text-align:center;margin-bottom:20px;">
-          ⭐ Вже 3 400+ людей знайшли свій слабкий вузол
+          12 сфер · 5 хвилин · Без реєстрації
         </div>
 
         <button onclick="expStart()"
@@ -1168,7 +1172,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
     <!-- ПИТАННЯ 1 -->
     <div class="exp-screen" id="exp-q1">
-      <div class="exp-social-proof">★ Вже 3 400+ людей знайшли свій слабкий вузол</div>
+      <div class="exp-social-proof">12 сфер · 5 хвилин · Без реєстрації</div>
       <h2 class="exp-h1">Як ти себе почуваєш <em>фізично</em>?</h2>
       <p class="exp-sub">Здоров'я · Відпочинок · Енергія</p>
       <div class="exp-options" id="exp-opts1">
@@ -1270,7 +1274,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
             Повний аналіз покаже<br>
             <em style="color:#E08A4E;">де справжній корінь</em>
           </div>
-          <button class="exp-full-btn" onclick="expSkip()">Пройти повний аналіз 12 сфер →</button>
+          <button class="exp-full-btn" onclick="expSkip(true)">Пройти повний аналіз 12 сфер →</button>
           <div class="exp-full-sub">AI знайде корінь і дасть план на 30 днів</div>
         </div>
         <div class="exp-narr">
@@ -1342,16 +1346,16 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
     <!-- Stats -->
     <div class="hero-stats">
       <div class="hero-stat">
-        <span class="hero-stat-num"><span id="heroCounterText">3 400+</span></span>
-        <span class="hero-stat-lbl">аналізів</span>
-      </div>
-      <div class="hero-stat">
         <span class="hero-stat-num">12</span>
         <span class="hero-stat-lbl">сфер</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-num">4.9★</span>
-        <span class="hero-stat-lbl">рейтинг</span>
+        <span class="hero-stat-num">5 хв</span>
+        <span class="hero-stat-lbl">на тест</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">0₴</span>
+        <span class="hero-stat-lbl">реєстрації</span>
       </div>
     </div>
   </div>
@@ -1947,8 +1951,6 @@ function loadUserCounter(){
       const count = data.totalAssessments || data.total || 0;
       if(count > 0){
         el.textContent = count + ' людей вже оцінили своє колесо';
-        const heroEl = document.getElementById('heroCounterText');
-        if(heroEl) heroEl.textContent = count + '+ аналізів';
       } else {
         el.textContent = 'Перший безкоштовно · Без реєстрації';
       }
@@ -4868,9 +4870,12 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
     if(kicker){kicker.style.display='';kicker.textContent='ПИТАННЯ 1 З 3';}
     expShowScreen('exp-q1');
     trackEvent('express_start_btn','express_test','start_screen');
+    trackKrok('express_start');
   };
 
   window.expNext=function(q){
+    // q — номер наступного питання, тому попереднє = q-1
+    trackKrok('express_q'+(q-1));
     document.querySelectorAll('.exp-prog-dot').forEach(function(d,i){
       d.classList.remove('active','done');
       if(i<q-1)d.classList.add('done');
@@ -4881,6 +4886,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
   };
 
   window.expShowResult=function(){
+    trackKrok('express_q3');
     var a1=expAnswers[1]||5,a2=expAnswers[2]||5,a3=expAnswers[3]||5;
     var avg=((a1+a2+a3)/3);
     document.querySelectorAll('.exp-prog-dot').forEach(function(d){d.classList.remove('active');d.classList.add('done')});
@@ -4901,10 +4907,13 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         },900+i*150);
       });
       trackEvent('express_result','express_test',avg.toFixed(1));
+      trackKrok('express_result');
     },400);
   };
 
-  window.expSkip=function(){
+  // fromResult=true — перехід з екрану результату; false — ранній пропуск
+  window.expSkip=function(fromResult){
+    trackKrok(fromResult ? 'full_test_click' : 'express_skip');
     var overlay=document.getElementById('express-overlay');
     var a1=expAnswers[1]||5,a2=expAnswers[2]||5,a3=expAnswers[3]||5;
     // Pre-populate 3 spheres so full test starts with express answers
@@ -4950,6 +4959,7 @@ buildNav();buildDetail();drawWheel();updateResults();initCookieBanner();updateCo
         document.documentElement.classList.add('exp-open');
         document.body.classList.add('exp-open');
         trackEvent('express_view','express_test','init');
+        trackKrok('express_shown');
       }
     }
   }catch(e){}
