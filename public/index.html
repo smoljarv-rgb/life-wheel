@@ -4327,7 +4327,7 @@ function saveToGoogleDrive(avgScore){
   const overlay=document.createElement('div');
   overlay.id='driveInstructionOverlay';
   overlay.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px';
-  let overlayHTML='<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:'Inter Tight',sans-serif">';
+  let overlayHTML=`<div style="background:#fff;border-radius:18px;padding:28px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:'Inter Tight',sans-serif">`;
   overlayHTML+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">';
   overlayHTML+='<div><div style="font-size:1rem;font-weight:800;color:#1a2e48">Зберегти PDF у Google Drive</div>';
   overlayHTML+='<div style="font-size:.68rem;color:#8aabcc">3 прості кроки</div></div></div>';
@@ -4345,8 +4345,8 @@ function saveToGoogleDrive(avgScore){
   overlayHTML+='<div><div style="font-size:.78rem;font-weight:700;color:#1a2e48;margin-bottom:2px">Завантаж у Google Drive</div>';
   overlayHTML+='<div style="font-size:.68rem;color:#5a7090;line-height:1.5">Drive відкриється автоматично. Натисни <b>+ Новий → Завантажити файл</b></div></div></div></div>';
   overlayHTML+='<div style="display:flex;gap:8px">';
-  overlayHTML+='<button onclick="document.getElementById(\'driveInstructionOverlay\').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:'Inter Tight',sans-serif">Скасувати</button>';
-  overlayHTML+='<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif">Відкрити PDF та Drive</button>';
+  overlayHTML+=`<button onclick="document.getElementById('driveInstructionOverlay').remove()" style="flex:1;padding:10px;background:transparent;color:#8aabcc;border:1.5px solid #d0e4f8;border-radius:9px;font-size:.75rem;cursor:pointer;font-family:'Inter Tight',sans-serif">Скасувати</button>`;
+  overlayHTML+=`<button onclick="startDrivePdfExport()" style="flex:2;padding:10px;background:linear-gradient(135deg,#2878c8,#1a58a8);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:'Inter Tight',sans-serif">Відкрити PDF та Drive</button>`;
   overlayHTML+='</div></div>';
   overlay.innerHTML=overlayHTML;
   document.body.appendChild(overlay);
@@ -4492,19 +4492,19 @@ function showPromoEmailForm(plan, code) {
   window._promoActivatePlan = plan;
   window._promoActivateCode = code;
   box.innerHTML =
-    '<div class="promo-banner">&#x1F389; Промокод активовано!</div>' +
-    '<h2 style="font-size:1.1rem;color:#1a2e48;margin-bottom:8px">Введи email для активації</h2>' +
-    '<p style="font-size:.8rem;color:#5a7090;margin-bottom:16px">Введи email щоб активувати доступ з будь-якого пристрою.</p>' +
-    '<input type="email" id="promoEmailInput" placeholder="email@example.com" ' +
-    'style="width:100%;padding:10px 14px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:10px;' +
-    'color:#1a2e48;font-size:.85rem;outline:none;font-family:'Inter Tight',sans-serif;margin-bottom:10px">' +
-    '<div id="promoEmailMsg" style="font-size:.72rem;margin-bottom:10px;display:none"></div>' +
-    '<button onclick="activatePromoSubscription()" ' +
-    'style="width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#1e8449);border:none;' +
-    'border-radius:12px;color:#fff;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer">' +
-    '&#x2705; Активувати безкоштовно</button>' +
-    '<button onclick="closePaywall()" style="width:100%;margin-top:8px;padding:10px;background:transparent;' +
-    'border:none;color:#8aabcc;font-family:'Inter Tight',sans-serif;font-size:.75rem;cursor:pointer">&#x23F3; Пізніше</button>';
+    `<div class="promo-banner">&#x1F389; Промокод активовано!</div>` +
+    `<h2 style="font-size:1.1rem;color:#1a2e48;margin-bottom:8px">Введи email для активації</h2>` +
+    `<p style="font-size:.8rem;color:#5a7090;margin-bottom:16px">Введи email щоб активувати доступ з будь-якого пристрою.</p>` +
+    `<input type="email" id="promoEmailInput" placeholder="email@example.com" ` +
+    `style="width:100%;padding:10px 14px;background:#f0f4f8;border:1px solid #d0e0f0;border-radius:10px;` +
+    `color:#1a2e48;font-size:.85rem;outline:none;font-family:'Inter Tight',sans-serif;margin-bottom:10px">` +
+    `<div id="promoEmailMsg" style="font-size:.72rem;margin-bottom:10px;display:none"></div>` +
+    `<button onclick="activatePromoSubscription()" ` +
+    `style="width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#1e8449);border:none;` +
+    `border-radius:12px;color:#fff;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer">` +
+    `&#x2705; Активувати безкоштовно</button>` +
+    `<button onclick="closePaywall()" style="width:100%;margin-top:8px;padding:10px;background:transparent;` +
+    `border:none;color:#8aabcc;font-family:'Inter Tight',sans-serif;font-size:.75rem;cursor:pointer">&#x23F3; Пізніше</button>`;
 }
 
 function activatePromoSubscription() {
