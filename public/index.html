@@ -89,6 +89,9 @@
 </script>
 <!-- GA4 stub — actual script injected after load to avoid blocking FCP/LCP -->
 <script>
+// Черга Clarity — створюється одразу, щоб події воронки
+// буферизувались до завантаження clarity.js (відкладеного для швидкодії)
+window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments)};
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
