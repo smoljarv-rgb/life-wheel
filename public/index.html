@@ -123,7 +123,7 @@ var spheres;
   --ink-2:      #152538;
   --ink-3:      #1E3047;
   --fog:        #F4EFE6;
-  --muted:      rgba(244,239,230,0.55);
+  --muted:      rgba(244,239,230,0.72);
   --cta:        #E8C17A;
   --ember:      #E08A4E;
   --ember-deep: #C9712F;
@@ -135,7 +135,7 @@ var spheres;
   /* Legacy compat — keep existing components working */
   --td: #F4EFE6;
   --tm: rgba(244,239,230,0.75);
-  --tl: rgba(244,239,230,0.50);
+  --tl: rgba(244,239,230,0.60);
   --ac: #E08A4E;
   --ac2:#C9712F;
   --sf: rgba(21,37,56,0.88);
@@ -419,7 +419,7 @@ input[type=range].qc::-moz-range-thumb,input[type=range].srange::-moz-range-thum
 
 /* ── MOBILE ── */
 @media(max-width:600px){
-  body{font-size:14px}
+  body{font-size:16px}
   .wrapper{padding-top:0;display:flex;flex-direction:column}
   .wrapper.test-started{display:flex!important}
   .wrapper:not(.test-started){display:none!important}
@@ -1037,7 +1037,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 .exp-screen.active{display:flex;flex-direction:column}
 .exp-h1{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:30px;line-height:1.1;color:#F4EFE6;margin-bottom:8px}
 .exp-h1 em{color:#E08A4E}
-.exp-sub{font-size:13px;color:rgba(244,239,230,0.55);line-height:1.6;margin-bottom:24px}
+.exp-sub{font-size:13px;color:rgba(244,239,230,0.72);line-height:1.6;margin-bottom:24px}
 .exp-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
 .exp-option{background:#152538;border:1px solid rgba(244,239,230,0.10);border-radius:14px;padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .2s,background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
 .exp-option:active{transform:scale(0.98)}
@@ -1047,7 +1047,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 .exp-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:#0E1B2C;opacity:0;transition:opacity .2s}
 .exp-option.selected .exp-radio::after{opacity:1}
 .exp-opt-title{font-size:14px;font-weight:600;color:#F4EFE6;margin-bottom:2px}
-.exp-opt-sub{font-size:11px;color:rgba(244,239,230,0.55)}
+.exp-opt-sub{font-size:11px;color:rgba(244,239,230,0.72)}
 .exp-btn{background:#E8C17A;color:#0E1B2C;border:none;border-radius:999px;padding:16px 24px;font-family:'Inter Tight',system-ui,sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer;width:100%;opacity:.4;pointer-events:none;transition:opacity .2s,transform .15s;margin-top:4px}
 .exp-btn.ready{opacity:1;pointer-events:auto}
 .exp-btn.ready:active{transform:scale(0.98)}
@@ -1165,7 +1165,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
         <div onclick="expSkip()"
           style="text-align:center;margin-top:14px;
-          font-size:12px;color:rgba(244,239,230,0.30);
+          font-size:12px;color:rgba(244,239,230,0.50);
           cursor:pointer;text-decoration:underline;
           text-underline-offset:3px;">
           Пропустити → одразу до повного тесту
@@ -1620,7 +1620,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
 
   <!-- LEFT -->
   <div class="left-col" id="leftNav">
-    <div class="left-col-header" id="leftColHeader" style="display:none;font-family:'Inter Tight',sans-serif;font-size:.72rem;font-weight:700;color:rgba(244,239,230,0.45);text-transform:uppercase;letter-spacing:.1em;padding:0 4px 6px">① Обери сферу:</div>
+    <div class="left-col-header" id="leftColHeader" style="display:none;font-family:'Inter Tight',sans-serif;font-size:.72rem;font-weight:700;color:rgba(244,239,230,0.60);text-transform:uppercase;letter-spacing:.1em;padding:0 4px 6px">① Обери сферу:</div>
     <div class="page-title">
       <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 80 80" style="display:block;margin:0 auto 10px" aria-hidden="true">
         <ellipse cx="40" cy="14" rx="7" ry="12" fill="#c4a882" opacity="0.30" transform="rotate(0 40 40)"/>
