@@ -1689,7 +1689,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
       </svg>
       <div style="text-align:center;margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
         <div class="wheel-hint" style="font-size:.72rem">⬡ Точка на колесі &rarr; <strong>швидка</strong> оцінка сфери</div>
-        <div class="wheel-hint" style="font-size:.72rem;background:rgba(232,193,122,.10);border-color:rgba(232,193,122,.3);color:var(--cta,#E8C17A)">🎯 Повзунки під сферою &rarr; <strong>точний</strong> аналіз підкритеріїв</div>
+        <div class="wheel-hint" style="font-size:.72rem;background:rgba(232,193,122,.10);border-color:rgba(232,193,122,.3);color:var(--cta,#E8C17A)">🎯 Шкала під сферою &rarr; <strong>точний</strong> аналіз підкритеріїв</div>
       </div>
     </div>
     <div class="detail-box glass" id="detailBox"></div>
@@ -1722,7 +1722,7 @@ body.exp-open #mobileCta,body.exp-open .cookie-banner,body.exp-open #exit-popup,
         <div style="height:5px;border-radius:999px;background:rgba(244,239,230,0.08);overflow:hidden">
           <div id="accuracyBar" style="height:100%;border-radius:999px;width:0%;background:#E08A4E;transition:width .5s,background .5s"></div>
         </div>
-        <div id="accuracyLabel" style="font-size:.62rem;color:var(--tl);margin-top:5px;transition:color 3s">Груба оцінка &mdash; налаштуй повзунки для точного аналізу</div>
+        <div id="accuracyLabel" style="font-size:.62rem;color:var(--tl);margin-top:5px;transition:color 3s">Груба оцінка &mdash; налаштуй шкали для точного аналізу</div>
       </div>
     </div>
 
@@ -2128,30 +2128,48 @@ function buildDetail(){
   <div style="margin:6px 0 8px;padding:9px 13px;background:linear-gradient(135deg,rgba(40,120,200,.12),rgba(40,120,200,.06));border:1.5px solid rgba(40,120,200,.25);border-radius:10px;display:flex;align-items:center;gap:8px;transition:background 3s,color 3s,border-color 3s,opacity 3s">
     <span style="font-size:1.2rem">👆</span>
     <div>
-      <div style="font-size:.78rem;font-weight:700;color:var(--ac);transition:color 3s">Пересувай повзунок для оцінки</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--ac);transition:color 3s">Пересувай шкалу або тисни +/− для оцінки</div>
       <div style="font-size:.65rem;color:var(--tm);margin-top:1px;transition:color 3s">1 = дуже погано · 5 = середньо · 10 = ідеально</div>
     </div>
   </div>
   <div class="sub-list" id="subList"></div>`;
   const list=document.getElementById('subList');
+
+  // One-time mobile intro shown before the very first slider interaction
+  if(!_sliderIntroShown){
+    _sliderIntroShown=true;
+    const intro=document.createElement('div');
+    intro.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:rgba(232,193,122,0.07);border:1px solid rgba(232,193,122,0.22);border-radius:10px;margin-bottom:8px;font-family:"Inter Tight",sans-serif';
+    intro.innerHTML='<span style="font-size:1.1rem;flex-shrink:0">☝️</span><span style="font-size:.74rem;color:var(--fog);line-height:1.5"><strong style="color:#E8C17A">Як оцінити:</strong> проведи пальцем по шкалі або тисни <strong>+</strong> / <strong>−</strong> щоб виставити оцінку від 1 до 10</span>';
+    list.appendChild(intro);
+  }
+
   s.sub.forEach(sub=>{
     const v=state[s.id][sub.k];
     const sd2=sDesc(v);
     const row=document.createElement('div');row.className='sub-item';
-    row.innerHTML=`<div class="sub-top">
+    row.innerHTML=`<div class="sub-top" style="align-items:center">
         <span class="sub-lbl">${sub.n}</span>
-        <span class="sub-num" style="color:${sColor(v)}" id="sv_${s.id}_${sub.k}">${v} — ${sd2.label}</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+          <button class="sub-pm-btn" data-id="${s.id}" data-key="${sub.k}" data-dir="-1"
+            style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--ink-3);color:var(--fog);font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;font-family:inherit">−</button>
+          <span class="sub-num" style="color:${sColor(v)};font-size:1.25rem;font-weight:800;min-width:1.6rem;text-align:center;line-height:1" id="sv_${s.id}_${sub.k}">${v}</span>
+          <button class="sub-pm-btn" data-id="${s.id}" data-key="${sub.k}" data-dir="1"
+            style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--ink-3);color:var(--fog);font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;font-family:inherit">+</button>
+        </div>
       </div>
       <input type="range" class="srange" min="1" max="10" step="1" value="${v}"
         id="r_${s.id}_${sub.k}">
       <div class="sub-desc" id="sd_${s.id}_${sub.k}">${sd2.desc}</div>`;
     list.appendChild(row);
     const inp=row.querySelector('input');
-    inp.addEventListener('input',()=>{
-      const val=+inp.value,sd3=sDesc(val);
+
+    function _applyVal(val){
+      val=Math.max(1,Math.min(10,val));
       state[s.id][sub.k]=val;
-      // Lightweight: immediate feedback (text/color only)
-      document.getElementById(`sv_${s.id}_${sub.k}`).textContent=`${val} — ${sd3.label}`;
+      inp.value=val;
+      const sd3=sDesc(val);
+      document.getElementById(`sv_${s.id}_${sub.k}`).textContent=val;
       document.getElementById(`sv_${s.id}_${sub.k}`).style.color=sColor(val);
       document.getElementById(`sd_${s.id}_${sub.k}`).textContent=sd3.desc;
       const newA=avg(s.id);
@@ -2160,7 +2178,6 @@ function buildDetail(){
       showSavedToast();
       const nb=document.getElementById('nextSphereBtn');
       if(nb) nb.style.display='flex';
-      // Heavy: canvas + nav + results deferred to next animation frame (INP fix)
       if(!_rafPending){
         _rafPending=true;
         requestAnimationFrame(()=>{
@@ -2168,6 +2185,11 @@ function buildDetail(){
           buildNav();updateResults();drawWheel();updateConstellation(SPHERES.map(s=>avg(s.id)));
         });
       }
+    }
+
+    inp.addEventListener('input',()=>_applyVal(+inp.value));
+    row.querySelectorAll('.sub-pm-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>_applyVal(+inp.value + +btn.dataset.dir));
     });
   });
 
@@ -2224,7 +2246,7 @@ function updateAccuracy(){
   if(pct===0){
     bar.style.background='#E08A4E';
     num.style.color='#E08A4E';
-    lbl.textContent='Груба оцінка — налаштуй повзунки для точного аналізу';
+    lbl.textContent='Груба оцінка — налаштуй шкали для точного аналізу';
     lbl.style.color='';
   } else if(pct<40){
     bar.style.background='#E08A4E';
@@ -2539,6 +2561,7 @@ cv.addEventListener('click',e=>{
 let lastParsed=null;
 let selectedSpheres=new Set();
 let _rafPending=false; // INP optimization: throttle heavy slider updates via RAF
+let _sliderIntroShown=false;
 let isPremiumUnlocked=false; // true after payment or promo
 let paywallActivePromo = null; // { code, discount, free }
 let freeAnalysisUsed=false; // 1 free sphere analysis per session
